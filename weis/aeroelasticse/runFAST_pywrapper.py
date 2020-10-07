@@ -14,6 +14,8 @@ from weis.aeroelasticse.FAST_writer import InputWriter_Common, InputWriter_OpenF
 from weis.aeroelasticse.FAST_wrapper import FastWrapper
 from weis.aeroelasticse.FAST_post   import FAST_IO_timeseries
 
+from shutil import copyfile
+
 import numpy as np
 
 class runFAST_pywrapper(object):
@@ -32,6 +34,7 @@ class runFAST_pywrapper(object):
         self.case               = {}     # dictionary of variable values to change
         self.channels           = {}     # dictionary of output channels to change
         self.debug_level        = 0
+        self.Hull_TMD_File      = ''
 
         self.overwrite_outfiles = True   # True: existing output files will be overwritten, False: if output file with the same name already exists, OpenFAST WILL NOT RUN; This is primarily included for code debugging with OpenFAST in the loop or for specific Optimization Workflows where OpenFAST is to be run periodically instead of for every objective function anaylsis
 
@@ -82,6 +85,9 @@ class runFAST_pywrapper(object):
         if self.write_yaml:
             writer.FAST_yamlfile = self.FAST_yamlfile_out
             writer.write_yaml()
+
+        # Copy TMD input
+        copyfile(os.path.join(self.FAST_directory,self.Hull_TMD_File),os.path.join(self.FAST_runDirectory,'Hull_TMD_Input.dat'))
 
         # Run FAST
         wrapper.FAST_exe = self.FAST_exe
@@ -144,7 +150,7 @@ class runFAST_pywrapper_batch(object):
 
         out = [None]*len(self.case_list)
         for i, (case, case_name) in enumerate(zip(self.case_list, self.case_name_list)):
-            out[i] = eval(case, case_name, self.FAST_ver, self.FAST_exe, self.FAST_runDirectory, self.FAST_InputFile, self.FAST_directory, self.read_yaml, self.FAST_yamlfile_in, self.fst_vt, self.write_yaml, self.FAST_yamlfile_out, self.channels, self.debug_level, self.overwrite_outfiles, self.post)
+            out[i] = eval(case, case_name, self.FAST_ver, self.FAST_exe, self.FAST_runDirectory, self.FAST_InputFile, self.FAST_directory, self.read_yaml, self.FAST_yamlfile_in, self.fst_vt, self.write_yaml, self.FAST_yamlfile_out, self.channels, self.debug_level, self.overwrite_outfiles, self.post, self.Hull_TMD_File)
 
         return out
 
@@ -177,6 +183,7 @@ class runFAST_pywrapper_batch(object):
             case_data.append(self.debug_level)
             case_data.append(self.overwrite_outfiles)
             case_data.append(self.post)
+            case_data.append(self.Hull_TMD_File)
 
             case_data_all.append(case_data)
 
@@ -328,7 +335,7 @@ class runFAST_pywrapper_batch(object):
 
 
 
-def eval(case, case_name, FAST_ver, FAST_exe, FAST_runDirectory, FAST_InputFile, FAST_directory, read_yaml, FAST_yamlfile_in, fst_vt, write_yaml, FAST_yamlfile_out, channels, debug_level, overwrite_outfiles, post):
+def eval(case, case_name, FAST_ver, FAST_exe, FAST_runDirectory, FAST_InputFile, FAST_directory, read_yaml, FAST_yamlfile_in, fst_vt, write_yaml, FAST_yamlfile_out, channels, debug_level, overwrite_outfiles, post, Hull_TMD_File):
     # Batch FAST pyWrapper call, as a function outside the runFAST_pywrapper_batch class for pickle-ablility
 
     fast = runFAST_pywrapper(FAST_ver=FAST_ver)
@@ -347,6 +354,7 @@ def eval(case, case_name, FAST_ver, FAST_exe, FAST_runDirectory, FAST_InputFile,
     fast.case               = case
     fast.channels           = channels
     fast.debug_level        = debug_level
+    fast.Hull_TMD_File      = Hull_TMD_File
 
     fast.overwrite_outfiles = overwrite_outfiles
 

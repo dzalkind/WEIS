@@ -1122,7 +1122,7 @@ class InputReader_OpenFAST(InputReader_Common):
 
         self.read_AeroDyn15Blade()
         self.read_AeroDyn15Polar()
-        # self.read_AeroDyn15Coord()
+        self.read_AeroDyn15Coord()
 
     def read_AeroDyn15Blade(self):
         # AeroDyn v5.00 Blade Definition File
@@ -1170,8 +1170,8 @@ class InputReader_OpenFAST(InputReader_Common):
 
             polar['InterpOrd']      = int_read(readline_filterComments(f).split()[0])
             polar['NonDimArea']     = int_read(readline_filterComments(f).split()[0])
-            # polar['NumCoords']      = readline_filterComments(f).split()[0]
-            polar['BL_file']        = readline_filterComments(f).split()[0]
+            polar['NumCoords']      = readline_filterComments(f).split()[0]
+            # polar['BL_file']        = readline_filterComments(f).split()[0]
             polar['NumTabs']        = int_read(readline_filterComments(f).split()[0])
             self.fst_vt['AeroDyn15']['af_data'][afi] = [None]*polar['NumTabs']
 

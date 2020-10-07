@@ -408,12 +408,12 @@ class InputWriter_OpenFAST(InputWriter_Common):
         f.write('{:<22} {:<11} {:}'.format('"'+self.fst_vt['Fst']['OutFmt']+'"', 'OutFmt', '- Format used for text tabular output, excluding the time channel.  Resulting field should be 10 characters. (quoted string)\n'))
         f.write('---------------------- LINEARIZATION -------------------------------------------\n')
         f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['Fst']['Linearize'],   'Linearize',    '- Linearization analysis (flag)\n'))
-        f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['Fst']['CalcSteady'],  'CalcSteady',   '- Calculate a steady-state periodic operating point before linearization? [unused if Linearize=False] (flag)\n'))
-        f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['TrimCase'],      'TrimCase',     '- Controller parameter to be trimmed {1:yaw; 2:torque; 3:pitch} [used only if CalcSteady=True] (-)\n'))
-        f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['TrimTol'],       'TrimTol',      '- Tolerance for the rotational speed convergence [used only if CalcSteady=True] (-)\n'))
-        f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['TrimGain'],      'TrimGain',     '- Proportional gain for the rotational speed error (>0) [used only if CalcSteady=True] (rad/(rad/s) for yaw or pitch; Nm/(rad/s) for torque)\n'))
-        f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['Twr_Kdmp'],      'Twr_Kdmp',     '- Damping factor for the tower [used only if CalcSteady=True] (N/(m/s))\n'))
-        f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['Bld_Kdmp'],      'Bld_Kdmp',     '- Damping factor for the blades [used only if CalcSteady=True] (N/(m/s))\n'))
+        # f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['Fst']['CalcSteady'],  'CalcSteady',   '- Calculate a steady-state periodic operating point before linearization? [unused if Linearize=False] (flag)\n'))
+        # f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['TrimCase'],      'TrimCase',     '- Controller parameter to be trimmed {1:yaw; 2:torque; 3:pitch} [used only if CalcSteady=True] (-)\n'))
+        # f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['TrimTol'],       'TrimTol',      '- Tolerance for the rotational speed convergence [used only if CalcSteady=True] (-)\n'))
+        # f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['TrimGain'],      'TrimGain',     '- Proportional gain for the rotational speed error (>0) [used only if CalcSteady=True] (rad/(rad/s) for yaw or pitch; Nm/(rad/s) for torque)\n'))
+        # f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['Twr_Kdmp'],      'Twr_Kdmp',     '- Damping factor for the tower [used only if CalcSteady=True] (N/(m/s))\n'))
+        # f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['Bld_Kdmp'],      'Bld_Kdmp',     '- Damping factor for the blades [used only if CalcSteady=True] (N/(m/s))\n'))
         f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['NLinTimes'],     'NLinTimes',    '- Number of times to linearize (-) [>=1] [unused if Linearize=False]\n'))
         f.write('{:<22} {:<11} {:}'.format(', '.join(['%f'%i for i in np.array(self.fst_vt['Fst']['LinTimes'], dtype=float)]), 'LinTimes', '- List of times at which to linearize (s) [1 to NLinTimes] [used only when Linearize=True and CalcSteady=False]\n'))
         f.write('{:<22} {:<11} {:}'.format(self.fst_vt['Fst']['LinInputs'],     'LinInputs',    '- Inputs included in linearization (switch) {0=none; 1=standard; 2=all module inputs (debug)} [unused if Linearize=False]\n'))
@@ -866,8 +866,8 @@ class InputWriter_OpenFAST(InputWriter_Common):
         self.write_AeroDyn15Polar()
         
         # Generate AeroDyn v15 airfoil coordinates
-        # if self.fst_vt['AeroDyn15']['af_data'][1][0]['NumCoords'] != 0:
-            # self.write_AeroDyn15Coord()
+        if self.fst_vt['AeroDyn15']['af_data'][1][0]['NumCoords'] != 0:
+            self.write_AeroDyn15Coord()
         
         # Generate AeroDyn v15.03 input file
         self.fst_vt['Fst']['AeroFile'] = self.FAST_namingOut + '_AeroDyn15.dat'
@@ -1013,12 +1013,12 @@ class InputWriter_OpenFAST(InputWriter_Common):
             f.write('! ------------------------------------------------------------------------------\n')
             f.write('{:<22}   {:<11} {:}'.format(self.fst_vt['AeroDyn15']['af_data'][afi][0]['InterpOrd'], 'InterpOrd', '! Interpolation order to use for quasi-steady table lookup {1=linear; 3=cubic spline; "default"} [default=3]\n'))
             f.write('{:<22d}   {:<11} {:}'.format(self.fst_vt['AeroDyn15']['af_data'][afi][0]['NonDimArea'], 'NonDimArea', '! The non-dimensional area of the airfoil (area/chord^2) (set to 1.0 if unsure or unneeded)\n'))
-            # if self.fst_vt['AeroDyn15']['af_data'][1][0]['NumCoords'] != 0:
-                # f.write('@"{:}_AF{:02d}_Coords.txt"       {:<11} {:}'.format(self.FAST_namingOut, afi, 'NumCoords', '! The number of coordinates in the airfoil shape file. Set to zero if coordinates not included.\n'))
-            # else:
-                # f.write('{:<22d}       {:<11} {:}'.format(0, 'NumCoords', '! The number of coordinates in the airfoil shape file. Set to zero if coordinates not included.\n'))
+            if self.fst_vt['AeroDyn15']['af_data'][1][0]['NumCoords'] != 0:
+                f.write('@"{:}_AF{:02d}_Coords.txt"       {:<11} {:}'.format(self.FAST_namingOut, afi, 'NumCoords', '! The number of coordinates in the airfoil shape file. Set to zero if coordinates not included.\n'))
+            else:
+                f.write('{:<22d}       {:<11} {:}'.format(0, 'NumCoords', '! The number of coordinates in the airfoil shape file. Set to zero if coordinates not included.\n'))
             # f.write('AF{:02d}_BL.txt              {:<11} {:}'.format(afi, 'BL_file', '! The file name including the boundary layer characteristics of the profile. Ignored if the aeroacoustic module is not called.\n'))
-            # f.write('{:<22d}   {:<11} {:}'.format(self.fst_vt['AeroDyn15']['af_data'][afi][0]['NumTabs'], 'NumTabs', '! Number of airfoil tables in this file.  Each table must have lines for Re and Ctrl.\n'))
+            f.write('{:<22d}   {:<11} {:}'.format(self.fst_vt['AeroDyn15']['af_data'][afi][0]['NumTabs'], 'NumTabs', '! Number of airfoil tables in this file.  Each table must have lines for Re and Ctrl.\n'))
 
 
             # check if airfoils with multiple flaps exists.
@@ -1032,13 +1032,13 @@ class InputWriter_OpenFAST(InputWriter_Common):
             else:
                 num_tab = 1
             # f.write('{:<22d}   {:<11} {:}'.format(self.fst_vt['AeroDyn15']['af_data'][afi][0]['NumTabs'], 'NumTabs','! Number of airfoil tables in this file.  Each table must have lines for Re and Ctrl.\n'))
-            f.write('{:<22d}   {:<11} {:}'.format(num_tab, 'NumTabs','! Number of airfoil tables in this file.  Each table must have lines for Re and Ctrl.\n'))
+            # f.write('{:<22d}   {:<11} {:}'.format(num_tab, 'NumTabs','! Number of airfoil tables in this file.  Each table must have lines for Re and Ctrl.\n'))
 
             # for tab in range(self.fst_vt['AeroDyn15']['af_data'][afi][0]['NumTabs']): # For writting multiple tables (different Re or Ctrl values)
             for tab in range(num_tab): # For writting multiple tables (different Re or Ctrl values)
-                f.write('! ------------------------------------------------------------------------------\n')
-                f.write("! data for table %i \n" % (tab + 1))
-                f.write('! ------------------------------------------------------------------------------\n')
+                # f.write('! ------------------------------------------------------------------------------\n')
+                # f.write("! data for table %i \n" % (tab + 1))
+                # f.write('! ------------------------------------------------------------------------------\n')
                 f.write('{:<22f}   {:<11} {:}'.format(self.fst_vt['AeroDyn15']['af_data'][afi][tab]['Re'], 'Re', '! Reynolds number in millions\n'))
                 f.write('{:<22d}   {:<11} {:}'.format(int(self.fst_vt['AeroDyn15']['af_data'][afi][tab]['Ctrl']), 'Ctrl', '! Control setting (must be 0 for current AirfoilInfo)\n'))
                 f.write('{!s:<22}   {:<11} {:}'.format(self.fst_vt['AeroDyn15']['af_data'][afi][tab]['InclUAdata'], 'InclUAdata', '! Is unsteady aerodynamics data included in this table? If TRUE, then include 30 UA coefficients below this line\n'))
@@ -1420,7 +1420,7 @@ class InputWriter_OpenFAST(InputWriter_Common):
         f.write('{:<22} {:<11} {:}'.format(self.fst_vt['HydroDyn']['PtfmVol0'], 'PtfmVol0', '- Displaced volume of water when the platform is in its undisplaced position (m^3) [only used when PotMod=1; USE THE SAME VALUE COMPUTED BY WAMIT AS OUTPUT IN THE .OUT FILE!]\n'))
         f.write('{:<22} {:<11} {:}'.format(self.fst_vt['HydroDyn']['PtfmCOBxt'], 'PtfmCOBxt', '- The xt offset of the center of buoyancy (COB) from the platform reference point (meters)  [only used when PotMod=1]\n'))
         f.write('{:<22} {:<11} {:}'.format(self.fst_vt['HydroDyn']['PtfmCOByt'], 'PtfmCOByt', '- The yt offset of the center of buoyancy (COB) from the platform reference point (meters)  [only used when PotMod=1]\n'))
-        f.write('{:<22d} {:<11} {:}'.format(self.fst_vt['HydroDyn']['ExctnMod'], 'ExctnMod', '- Wave Excitation model {0: None, 1: DFT, 2: state-space} (switch) [only used when PotMod=1; STATE-SPACE REQUIRES *.ssexctn INPUT FILE]\n'))
+        # f.write('{:<22d} {:<11} {:}'.format(self.fst_vt['HydroDyn']['ExctnMod'], 'ExctnMod', '- Wave Excitation model {0: None, 1: DFT, 2: state-space} (switch) [only used when PotMod=1; STATE-SPACE REQUIRES *.ssexctn INPUT FILE]\n'))
         f.write('{:<22d} {:<11} {:}'.format(self.fst_vt['HydroDyn']['RdtnMod'], 'RdtnMod', '- Radiation memory-effect model {0: no memory-effect calculation, 1: convolution, 2: state-space} (switch) [only used when PotMod=1; STATE-SPACE REQUIRES *.ss INPUT FILE]\n'))
         f.write('{:<22} {:<11} {:}'.format(self.fst_vt['HydroDyn']['RdtnTMax'], 'RdtnTMax', '- Analysis time for wave radiation kernel calculations (sec) [only used when PotMod=1; determines RdtnDOmega=Pi/RdtnTMax in the cosine transform; MAKE SURE THIS IS LONG ENOUGH FOR THE RADIATION IMPULSE RESPONSE FUNCTIONS TO DECAY TO NEAR-ZERO FOR THE GIVEN PLATFORM!]\n'))
         f.write('{:<22} {:<11} {:}'.format(self.fst_vt['HydroDyn']['RdtnDT'], 'RdtnDT', '- Time step for wave radiation kernel calculations (sec) [only used when PotMod=1; DT<=RdtnDT<=0.1 recommended; determines RdtnOmegaMax=Pi/RdtnDT in the cosine transform]\n'))
