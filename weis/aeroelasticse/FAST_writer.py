@@ -866,8 +866,8 @@ class InputWriter_OpenFAST(InputWriter_Common):
         self.write_AeroDyn15Polar()
         
         # Generate AeroDyn v15 airfoil coordinates
-        if self.fst_vt['AeroDyn15']['af_data'][1][0]['NumCoords'] != 0:
-            self.write_AeroDyn15Coord()
+        # if self.fst_vt['AeroDyn15']['af_data'][1][0]['NumCoords'] != 0:
+            # self.write_AeroDyn15Coord()
         
         # Generate AeroDyn v15.03 input file
         self.fst_vt['Fst']['AeroFile'] = self.FAST_namingOut + '_AeroDyn15.dat'
@@ -887,8 +887,8 @@ class InputWriter_OpenFAST(InputWriter_Common):
         f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['FrozenWake'], 'FrozenWake', '- Assume frozen wake during linearization? (flag) [used only when WakeMod=1 and when linearizing]\n'))
         if self.FAST_ver.lower() != 'fast8':
             f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['CavitCheck'], 'CavitCheck', '- Perform cavitation check? (flag) TRUE will turn off unsteady aerodynamics\n'))
-            f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['CompAA'], 'CompAA', 'Flag to compute AeroAcoustics calculation [only used when WakeMod=1 or 2]\n'))
-            f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['AA_InputFile'], 'AA_InputFile', '- Aeroacoustics input file\n'))
+            # f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['CompAA'], 'CompAA', 'Flag to compute AeroAcoustics calculation [only used when WakeMod=1 or 2]\n'))
+            # f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['AA_InputFile'], 'AA_InputFile', '- Aeroacoustics input file\n'))
         
         f.write('======  Environmental Conditions  ===================================================================\n')
         f.write('{: 2.15e} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['AirDens'], 'AirDens', '- Air density (kg/m^3)\n'))
@@ -911,8 +911,8 @@ class InputWriter_OpenFAST(InputWriter_Common):
         f.write('======  Dynamic Blade-Element/Momentum Theory Options  ====================================================== [used only when WakeMod=1]\n')
         f.write('{:<22d} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['DBEMT_Mod'], 'DBEMT_Mod', '- Type of dynamic BEMT (DBEMT) model {1=constant tau1, 2=time-dependent tau1} (-) [used only when WakeMod=2]\n'))
         f.write('{:<22d} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['tau1_const'], 'tau1_const', '- Time constant for DBEMT (s) [used only when WakeMod=2 and DBEMT_Mod=1]\n'))
-        f.write('======  OLAF -- cOnvecting LAgrangian Filaments (Free Vortex Wake) Theory Options  ================== [used only when WakeMod=3]\n')
-        f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['OLAFInputFileName'], 'OLAFInputFileName', '- Input file for OLAF [used only when WakeMod=3]\n'))  
+        # f.write('======  OLAF -- cOnvecting LAgrangian Filaments (Free Vortex Wake) Theory Options  ================== [used only when WakeMod=3]\n')
+        # f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['OLAFInputFileName'], 'OLAFInputFileName', '- Input file for OLAF [used only when WakeMod=3]\n'))  
         f.write('======  Beddoes-Leishman Unsteady Airfoil Aerodynamics Options  ===================================== [used only when AFAeroMod=2]\n')
         f.write('{:<22d} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['UAMod'], 'UAMod', "Unsteady Aero Model Switch (switch) {1=Baseline model (Original), 2=Gonzalez's variant (changes in Cn,Cc,Cm), 3=Minemma/Pierce variant (changes in Cc and Cm)} [used only when AFAeroMod=2]\n"))
         f.write('{!s:<22} {:<11} {:}'.format(self.fst_vt['AeroDyn15']['FLookup'], 'FLookup', "Flag to indicate whether a lookup for f' will be calculated (TRUE) or whether best-fit exponential equations will be used (FALSE); if FALSE S1-S4 must be provided in airfoil input files (flag) [used only when AFAeroMod=2]\n"))
@@ -1013,11 +1013,11 @@ class InputWriter_OpenFAST(InputWriter_Common):
             f.write('! ------------------------------------------------------------------------------\n')
             f.write('{:<22}   {:<11} {:}'.format(self.fst_vt['AeroDyn15']['af_data'][afi][0]['InterpOrd'], 'InterpOrd', '! Interpolation order to use for quasi-steady table lookup {1=linear; 3=cubic spline; "default"} [default=3]\n'))
             f.write('{:<22d}   {:<11} {:}'.format(self.fst_vt['AeroDyn15']['af_data'][afi][0]['NonDimArea'], 'NonDimArea', '! The non-dimensional area of the airfoil (area/chord^2) (set to 1.0 if unsure or unneeded)\n'))
-            if self.fst_vt['AeroDyn15']['af_data'][1][0]['NumCoords'] != 0:
-                f.write('@"{:}_AF{:02d}_Coords.txt"       {:<11} {:}'.format(self.FAST_namingOut, afi, 'NumCoords', '! The number of coordinates in the airfoil shape file. Set to zero if coordinates not included.\n'))
-            else:
-                f.write('{:<22d}       {:<11} {:}'.format(0, 'NumCoords', '! The number of coordinates in the airfoil shape file. Set to zero if coordinates not included.\n'))
-            f.write('AF{:02d}_BL.txt              {:<11} {:}'.format(afi, 'BL_file', '! The file name including the boundary layer characteristics of the profile. Ignored if the aeroacoustic module is not called.\n'))
+            # if self.fst_vt['AeroDyn15']['af_data'][1][0]['NumCoords'] != 0:
+                # f.write('@"{:}_AF{:02d}_Coords.txt"       {:<11} {:}'.format(self.FAST_namingOut, afi, 'NumCoords', '! The number of coordinates in the airfoil shape file. Set to zero if coordinates not included.\n'))
+            # else:
+                # f.write('{:<22d}       {:<11} {:}'.format(0, 'NumCoords', '! The number of coordinates in the airfoil shape file. Set to zero if coordinates not included.\n'))
+            # f.write('AF{:02d}_BL.txt              {:<11} {:}'.format(afi, 'BL_file', '! The file name including the boundary layer characteristics of the profile. Ignored if the aeroacoustic module is not called.\n'))
             # f.write('{:<22d}   {:<11} {:}'.format(self.fst_vt['AeroDyn15']['af_data'][afi][0]['NumTabs'], 'NumTabs', '! Number of airfoil tables in this file.  Each table must have lines for Re and Ctrl.\n'))
 
 

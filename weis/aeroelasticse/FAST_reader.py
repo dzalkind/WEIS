@@ -491,12 +491,12 @@ class InputReader_OpenFAST(InputReader_Common):
         # Fst
         f.readline()
         self.fst_vt['Fst']['Linearize']  = f.readline().split()[0]
-        self.fst_vt['Fst']['CalcSteady'] = f.readline().split()[0]
-        self.fst_vt['Fst']['TrimCase']   = f.readline().split()[0]
-        self.fst_vt['Fst']['TrimTol']    = f.readline().split()[0]
-        self.fst_vt['Fst']['TrimGain']   = f.readline().split()[0]
-        self.fst_vt['Fst']['Twr_Kdmp']   = f.readline().split()[0]
-        self.fst_vt['Fst']['Bld_Kdmp']   = f.readline().split()[0]
+        # self.fst_vt['Fst']['CalcSteady'] = f.readline().split()[0]
+        # self.fst_vt['Fst']['TrimCase']   = f.readline().split()[0]
+        # self.fst_vt['Fst']['TrimTol']    = f.readline().split()[0]
+        # self.fst_vt['Fst']['TrimGain']   = f.readline().split()[0]
+        # self.fst_vt['Fst']['Twr_Kdmp']   = f.readline().split()[0]
+        # self.fst_vt['Fst']['Bld_Kdmp']   = f.readline().split()[0]
         self.fst_vt['Fst']['NLinTimes']  = f.readline().split()[0]
         self.fst_vt['Fst']['LinTimes']   = re.findall(r'[^,\s]+', f.readline())[0:2]
         self.fst_vt['Fst']['LinInputs']  = f.readline().split()[0]
@@ -1026,8 +1026,8 @@ class InputReader_OpenFAST(InputReader_Common):
         self.fst_vt['AeroDyn15']['FrozenWake']    = bool_read(f.readline().split()[0])
         if self.FAST_ver.lower() != 'fast8':
                 self.fst_vt['AeroDyn15']['CavitCheck']    = bool_read(f.readline().split()[0])
-                self.fst_vt['AeroDyn15']['CompAA']        = bool_read(f.readline().split()[0])
-                self.fst_vt['AeroDyn15']['AA_InputFile']  = f.readline().split()[0]
+                # self.fst_vt['AeroDyn15']['CompAA']        = bool_read(f.readline().split()[0])
+                # self.fst_vt['AeroDyn15']['AA_InputFile']  = f.readline().split()[0]
 
         # Environmental Conditions
         f.readline()
@@ -1058,8 +1058,8 @@ class InputReader_OpenFAST(InputReader_Common):
         self.fst_vt['AeroDyn15']['tau1_const']         = int(f.readline().split()[0])
 
         # Olaf -- cOnvecting LAgrangian Filaments (Free Vortex Wake) Theory Options
-        f.readline()
-        self.fst_vt['AeroDyn15']['OLAFInputFileName']  = f.readline().split()[0]
+        # f.readline()
+        # self.fst_vt['AeroDyn15']['OLAFInputFileName']  = f.readline().split()[0]
         
         # Beddoes-Leishman Unsteady Airfoil Aerodynamics Options
         f.readline()
@@ -1122,7 +1122,7 @@ class InputReader_OpenFAST(InputReader_Common):
 
         self.read_AeroDyn15Blade()
         self.read_AeroDyn15Polar()
-        self.read_AeroDyn15Coord()
+        # self.read_AeroDyn15Coord()
 
     def read_AeroDyn15Blade(self):
         # AeroDyn v5.00 Blade Definition File
@@ -1170,7 +1170,7 @@ class InputReader_OpenFAST(InputReader_Common):
 
             polar['InterpOrd']      = int_read(readline_filterComments(f).split()[0])
             polar['NonDimArea']     = int_read(readline_filterComments(f).split()[0])
-            polar['NumCoords']      = readline_filterComments(f).split()[0]
+            # polar['NumCoords']      = readline_filterComments(f).split()[0]
             polar['BL_file']        = readline_filterComments(f).split()[0]
             polar['NumTabs']        = int_read(readline_filterComments(f).split()[0])
             self.fst_vt['AeroDyn15']['af_data'][afi] = [None]*polar['NumTabs']
@@ -1528,7 +1528,7 @@ class InputReader_OpenFAST(InputReader_Common):
         self.fst_vt['HydroDyn']['PtfmVol0']      = float_read(f.readline().split()[0])
         self.fst_vt['HydroDyn']['PtfmCOBxt']     = float_read(f.readline().split()[0])
         self.fst_vt['HydroDyn']['PtfmCOByt']     = float_read(f.readline().split()[0])
-        self.fst_vt['HydroDyn']['ExctnMod']      = int_read(f.readline().split()[0])
+        # self.fst_vt['HydroDyn']['ExctnMod']      = int_read(f.readline().split()[0])
         self.fst_vt['HydroDyn']['RdtnMod']       = int_read(f.readline().split()[0])
         self.fst_vt['HydroDyn']['RdtnTMax']      = float_read(f.readline().split()[0])
         self.fst_vt['HydroDyn']['RdtnDT']        = float_read(f.readline().split()[0])
@@ -1554,6 +1554,8 @@ class InputReader_OpenFAST(InputReader_Common):
         self.fst_vt['HydroDyn']['AddF0']         = [float(idx) for idx in f.readline().strip().split()[:6]]
         self.fst_vt['HydroDyn']['AddCLin']       = np.array([[float(idx) for idx in f.readline().strip().split()[:6]] for i in range(6)])
         self.fst_vt['HydroDyn']['AddBLin']       = np.array([[float(idx) for idx in f.readline().strip().split()[:6]] for i in range(6)])
+        # for i in range(6):
+            # f.readline()
         self.fst_vt['HydroDyn']['AddBQuad']      = np.array([[float(idx) for idx in f.readline().strip().split()[:6]] for i in range(6)])
 
         #AXIAL COEFFICIENTS
