@@ -75,13 +75,13 @@ class CaseGen_IEC():
             case_inputs_i = copy.deepcopy(case_inputs)
 
             # DLC specific variable changes
-            if dlc in [1.1, 1.2, 5.1]:
+            if dlc in [1.1, 1.2, 1.6, 5.1]:
                 IEC_WindType = 'NTM'
                 alpha = 0.2
                 iecwind = pyIECWind_turb()
                 TMax = 630.
 
-            elif dlc in [1.3, 6.1, 6.3]:
+            elif dlc in [1.3, 6.1, 6.3, 6.5]:
                 if self.Turbine_Class == 'I':
                     x = 1
                 elif self.Turbine_Class == 'II':
@@ -137,7 +137,7 @@ class CaseGen_IEC():
             iecwind_ex.Turbulence_Class = self.Turbulence_Class
             iecwind_ex.z_hub            = self.z_hub
             iecwind_ex.setup()
-            _, V_e50, V_e1, V_50, V_1   = iecwind_ex.EWM(0.)
+            _, V_e50, V_e1, V_500, V_50, V_1   = iecwind_ex.EWM(0.)
 
 
             if dlc == 5.1:
@@ -165,7 +165,7 @@ class CaseGen_IEC():
                 case_inputs_i[("ServoDyn","GenTiStp")]   = {'vals':["True"], 'group':0}
                 case_inputs_i[("ServoDyn","TimGenOf")]   = {'vals':[9999.9], 'group':0}
 
-            if dlc == 6.1:
+            if dlc == 6.1:  # 50-year
                 self.dlc_inputs['U'][i] = [V_50]
                 self.dlc_inputs['Yaw'][i] = [-8.,8.]
                 case_inputs_i[("ElastoDyn","GenDOF")]   = {'vals':["False"], 'group':0}
@@ -176,7 +176,12 @@ class CaseGen_IEC():
                 case_inputs_i[("ElastoDyn","BlPitch3")] = {'vals':[90.], 'group':0}
                 case_inputs_i[("ServoDyn","PCMode")]    = {'vals':[0], 'group':0}
                 case_inputs_i[("AeroDyn15","AFAeroMod")]= {'vals':[1], 'group':0}
-            elif dlc == 6.3:
+
+                # wave setup, Maine specific
+                case_inputs_i[('HydroDyn','WaveHs')]    = {'vals':[10.68], 'group': 0}
+                case_inputs_i[('HydroDyn','WaveTp')]    = {'vals':[14.2], 'group': 0}
+
+            elif dlc == 6.3: # 1-year
                 self.dlc_inputs['U'][i] = [V_1]
                 self.dlc_inputs['Yaw'][i] = [-20.,20.]
                 case_inputs_i[("ElastoDyn","GenDOF")]   = {'vals':["False"], 'group':0}
@@ -187,12 +192,33 @@ class CaseGen_IEC():
                 case_inputs_i[("ElastoDyn","BlPitch3")] = {'vals':[90.], 'group':0}
                 case_inputs_i[("ServoDyn","PCMode")]    = {'vals':[0], 'group':0}
                 case_inputs_i[("AeroDyn15","AFAeroMod")]= {'vals':[1], 'group':0}
+
+                # wave setup, Maine specific
+                case_inputs_i[('HydroDyn','WaveHs')]    = {'vals':[6.98], 'group': 0}
+                case_inputs_i[('HydroDyn','WaveTp')]    = {'vals':[11.7], 'group': 0}
+
+            elif dlc == 6.5: # 500-year
+                self.dlc_inputs['U'][i] = [V_500]
+                self.dlc_inputs['Yaw'][i] = [-8.,8.]
+                case_inputs_i[("ElastoDyn","GenDOF")]   = {'vals':["False"], 'group':0}
+                case_inputs_i[("ElastoDyn","YawDOF")]   = {'vals':["False"], 'group':0}
+                case_inputs_i[("ElastoDyn","RotSpeed")] = {'vals':[0.], 'group':0}
+                case_inputs_i[("ElastoDyn","BlPitch1")] = {'vals':[90.], 'group':0}
+                case_inputs_i[("ElastoDyn","BlPitch2")] = {'vals':[90.], 'group':0}
+                case_inputs_i[("ElastoDyn","BlPitch3")] = {'vals':[90.], 'group':0}
+                case_inputs_i[("ServoDyn","PCMode")]    = {'vals':[0], 'group':0}
+                case_inputs_i[("AeroDyn15","AFAeroMod")]= {'vals':[1], 'group':0}
+
+                # wave setup, Maine specific
+                case_inputs_i[('HydroDyn','WaveHs')]    = {'vals':[12.54], 'group': 0}
+                case_inputs_i[('HydroDyn','WaveTp')]    = {'vals':[15], 'group': 0}
+
             else:
                 self.dlc_inputs['Yaw'][i] = [0.]
                 case_inputs_i[("ServoDyn","PCMode")]    = {'vals':[5], 'group':0}
                 case_inputs_i[("AeroDyn15","AFAeroMod")]= {'vals':[2], 'group':0}
                 case_inputs_i[("ElastoDyn","GenDOF")]   = {'vals':["True"], 'group':0}
-                case_inputs_i[("ElastoDyn","YawDOF")]   = {'vals':["True"], 'group':0}
+                # case_inputs_i[("ElastoDyn","YawDOF")]   = {'vals':["True"], 'group':0}
 
 
             # Matrix combining N dlc variables that affect wind file generation
@@ -287,6 +313,13 @@ class CaseGen_IEC():
 
             if len(self.dlc_inputs['Yaw'][i]) > 0:
                     case_inputs_i[("ElastoDyn","NacYaw")] = {'vals':self.dlc_inputs['Yaw'][i], 'group':2}
+
+            # Alter waves for DLC 1.6, specific to Maine
+            if dlc == 1.6:
+                self.init_cond[('HydroDyn','WaveHs')] = {'U': [4., 6., 8., 10., 12., 14., 16., 18., 20., 22., 24.]}
+                self.init_cond[('HydroDyn','WaveHs')]['val'] = [6.3, 8.,8.,8.1, 8.5, 8.5, 9.8, 9.8, 9.8, 9.8, 9.8]
+                self.init_cond[('HydroDyn','WaveTp')] = {'U': [4.,   6.,  8.,  10., 12., 14., 16., 18., 20., 22., 24.]}
+                self.init_cond[('HydroDyn','WaveTp')]['val'] = [11.5,12.7,12.7,12.8,13.1,13.1,14.1,14.1,14.1,14.1,14.1]
 
             # Set FAST variables from inital conditions
             if self.init_cond:

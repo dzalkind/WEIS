@@ -38,6 +38,8 @@ class pyIECWind_extreme():
             self.V_ref = 37.5
         elif self.Turbine_Class == 'IV':
             self.V_ref = 30.
+        elif self.Turbine_Class == 'Maine':
+            self.V_ref = 58.7
         self.V_ave = self.V_ref*0.2
 
         if self.Turbulence_Class == 'A+':
@@ -76,9 +78,10 @@ class pyIECWind_extreme():
         # Turb
         V_50 = self.V_ref
         V_1 = 0.8*V_50
+        V_500 = 1.1*V_50
         sigma_1 = 0.11*V_hub
 
-        return sigma_1, V_e50, V_e1, V_50, V_1
+        return sigma_1, V_e50, V_e1, V_500, V_50, V_1
 
     def EOG(self, V_hub_in):
         # Extreme operating guest: 6.3.2.2
@@ -440,8 +443,8 @@ class pyIECWind_turb():
         turbsim_vt.runtime_options.WrADTWR    = False
         turbsim_vt.tmspecs.AnalysisTime       = self.AnalysisTime
         turbsim_vt.tmspecs.HubHt              = self.z_hub
-        turbsim_vt.tmspecs.GridHeight         = np.ceil(self.z_hub*1.9)
-        turbsim_vt.tmspecs.GridWidth          = np.ceil(self.z_hub*1.9)
+        turbsim_vt.tmspecs.GridHeight         = np.ceil(self.z_hub*1.99)
+        turbsim_vt.tmspecs.GridWidth          = np.ceil(self.z_hub*1.99)
         turbsim_vt.tmspecs.NumGrid_Z          = 25
         turbsim_vt.tmspecs.NumGrid_Y          = 25
         turbsim_vt.tmspecs.HFlowAng           = 0.0

@@ -46,9 +46,9 @@ def NASA_runFAST_CaseGenIEC(TMD):
     iec.init_cond[('HydroDyn','WaveTp')] = {'U': [4., 6., 8., 10., 12., 14., 16., 18., 20., 22., 24.]}
     iec.init_cond[('HydroDyn','WaveTp')]['val'] = [8.515,8.310,8.006,7.651,7.441,7.461,7.643,8.047,8.521,8.987,9.452]
 
-    iec.Turbine_Class = 'I' # I, II, III, IV
+    iec.Turbine_Class = 'II' # I, II, III, IV
     iec.Turbulence_Class = 'A'
-    iec.D = 240.            #TODO: pull this info from fast file...do we know fast file?
+    iec.D = 300.            #TODO: pull this info from fast file...do we know fast file?
     iec.z_hub = 150
 
     # DLC inputs
@@ -56,58 +56,72 @@ def NASA_runFAST_CaseGenIEC(TMD):
 
     # full set
     if False:  
-        iec.dlc_inputs['DLC']   = [1.1,1.3,1.4,1.5,5.1]#,6.1,6.3]
-        iec.dlc_inputs['U']     = [[4,6,8,10,12,14,16,18,20,22,24],[4,6,8,10,12,14,16,18,20,22,24],[8.88,12.88], \
-                                        [4,6,8,10,12,14,16,18,20,22,24],[8,12,24]]#,[],[]]  #[[10, 12, 14], [12]]
-        iec.dlc_inputs['Seeds'] = [[1,2,3,4,5,6],[11,12,13,14,15,16],[],[],[21,22,23,24,25,26]]#,[],[]] #[[5, 6, 7], []]
-        iec.dlc_inputs['WaveSeeds'] = [[1,2,3,4,5,6],[11,12,13,14,15,16],[],[],[21,22,23,24,25,26]]#,[],[]] #[[5, 6, 7], []]
+        iec.dlc_inputs['DLC']   = [1.2,1.6,6.1,6.3,6.5]#,6.1,6.3]
+        iec.dlc_inputs['U']     = [[4,6,8,10,12,14,16,18,20,22,24],[4,6,8,10,12,14,16,18,20,22,24],[], \
+                                        [],[]]#,[],[]]  #[[10, 12, 14], [12]]
+        iec.dlc_inputs['Seeds'] = [[1,2,3,4,5,6],[11,12,13,14,15,16],[17,18,19,20,21,22],[23,24,25,26,27,28],\
+                                        [29,30,31,32,33]]#,[],[]] #[[5, 6, 7], []]
+        iec.dlc_inputs['WaveSeeds'] = [[1,2,3,4,5,6],[11,12,13,14,15,16],[17,18,19,20,21,22],[23,24,25,26,27,28],\
+                                        [29,30,31,32,33]]
         iec.dlc_inputs['Yaw']   = [[],[],[],[],[]]#,[],[]]  #[[], []]
 
         iec.transient_dir_change        = 'both'  # '+','-','both': sign for transient events in EDC, EWS
         iec.transient_shear_orientation = 'both'  # 'v','h','both': vertical or horizontal shear for EWS
-        iec.uniqueSeeds = True
-        iec.uniqueWaveSeeds = True
+        
+    elif False:
+        iec.dlc_inputs['DLC']   = [1.6,6.1,6.3,6.5]#,6.1,6.3]
+        iec.dlc_inputs['U']     = [[20.,24.],[],[],[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
+        iec.dlc_inputs['Seeds'] = [[5],[12],[50],[60]]#,[],[]] #[[5, 6, 7], []]
+        iec.dlc_inputs['Yaw']   = [[],[],[],[]]#,[],[]]  #[[], []]
     else:  # reduced set
-        iec.dlc_inputs['DLC']   = [1.3]#,6.1,6.3]
-        iec.dlc_inputs['U']     = [[12.]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
-        iec.dlc_inputs['Seeds'] = [[5]]#,[],[]] #[[5, 6, 7], []]
+        iec.dlc_inputs['DLC']   = [6.5]#,6.1,6.3]
+        iec.dlc_inputs['U']     = [[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
+        iec.dlc_inputs['Seeds'] = [[69]]#,[],[]] #[[5, 6, 7], []]
         iec.dlc_inputs['Yaw']   = [[]]#,[],[]]  #[[], []]
 
+    iec.uniqueSeeds = True
+    iec.uniqueWaveSeeds = True
     # Set up TMD Case
     TMD_Case = TMD
 
 
     # Naming, file management, etc
-    iec.wind_dir = '/Users/dzalkind/Tools/WEIS/outputs/NASA/wind'
-    iec.case_name_base = 'TMD_' + TMD_Case
+    iec.wind_dir = '/Users/dzalkind/Tools/WEIS/outputs/NASA/dlc_test'
+    iec.case_name_base = 'DLC_Test'
     iec.Turbsim_exe = '/Users/dzalkind/Tools/openfast/build/modules/turbsim/turbsim'
     iec.debug_level = 2
     iec.parallel_windfile_gen = True
     iec.cores = 4
-    iec.run_dir = '/Users/dzalkind/Tools/WEIS/outputs/NASA/Testing/TMD_' + TMD_Case
+    iec.run_dir = '/Users/dzalkind/Tools/WEIS/outputs/NASA/DLC_Play'
+    iec.overwrite = True
 
     # Run case generator / wind file writing
     case_inputs = {}
     case_inputs[('Fst','OutFileFmt')] = {'vals':[1], 'group':0}   
+    case_inputs[("Fst","OutFileFmt")]        = {'vals':[3], 'group':0}
+    case_inputs[("Fst","TMax")]        = {'vals':[250], 'group':0}
 
-    if TMD_Case == 'A':
-        case_inputs[('ElastoDyn','PtfmCMzt')] = {'vals':[-2.8], 'group':0}
-        case_inputs[('ElastoDyn','PtfmMass')] = {'vals':[1.52989E+07], 'group':0}
-        case_inputs[('ElastoDyn','PtfmRIner')] = {'vals':[2.09344E+09], 'group':0}
-        case_inputs[('ElastoDyn','PtfmPIner')] = {'vals':[2.09344E+09], 'group':0}
-        case_inputs[('ElastoDyn','PtfmYIner')] = {'vals':[4.18455E+09], 'group':0}
-    elif TMD_Case == 'B':
-        case_inputs[('ElastoDyn','PtfmCMzt')] = {'vals':[-2.8], 'group':0}
-        case_inputs[('ElastoDyn','PtfmMass')] = {'vals':[1.54117E+07], 'group':0}
-        case_inputs[('ElastoDyn','PtfmRIner')] = {'vals':[2.17492E+09], 'group':0}
-        case_inputs[('ElastoDyn','PtfmPIner')] = {'vals':[2.17492E+09], 'group':0}
-        case_inputs[('ElastoDyn','PtfmYIner')] = {'vals':[4.34751E+09], 'group':0}
-    elif TMD_Case == 'C':
-        case_inputs[('ElastoDyn','PtfmCMzt')] = {'vals':[-2.8], 'group':0}
-        case_inputs[('ElastoDyn','PtfmMass')] = {'vals':[1.61682E+07], 'group':0}
-        case_inputs[('ElastoDyn','PtfmRIner')] = {'vals':[1.80011E+09], 'group':0}
-        case_inputs[('ElastoDyn','PtfmPIner')] = {'vals':[1.80011E+09], 'group':0}
-        case_inputs[('ElastoDyn','PtfmYIner')] = {'vals':[3.59751E+09], 'group':0}
+
+    case_inputs[('ElastoDyn','YawDOF')] = {'vals':[False], 'group':0}
+
+    # if TMD_Case == 'A':
+    #     case_inputs[('ElastoDyn','PtfmCMzt')] = {'vals':[-2.8], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmMass')] = {'vals':[1.52989E+07], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmRIner')] = {'vals':[2.09344E+09], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmPIner')] = {'vals':[2.09344E+09], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmYIner')] = {'vals':[4.18455E+09], 'group':0}
+    # elif TMD_Case == 'B':
+    #     case_inputs[('ElastoDyn','PtfmCMzt')] = {'vals':[-2.8], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmMass')] = {'vals':[1.54117E+07], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmRIner')] = {'vals':[2.17492E+09], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmPIner')] = {'vals':[2.17492E+09], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmYIner')] = {'vals':[4.34751E+09], 'group':0}
+    # elif TMD_Case == 'C':
+    #     case_inputs[('ElastoDyn','PtfmCMzt')] = {'vals':[-2.8], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmMass')] = {'vals':[1.61682E+07], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmRIner')] = {'vals':[1.80011E+09], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmPIner')] = {'vals':[1.80011E+09], 'group':0}
+    #     case_inputs[('ElastoDyn','PtfmYIner')] = {'vals':[3.59751E+09], 'group':0}
 
 
     case_list, case_name_list, dlc_all = iec.execute(case_inputs=case_inputs)
@@ -115,18 +129,20 @@ def NASA_runFAST_CaseGenIEC(TMD):
     # Run FAST cases
     fastBatch.FAST_exe = '/Users/dzalkind/Tools/openfast-umaine/install/bin/openfast'   # Path to executable
     fastBatch.FAST_InputFile = 'NASA_Float.fst'   # FAST input file (ext=.fst)
-    fastBatch.FAST_directory = '/Users/dzalkind/Projects/NASA/OpenFAST_Model'   # Path to fst directory files
+    fastBatch.FAST_directory = '/Users/dzalkind/Projects/NASA/OF_Model_2'   # Path to fst directory files
     fastBatch.FAST_runDirectory = iec.run_dir
-    fastBatch.Hull_TMD_File = 'Hull_TMD_Input_' + TMD_Case + '.dat'
+    fastBatch.Hull_TMD_File = 'Hull_TMD_Input.dat'
 
-
-
-
+    # Add channels
+    channels = {}
+    for var in ["TipDxc1", "TipDyc1", "TipDzc1", "TipDxb1", "TipDyb1", "TipDxc2", "TipDyc2", "TipDzc2", "TipDxb2", "TipDyb2", "TipDxc3", "TipDyc3", "TipDzc3", "TipDxb3", "TipDyb3", "RootMxc1", "RootMyc1", "RootMzc1", "RootMxb1", "RootMyb1", "RootMxc2", "RootMyc2", "RootMzc2", "RootMxb2", "RootMyb2", "RootMxc3", "RootMyc3", "RootMzc3", "RootMxb3", "RootMyb3", "TwrBsMxt", "TwrBsMyt", "TwrBsMzt", "GenPwr", "GenTq", "RotThrust", "RtAeroCp", "RtAeroCt", "RotSpeed", "BldPitch1", "TTDspSS", "TTDspFA", "NacYaw", "Wind1VelX", "Wind1VelY", "Wind1VelZ", "LSSTipMxa","LSSTipMya","LSSTipMza","LSSTipMxs","LSSTipMys","LSSTipMzs","LSShftFys","LSShftFzs", "TipRDxr", "TipRDyr", "TipRDzr"]:
+        channels[var] = True
 
     fastBatch.case_list = case_list
     fastBatch.case_name_list = case_name_list
     fastBatch.debug_level = 2
     fastBatch.dev_branch = True
+    fastBatch.channels = channels
 
     fastBatch.run_serial()
     # fastBatch.run_multi(4)
@@ -138,7 +154,7 @@ if __name__=="__main__":
     #example_runFAST_pywrapper_batch()
     #example_runFAST_CaseGenIEC()
 
-    TMD_Configs = ['A']   #['','A','B','C']
+    TMD_Configs = ['']   #['','A','B','C']
 
     for TMD in TMD_Configs:
         NASA_runFAST_CaseGenIEC(TMD)
