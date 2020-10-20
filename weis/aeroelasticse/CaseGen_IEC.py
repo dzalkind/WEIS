@@ -167,7 +167,7 @@ class CaseGen_IEC():
 
             if dlc == 6.1:  # 50-year
                 self.dlc_inputs['U'][i] = [V_50]
-                self.dlc_inputs['Yaw'][i] = [-8.,8.]
+                self.dlc_inputs['Yaw'][i] = [8.]  # HACK for now
                 case_inputs_i[("ElastoDyn","GenDOF")]   = {'vals':["False"], 'group':0}
                 case_inputs_i[("ElastoDyn","YawDOF")]   = {'vals':["False"], 'group':0}
                 case_inputs_i[("ElastoDyn","RotSpeed")] = {'vals':[0.], 'group':0}
@@ -245,7 +245,7 @@ class CaseGen_IEC():
             matrix_out = np.asarray(matrix_out)
 
             # change seed manually to not mess up indexing above, 600
-            if self.uniqueSeeds and dlc in [1.1, 1.2, 5.1, 1.3, 6.1, 6.3]:
+            if self.uniqueSeeds and dlc in [1.1, 1.2, 1.6, 5.1, 1.3]:
                 for idx, row in enumerate(matrix_out):
                     matrix_out[idx][1] = idx + 600
             

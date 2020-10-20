@@ -14,50 +14,61 @@ from ROSCO_toolbox import utilities as ROSCO_utilites
 fast_io = ROSCO_utilites.FAST_IO()
 fast_pl = ROSCO_utilites.FAST_Plots()
 # WISDEM modules
-from wisdem.aeroelasticse.Util import FileTools
+from weis.aeroelasticse.Util import FileTools
 # Batch Analysis
 from pCrunch import pdTools
 from pCrunch import Processing, Analysis
 
 
 # Define input files paths
-output_dir      = '/projects/ssc/nabbas/DLC_Analysis/5MW_OC3Spar/5MW_OC3Spar_rosco/'
-results_dir     = 'results'
-save_results    = True
+def post_BatchRun():
+    output_dir      = '/Users/dzalkind/Tools/WEIS/outputs/NASA/DLC_Play/'
+    results_dir     = 'results'
+    save_results    = True
 
 
-# Load case matrix into dataframe
-fname_case_matrix = os.path.join(output_dir,'case_matrix.yaml')
-case_matrix = FileTools.load_yaml(fname_case_matrix, package=1)
-cm = pd.DataFrame(case_matrix)
+    # Load case matrix into dataframe
+    fname_case_matrix = os.path.join(output_dir,'case_matrix.yaml')
+    case_matrix = FileTools.load_yaml(fname_case_matrix, package=1)
+    cm = pd.DataFrame(case_matrix)
 
-# Find all outfiles
-outfiles = []
-for file in os.listdir(output_dir):
-    if file.endswith('.outb'):
-        outfiles.append(output_dir + file)
-    elif file.endswith('.out'):
-        outfiles.append(output_dir + file)
-
-
-# Initialize processing classes
-fp = Processing.FAST_Processing()
-fa = Analysis.Loads_Analysis()
+    # Find all outfiles
+    outfiles = []
+    for file in os.listdir(output_dir):
+        if file.endswith('.outb'):
+            outfiles.append(output_dir + file)
+        # elif file.endswith('.out') and not file.endswith('.MD.out'):
+        #     outfiles.append(output_dir + file)
 
 
-# Set some processing parameters
-fp.OpenFAST_outfile_list = outfiles
-fp.t0 = 30
-fp.parallel_analysis = True
-fp.results_dir = os.path.join(output_dir, 'stats')
-fp.verbose=True
+    # Initialize processing classes
+    fp = Processing.FAST_Processing()
+    fa = Analysis.Loads_Analysis()
 
-if save_results:
-    fp.save_LoadRanking = True
-    fp.save_SummaryStats = True
 
-# Load and save statistics and load rankings
-stats, load_rankings = fp.batch_processing()
+    # Set some processing parameters
+    fp.OpenFAST_outfile_list = outfiles
+    fp.t0 = 100
+    fp.parallel_analysis = True
+    fp.results_dir = os.path.join(output_dir, 'stats')
+    fp.verbose=True
+
+
+    fp.DEL_info = [('TwrBsMyt', 3), ('PtfmHeave', 3), ('PtfmPitch', 3)]
+    
+    if save_results:
+        fp.save_LoadRanking = True
+        fp.save_SummaryStats = True
+
+    # Load and save statistics and load rankings
+    stats, load_rankings = fp.batch_processing()
+
+
+    print('here')
+
+if __name__ == '__main__':
+    post_BatchRun()
+
 
 # # Get wind speeds for processed runs
 # windspeeds, seed, IECtype, cm_wind = Processing.get_windspeeds(cm, return_df=True)

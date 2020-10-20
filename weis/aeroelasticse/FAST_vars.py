@@ -762,6 +762,7 @@ HydroDyn['CurrDIDir']        = 0.
 # FLOATING PLATFORM
 HydroDyn['PotMod']           = 0
 HydroDyn['PotFile']          = ""
+HydroDyn['TMDFile']          = ""
 HydroDyn['WAMITULEN']        = 0.
 HydroDyn['PtfmVol0']         = 0.
 HydroDyn['PtfmCOBxt']        = 0.

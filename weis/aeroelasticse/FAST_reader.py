@@ -1524,6 +1524,7 @@ class InputReader_OpenFAST(InputReader_Common):
         f.readline()
         self.fst_vt['HydroDyn']['PotMod']        = int_read(f.readline().split()[0])
         self.fst_vt['HydroDyn']['PotFile']       = os.path.normpath(os.path.join(os.path.split(hd_file)[0], f.readline().split()[0][1:-1]))
+        self.fst_vt['HydroDyn']['TMDFile']       = os.path.normpath(os.path.join(os.path.split(hd_file)[0], f.readline().split()[0][1:-1]))
         self.fst_vt['HydroDyn']['WAMITULEN']     = float_read(f.readline().split()[0])
         self.fst_vt['HydroDyn']['PtfmVol0']      = float_read(f.readline().split()[0])
         self.fst_vt['HydroDyn']['PtfmCOBxt']     = float_read(f.readline().split()[0])
