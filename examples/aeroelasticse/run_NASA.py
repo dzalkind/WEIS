@@ -70,10 +70,11 @@ def NASA_runFAST_CaseGenIEC(TMD):
         iec.transient_shear_orientation = 'both'  # 'v','h','both': vertical or horizontal shear for EWS
         
     elif False:
-        iec.dlc_inputs['DLC']   = [1.6,6.1,6.3,6.5]#,6.1,6.3]
-        iec.dlc_inputs['U']     = [[20.,24.],[],[],[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
-        iec.dlc_inputs['Seeds'] = [[5],[12],[50],[60]]#,[],[]] #[[5, 6, 7], []]
-        iec.dlc_inputs['Yaw']   = [[],[],[],[]]#,[],[]]  #[[], []]
+        iec.dlc_inputs['DLC']   = [1.2,1.6,6.1,6.3,6.5]#,6.1,6.3]
+        iec.dlc_inputs['U']     = [[8,12,24],[20.,24.],[],[],[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
+        iec.dlc_inputs['Seeds'] = [[3],[5],[12],[50],[60]]#,[],[]] #[[5, 6, 7], []]
+        iec.dlc_inputs['Yaw']   = [[],[],[],[],[]]#,[],[]]  #[[], []]
+        iec.TMax    = 3600
     else:  # reduced set
         iec.dlc_inputs['DLC']   = [6.1]#,6.1,6.3]
         iec.dlc_inputs['U']     = [[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
@@ -93,37 +94,38 @@ def NASA_runFAST_CaseGenIEC(TMD):
     iec.debug_level = 2
     iec.parallel_windfile_gen = True
     iec.cores = 4
-    iec.run_dir = '/Users/dzalkind/Tools/WEIS/outputs/NASA/TMD_Input_Play'
+    iec.run_dir = '/Users/dzalkind/Tools/WEIS/outputs/NASA/test_fll'
     iec.overwrite = False
 
     # Run case generator / wind file writing
     case_inputs = {}
     case_inputs[('Fst','OutFileFmt')] = {'vals':[1], 'group':0}   
     case_inputs[("Fst","OutFileFmt")]        = {'vals':[3], 'group':0}
-    # case_inputs[("Fst","TMax")]        = {'vals':[250], 'group':0}
+    # case_inputs[("Fst","TMax")]        = {'vals':[3600], 'group':0}
 
 
     case_inputs[('ElastoDyn','YawDOF')] = {'vals':[False], 'group':0}
 
     # TMD Cases
     # sweep natural frequency
-    w_sweep = np.linspace(0.05,1.55,num=24)
+    if False:
+        w_sweep = np.linspace(0.05,1.55,num=24)
 
-    nt      = NASA_TMD()
-    tmd_files = []
-    for i, w_tmd in enumerate(w_sweep):
-        # write TMD File to directory
-        nt.damper_freq = w_tmd
-        nt.update_tmd_props()
-        tmd_filename = os.path.join(iec.run_dir,'TMD_Inp_w{:3.3f}.dat'.format(w_tmd)) 
-        # tmd_filename = os.path.join(iec.run_dir,'TMD_Inp_{}.dat'.format(i)) 
-        nt.write_tmd_input(tmd_filename)
+        nt      = NASA_TMD()
+        tmd_files = []
+        for i, w_tmd in enumerate(w_sweep):
+            # write TMD File to directory
+            nt.damper_freq = w_tmd
+            nt.update_tmd_props()
+            tmd_filename = os.path.join(iec.run_dir,'TMD_Inp_w{:3.3f}.dat'.format(w_tmd)) 
+            # tmd_filename = os.path.join(iec.run_dir,'TMD_Inp_{}.dat'.format(i)) 
+            nt.write_tmd_input(tmd_filename)
 
-        # collect name for case_input
-        tmd_files.append(tmd_filename)
+            # collect name for case_input
+            tmd_files.append(tmd_filename)
 
 
-    case_inputs[('HydroDyn','TMDFile')] = {'vals':tmd_files, 'group':3}
+        case_inputs[('HydroDyn','TMDFile')] = {'vals':tmd_files, 'group':3}
 
 
 
