@@ -3,6 +3,9 @@ import numpy as np
 
 from weis.aeroelasticse.CaseGen_General import CaseGen_General
 from weis.aeroelasticse.CaseGen_IEC import CaseGen_IEC
+from ROSCO_toolbox import utilities as ROSCO_utilities
+from weis.aeroelasticse.HH_WindFile import HH_StepFile
+
 
 # def power_curve_fit(fst_vt, runDir, namebase, TMax, turbine_class, turbulence_class, Vrated, U_init=[], Omega_init=[], pitch_init=[], Turbsim_exe='', ptfm_U_init=[], ptfm_pitch_init=[], ptfm_surge_init=[], ptfm_heave_init=[], metocean_U_init=[], metocean_Hs_init=[], metocean_Tp_init=[]):
 
@@ -128,7 +131,7 @@ def power_curve(fst_vt, runDir, namebase, TMax, turbine_class, turbulence_class,
     # print(U)
 
     # dt = [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
-    dt = [0.01]*len(U)
+    # dt = [0.01]*len(U)
 
     # U = [4.,8.,9.,10.]
     omega = np.interp(U, U_init, Omega_init)
@@ -164,26 +167,26 @@ def power_curve(fst_vt, runDir, namebase, TMax, turbine_class, turbulence_class,
     # case_inputs[("ElastoDyn","PtfmSgDOF")]     = {'vals':['False'], 'group':0}
     # case_inputs[("ElastoDyn","PtfmHvDOF")]     = {'vals':['False'], 'group':0}
     # case_inputs[("ElastoDyn","PtfmPDOF")]     = {'vals':['False'], 'group':0}
-    case_inputs[("ElastoDyn","PtfmSwDOF")]     = {'vals':['False'], 'group':0}
-    case_inputs[("ElastoDyn","PtfmRDOF")]     = {'vals':['False'], 'group':0}
-    case_inputs[("ElastoDyn","PtfmYDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmSwDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmRDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmYDOF")]     = {'vals':['False'], 'group':0}
 
     case_inputs[("Fst","TMax")] = {'vals':[T], 'group':0}
     case_inputs[("Fst","TStart")] = {'vals':[TStart], 'group':0}
-    case_inputs[("Fst","DT")] = {'vals':dt, 'group':1}
-    case_inputs[("ElastoDyn","YawDOF")]      = {'vals':['True'], 'group':0}
-    case_inputs[("ElastoDyn","FlapDOF1")]    = {'vals':['False'], 'group':0}
-    case_inputs[("ElastoDyn","FlapDOF2")]    = {'vals':['False'], 'group':0}
-    case_inputs[("ElastoDyn","EdgeDOF")]     = {'vals':['False'], 'group':0}
-    case_inputs[("ElastoDyn","DrTrDOF")]     = {'vals':['False'], 'group':0}
-    case_inputs[("ElastoDyn","GenDOF")]      = {'vals':['True'], 'group':0} 
-    case_inputs[("ElastoDyn","TwFADOF1")]    = {'vals':['False'], 'group':0}
-    case_inputs[("ElastoDyn","TwFADOF2")]    = {'vals':['False'], 'group':0}
-    case_inputs[("ElastoDyn","TwSSDOF1")]    = {'vals':['False'], 'group':0}
-    case_inputs[("ElastoDyn","TwSSDOF2")]    = {'vals':['False'], 'group':0}
-    case_inputs[("ServoDyn","PCMode")]       = {'vals':[5], 'group':0}
-    case_inputs[("ServoDyn","VSContrl")]     = {'vals':[5], 'group':0}
-    case_inputs[("ServoDyn","YCMode")]       = {'vals':[5], 'group':0}
+    # case_inputs[("Fst","DT")] = {'vals':dt, 'group':1}
+    # case_inputs[("ElastoDyn","YawDOF")]      = {'vals':['True'], 'group':0}
+    # case_inputs[("ElastoDyn","FlapDOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","FlapDOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","EdgeDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","DrTrDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","GenDOF")]      = {'vals':['True'], 'group':0} 
+    # case_inputs[("ElastoDyn","TwFADOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwFADOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwSSDOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwSSDOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ServoDyn","PCMode")]       = {'vals':[5], 'group':0}
+    # case_inputs[("ServoDyn","VSContrl")]     = {'vals':[5], 'group':0}
+    # case_inputs[("ServoDyn","YCMode")]       = {'vals':[5], 'group':0}
     case_inputs[("AeroDyn15","WakeMod")]     = {'vals':[1], 'group':0}
     case_inputs[("AeroDyn15","AFAeroMod")]   = {'vals':[2], 'group':0}
     case_inputs[("AeroDyn15","TwrPotent")]   = {'vals':[0], 'group':0}
@@ -220,6 +223,313 @@ def power_curve(fst_vt, runDir, namebase, TMax, turbine_class, turbulence_class,
     channels = ['Wind1VelX','GenPwr',"RtAeroCp", "RotTorq", "RotThrust", "RotSpeed", "BldPitch1"]
 
     return case_list, case_name_list, channels
+
+def power_curve_control(discon_file,runDir, namebase,rosco_dll=''):
+    # Set up cases for FIW-JIP project
+    # 2.x in controller tuning register
+
+    # Default Runtime
+    T_max   = 800.
+
+
+    # Run conditions
+    U = np.arange(4,24.5,.5).tolist()
+
+    case_inputs = {}
+    # simulation settings
+    case_inputs[("Fst","TMax")] = {'vals':[T_max], 'group':0}
+
+    # DOFs
+    # case_inputs[("ElastoDyn","YawDOF")]      = {'vals':['True'], 'group':0}
+    # case_inputs[("ElastoDyn","FlapDOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","FlapDOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","EdgeDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","DrTrDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","GenDOF")]      = {'vals':['True'], 'group':0} 
+    # case_inputs[("ElastoDyn","TwFADOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwFADOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwSSDOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwSSDOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmSgDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmHvDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmPDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmSwDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmRDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmYDOF")]     = {'vals':['False'], 'group':0}
+    
+    # wind inflow
+    case_inputs[("InflowWind","WindType")] = {'vals':[1], 'group':0}
+    case_inputs[("InflowWind","HWindSpeed")] = {'vals':U, 'group':1}
+
+    # Stop Generator from Turning Off
+    case_inputs[('ServoDyn', 'GenTiStr')] = {'vals': ['True'], 'group': 0}
+    case_inputs[('ServoDyn', 'GenTiStp')] = {'vals': ['True'], 'group': 0}
+    case_inputs[('ServoDyn', 'SpdGenOn')] = {'vals': [0.], 'group': 0}
+    case_inputs[('ServoDyn', 'TimGenOn')] = {'vals': [0.], 'group': 0}
+    case_inputs[('ServoDyn', 'GenModel')] = {'vals': [1], 'group': 0}
+    
+
+    # AeroDyn
+    case_inputs[("AeroDyn15", "WakeMod")] = {'vals': [1], 'group': 0}
+    case_inputs[("AeroDyn15", "AFAeroMod")] = {'vals': [2], 'group': 0}
+    case_inputs[("AeroDyn15", "TwrPotent")] = {'vals': [0], 'group': 0}
+    case_inputs[("AeroDyn15", "TwrShadow")] = {'vals': ['False'], 'group': 0}
+    case_inputs[("AeroDyn15", "TwrAero")] = {'vals': ['False'], 'group': 0}
+    case_inputs[("AeroDyn15", "SkewMod")] = {'vals': [1], 'group': 0}
+    case_inputs[("AeroDyn15", "TipLoss")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "HubLoss")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "TanInd")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "AIDrag")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "TIDrag")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "IndToler")] = {'vals': [1.e-5], 'group': 0}
+    case_inputs[("AeroDyn15", "MaxIter")] = {'vals': [5000], 'group': 0}
+    case_inputs[("AeroDyn15", "UseBlCm")] = {'vals': ['True'], 'group': 0}
+
+    # Controller
+    if rosco_dll:
+        # Need to update this to ROSCO with power control!!!
+        case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[rosco_dll], 'group':0}
+
+    # Control (DISCON) Inputs
+    file_processing = ROSCO_utilities.FileProcessing()
+    discon_vt = file_processing.read_DISCON(discon_file)
+    for discon_input in discon_vt:
+        case_inputs[('DISCON_in',discon_input)] = {'vals': [discon_vt[discon_input]], 'group': 0}
+
+    from weis.aeroelasticse.CaseGen_General import CaseGen_General
+    case_list, case_name_list = CaseGen_General(case_inputs, dir_matrix=runDir, namebase=namebase)
+
+    channels = ['Wind1VelX','GenPwr',"RtAeroCp", "RotTorq", "RotThrust", "RotSpeed", "BldPitch1","GenTq","RtAeroCt"]
+
+    return case_list, case_name_list, channels
+
+def simp_step(discon_file,runDir, namebase,rosco_dll=''):
+    # Set up cases for FIW-JIP project
+    # 3.x in controller tuning register
+
+    # Default Runtime
+    T_max   = 800.
+
+    # Step Wind Setup
+
+    # Make Default step wind object
+    hh_step = HH_StepFile()
+    hh_step.t_max = T_max
+    hh_step.t_step = 400
+    hh_step.wind_directory = runDir
+
+    # Run conditions
+    U_start     = [9, 16]
+    U_end       = [13, 17]
+    step_wind_files = []
+
+    for u_s,u_e in zip(U_start,U_end):
+        # Make Step
+        hh_step.u_start = u_s
+        hh_step.u_end   = u_e
+        hh_step.update()
+        hh_step.write()
+
+        step_wind_files.append(hh_step.filename)
+
+    case_inputs = {}
+    # simulation settings
+    case_inputs[("Fst","TMax")] = {'vals':[T_max], 'group':0}
+
+    # DOFs
+    # case_inputs[("ElastoDyn","YawDOF")]      = {'vals':['True'], 'group':0}
+    # case_inputs[("ElastoDyn","FlapDOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","FlapDOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","EdgeDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","DrTrDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","GenDOF")]      = {'vals':['True'], 'group':0} 
+    # case_inputs[("ElastoDyn","TwFADOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwFADOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwSSDOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwSSDOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmSgDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmHvDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmPDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmSwDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmRDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmYDOF")]     = {'vals':['False'], 'group':0}
+    
+    # wind inflow
+    case_inputs[("InflowWind","WindType")] = {'vals':[2], 'group':0}
+    case_inputs[("InflowWind","Filename")] = {'vals':step_wind_files, 'group':1}
+
+
+    # Stop Generator from Turning Off
+    case_inputs[('ServoDyn', 'GenTiStr')] = {'vals': ['True'], 'group': 0}
+    case_inputs[('ServoDyn', 'GenTiStp')] = {'vals': ['True'], 'group': 0}
+    case_inputs[('ServoDyn', 'SpdGenOn')] = {'vals': [0.], 'group': 0}
+    case_inputs[('ServoDyn', 'TimGenOn')] = {'vals': [0.], 'group': 0}
+    case_inputs[('ServoDyn', 'GenModel')] = {'vals': [1], 'group': 0}
+    
+
+    # AeroDyn
+    case_inputs[("AeroDyn15", "WakeMod")] = {'vals': [1], 'group': 0}
+    case_inputs[("AeroDyn15", "AFAeroMod")] = {'vals': [2], 'group': 0}
+    case_inputs[("AeroDyn15", "TwrPotent")] = {'vals': [0], 'group': 0}
+    case_inputs[("AeroDyn15", "TwrShadow")] = {'vals': ['False'], 'group': 0}
+    case_inputs[("AeroDyn15", "TwrAero")] = {'vals': ['False'], 'group': 0}
+    case_inputs[("AeroDyn15", "SkewMod")] = {'vals': [1], 'group': 0}
+    case_inputs[("AeroDyn15", "TipLoss")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "HubLoss")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "TanInd")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "AIDrag")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "TIDrag")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "IndToler")] = {'vals': [1.e-5], 'group': 0}
+    case_inputs[("AeroDyn15", "MaxIter")] = {'vals': [5000], 'group': 0}
+    case_inputs[("AeroDyn15", "UseBlCm")] = {'vals': ['True'], 'group': 0}
+
+    # Controller
+    if rosco_dll:
+        # Need to update this to ROSCO with power control!!!
+        case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[rosco_dll], 'group':0}
+
+    # Control (DISCON) Inputs
+    file_processing = ROSCO_utilities.FileProcessing()
+    discon_vt = file_processing.read_DISCON(discon_file)
+    for discon_input in discon_vt:
+        case_inputs[('DISCON_in',discon_input)] = {'vals': [discon_vt[discon_input]], 'group': 0}
+
+    from weis.aeroelasticse.CaseGen_General import CaseGen_General
+    case_list, case_name_list = CaseGen_General(case_inputs, dir_matrix=runDir, namebase=namebase)
+
+    channels = {}
+    for var in ["TipDxc1", "TipDyc1", "TipDzc1", "TipDxb1", "TipDyb1", "TipDxc2", "TipDyc2", \
+         "TipDzc2", "TipDxb2", "TipDyb2", "TipDxc3", "TipDyc3", "TipDzc3", "TipDxb3", "TipDyb3", \
+             "RootMxc1", "RootMyc1", "RootMzc1", "RootMxb1", "RootMyb1", "RootMxc2", "RootMyc2", \
+                 "RootMzc2", "RootMxb2", "RootMyb2", "RootMxc3", "RootMyc3", "RootMzc3", "RootMxb3",\
+                      "RootMyb3", "TwrBsMxt", "TwrBsMyt", "TwrBsMzt", "GenPwr", "GenTq", "RotThrust",\
+                           "RtAeroCp", "RtAeroCt", "RotSpeed", "BldPitch1", "TTDspSS", "TTDspFA", \
+                               "NcIMUTAxs", "NcIMUTAys", "NcIMUTAzs", "NcIMURAxs", "NcIMURAys", "NcIMURAzs", \
+                                "NacYaw", "Wind1VelX", "Wind1VelY", "Wind1VelZ", "LSSTipMxa","LSSTipMya",\
+                                   "LSSTipMza","LSSTipMxs","LSSTipMys","LSSTipMzs","LSShftFys","LSShftFzs", \
+                                       "TipRDxr", "TipRDyr", "TipRDzr"]:
+        channels[var] = True
+
+    return case_list, case_name_list, channels
+
+
+def steps(discon_file,runDir, namebase,rosco_dll=''):
+    # Set up cases for FIW-JIP project
+    # 3.x in controller tuning register
+
+    # Default Runtime
+    T_max   = 800.
+
+    # Step Wind Setup
+
+    # Make Default step wind object
+    hh_step = HH_StepFile()
+    hh_step.t_max = T_max
+    hh_step.t_step = 400
+    hh_step.wind_directory = runDir
+
+    # Run conditions
+    U = np.arange(4,24,1).tolist()
+    step_wind_files = []
+
+    for u in U:
+        # Step up
+        hh_step.u_start = u
+        hh_step.u_end   = u+1
+        hh_step.update()
+        hh_step.write()
+
+        step_wind_files.append(hh_step.filename)
+
+        # Step down
+        hh_step.u_start = u+1
+        hh_step.u_end   = u
+        hh_step.update()
+        hh_step.write()
+
+        step_wind_files.append(hh_step.filename)
+
+    case_inputs = {}
+    # simulation settings
+    case_inputs[("Fst","TMax")] = {'vals':[T_max], 'group':0}
+
+    # DOFs
+    # case_inputs[("ElastoDyn","YawDOF")]      = {'vals':['True'], 'group':0}
+    # case_inputs[("ElastoDyn","FlapDOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","FlapDOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","EdgeDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","DrTrDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","GenDOF")]      = {'vals':['True'], 'group':0} 
+    # case_inputs[("ElastoDyn","TwFADOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwFADOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwSSDOF1")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","TwSSDOF2")]    = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmSgDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmHvDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmPDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmSwDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmRDOF")]     = {'vals':['False'], 'group':0}
+    # case_inputs[("ElastoDyn","PtfmYDOF")]     = {'vals':['False'], 'group':0}
+    
+    # wind inflow
+    case_inputs[("InflowWind","WindType")] = {'vals':[2], 'group':0}
+    case_inputs[("InflowWind","Filename")] = {'vals':step_wind_files, 'group':1}
+
+
+    # Stop Generator from Turning Off
+    case_inputs[('ServoDyn', 'GenTiStr')] = {'vals': ['True'], 'group': 0}
+    case_inputs[('ServoDyn', 'GenTiStp')] = {'vals': ['True'], 'group': 0}
+    case_inputs[('ServoDyn', 'SpdGenOn')] = {'vals': [0.], 'group': 0}
+    case_inputs[('ServoDyn', 'TimGenOn')] = {'vals': [0.], 'group': 0}
+    case_inputs[('ServoDyn', 'GenModel')] = {'vals': [1], 'group': 0}
+    
+
+    # AeroDyn
+    case_inputs[("AeroDyn15", "WakeMod")] = {'vals': [1], 'group': 0}
+    case_inputs[("AeroDyn15", "AFAeroMod")] = {'vals': [2], 'group': 0}
+    case_inputs[("AeroDyn15", "TwrPotent")] = {'vals': [0], 'group': 0}
+    case_inputs[("AeroDyn15", "TwrShadow")] = {'vals': ['False'], 'group': 0}
+    case_inputs[("AeroDyn15", "TwrAero")] = {'vals': ['False'], 'group': 0}
+    case_inputs[("AeroDyn15", "SkewMod")] = {'vals': [1], 'group': 0}
+    case_inputs[("AeroDyn15", "TipLoss")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "HubLoss")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "TanInd")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "AIDrag")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "TIDrag")] = {'vals': ['True'], 'group': 0}
+    case_inputs[("AeroDyn15", "IndToler")] = {'vals': [1.e-5], 'group': 0}
+    case_inputs[("AeroDyn15", "MaxIter")] = {'vals': [5000], 'group': 0}
+    case_inputs[("AeroDyn15", "UseBlCm")] = {'vals': ['True'], 'group': 0}
+
+    # Controller
+    if rosco_dll:
+        # Need to update this to ROSCO with power control!!!
+        case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[rosco_dll], 'group':0}
+
+    # Control (DISCON) Inputs
+    file_processing = ROSCO_utilities.FileProcessing()
+    discon_vt = file_processing.read_DISCON(discon_file)
+    for discon_input in discon_vt:
+        case_inputs[('DISCON_in',discon_input)] = {'vals': [discon_vt[discon_input]], 'group': 0}
+
+    from weis.aeroelasticse.CaseGen_General import CaseGen_General
+    case_list, case_name_list = CaseGen_General(case_inputs, dir_matrix=runDir, namebase=namebase)
+
+    channels = {}
+    for var in ["TipDxc1", "TipDyc1", "TipDzc1", "TipDxb1", "TipDyb1", "TipDxc2", "TipDyc2", \
+         "TipDzc2", "TipDxb2", "TipDyb2", "TipDxc3", "TipDyc3", "TipDzc3", "TipDxb3", "TipDyb3", \
+             "RootMxc1", "RootMyc1", "RootMzc1", "RootMxb1", "RootMyb1", "RootMxc2", "RootMyc2", \
+                 "RootMzc2", "RootMxb2", "RootMyb2", "RootMxc3", "RootMyc3", "RootMzc3", "RootMxb3",\
+                      "RootMyb3", "TwrBsMxt", "TwrBsMyt", "TwrBsMzt", "GenPwr", "GenTq", "RotThrust",\
+                           "RtAeroCp", "RtAeroCt", "RotSpeed", "BldPitch1", "TTDspSS", "TTDspFA", \
+                               "NcIMUTAxs", "NcIMUTAys", "NcIMUTAzs", "NcIMURAxs", "NcIMURAys", "NcIMURAzs", \
+                                "NacYaw", "Wind1VelX", "Wind1VelY", "Wind1VelZ", "LSSTipMxa","LSSTipMya",\
+                                   "LSSTipMza","LSSTipMxs","LSSTipMys","LSSTipMzs","LSShftFys","LSShftFzs", \
+                                       "TipRDxr", "TipRDyr", "TipRDzr"]:
+        channels[var] = True
+
+    return case_list, case_name_list, channels
+
+
 
 def RotorSE_rated(fst_vt, runDir, namebase, TMax, turbine_class, turbulence_class, Vrated, U_init=[], Omega_init=[], pitch_init=[], Turbsim_exe='', ptfm_U_init=[], ptfm_pitch_init=[], ptfm_surge_init=[], ptfm_heave_init=[], metocean_U_init=[], metocean_Hs_init=[], metocean_Tp_init=[]):
 
@@ -801,13 +1111,15 @@ def RotorSE_steady_wind(fst_vt, runDir, namebase, TMax, turbine_class, turbulenc
 
 
 
-
-
-
 if __name__ == "__main__":
 
     # power_curve()
+    weis_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    discon = "/Users/dzalkind/Tools/WEIS-3/ROSCO_toolbox/ROSCO_testing/DISCON-UMaineSemi_NoPS.IN"
+    run_dir = os.path.join(weis_dir,'results','step_test')
 
-    case_list, case_name_list = RotorSE_rated('test', 60., 11., 12.1, 0.)
+    case_list, case_name_list, channels = steps(discon,run_dir,'test0')
+
+    print('here')
 
 
