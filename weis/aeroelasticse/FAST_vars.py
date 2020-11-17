@@ -763,6 +763,7 @@ HydroDyn['CurrDIDir']        = 0.
 HydroDyn['PotMod']           = 0
 HydroDyn['PotFile']          = ""
 HydroDyn['TMDFile']          = ""
+HydroDyn['TMDControlFile']          = ""
 HydroDyn['WAMITULEN']        = 0.
 HydroDyn['PtfmVol0']         = 0.
 HydroDyn['PtfmCOBxt']        = 0.
