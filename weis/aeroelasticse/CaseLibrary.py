@@ -303,7 +303,7 @@ def power_curve_control(discon_file,runDir, namebase,rosco_dll=''):
 
     return case_list, case_name_list, channels
 
-def simp_step(discon_file,runDir, namebase,rosco_dll=''):
+def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
     # Set up cases for FIW-JIP project
     # 3.x in controller tuning register
 
@@ -393,6 +393,16 @@ def simp_step(discon_file,runDir, namebase,rosco_dll=''):
     discon_vt = file_processing.read_DISCON(discon_file)
     for discon_input in discon_vt:
         case_inputs[('DISCON_in',discon_input)] = {'vals': [discon_vt[discon_input]], 'group': 0}
+
+
+    # Tune Floating Feedback Gain
+    if tune == 'fl_gain':
+        case_inputs[('DISCON_in','Fl_Kp')] = {'vals': np.linspace(0,-25,10,endpoint=True).tolist(), 'group': 2}
+
+    elif tune == 'fl_phase':
+        case_inputs[('DISCON_in','Fl_Kp')] = {'vals': [-20.9,-13.8,-11,-9.64,-8.87,-8.38,-8.06,-7.84], 'group': 2}
+        case_inputs[('DISCON_in','F_FlCornerFreq')] = {'vals':  [0.1,0.143,0.186,0.229,0.271,0.314,0.357,0.4], 'group': 2}
+        case_inputs[('meta','Fl_Phase')] = {'vals':  [-12.7,7.33,22.2,33.3,41.7,48.3,53.5,57.8], 'group': 2}
 
     from weis.aeroelasticse.CaseGen_General import CaseGen_General
     case_list, case_name_list = CaseGen_General(case_inputs, dir_matrix=runDir, namebase=namebase)

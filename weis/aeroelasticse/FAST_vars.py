@@ -1323,6 +1323,7 @@ FstModel['MAP']               = MAP
 FstModel['BeamDyn']           = BeamDyn
 FstModel['BeamDynBlade']      = BeamDynBlade
 FstModel['Fst7']              = Fst7
+FstModel['meta']              = {}
         
 # List of Outputs (all input files -- FST, ED, SD)
 # TODO: Update FstOutput for a few new outputs in FAST8
