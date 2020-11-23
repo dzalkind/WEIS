@@ -1,10 +1,14 @@
-import os
+import os, yaml
 import numpy as np
 
 from weis.aeroelasticse.CaseGen_General import CaseGen_General
 from weis.aeroelasticse.CaseGen_IEC import CaseGen_IEC
-from ROSCO_toolbox import utilities as ROSCO_utilities
 from weis.aeroelasticse.HH_WindFile import HH_StepFile
+
+# ROSCO 
+from ROSCO_toolbox import controller as ROSCO_controller
+from ROSCO_toolbox import turbine as ROSCO_turbine
+from ROSCO_toolbox import utilities as ROSCO_utilities
 
 
 # def power_curve_fit(fst_vt, runDir, namebase, TMax, turbine_class, turbulence_class, Vrated, U_init=[], Omega_init=[], pitch_init=[], Turbsim_exe='', ptfm_U_init=[], ptfm_pitch_init=[], ptfm_surge_init=[], ptfm_heave_init=[], metocean_U_init=[], metocean_Hs_init=[], metocean_Tp_init=[]):
@@ -299,7 +303,7 @@ def power_curve_control(discon_file,runDir, namebase,rosco_dll=''):
     from weis.aeroelasticse.CaseGen_General import CaseGen_General
     case_list, case_name_list = CaseGen_General(case_inputs, dir_matrix=runDir, namebase=namebase)
 
-    channels = ['Wind1VelX','GenPwr',"RtAeroCp", "RotTorq", "RotThrust", "RotSpeed", "BldPitch1","GenTq","RtAeroCt"]
+    channels = set_channels()
 
     return case_list, case_name_list, channels
 
@@ -319,8 +323,8 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
     hh_step.wind_directory = runDir
 
     # Run conditions
-    U_start     = [9, 16]
-    U_end       = [13, 17]
+    U_start     = [9] #, 16]
+    U_end       = [13] #, 17]
     step_wind_files = []
 
     for u_s,u_e in zip(U_start,U_end):
@@ -400,25 +404,64 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
         case_inputs[('DISCON_in','Fl_Kp')] = {'vals': np.linspace(0,-25,10,endpoint=True).tolist(), 'group': 2}
 
     elif tune == 'fl_phase':
-        case_inputs[('DISCON_in','Fl_Kp')] = {'vals': [-20.9,-13.8,-11,-9.64,-8.87,-8.38,-8.06,-7.84], 'group': 2}
-        case_inputs[('DISCON_in','F_FlCornerFreq')] = {'vals':  [0.1,0.143,0.186,0.229,0.271,0.314,0.357,0.4], 'group': 2}
-        case_inputs[('meta','Fl_Phase')] = {'vals':  [-12.7,7.33,22.2,33.3,41.7,48.3,53.5,57.8], 'group': 2}
+        case_inputs[('DISCON_in','Fl_Kp')] = {'vals': 8*[-25], 'group': 2}
+        case_inputs[('DISCON_in','F_FlCornerFreq')] = {'vals': 8*[0.300], 'group': 2}
+        case_inputs[('DISCON_in','F_FlHighPassFreq')] = {'vals':[0.001,0.005,0.010,0.020,0.030,0.042,0.060,0.100], 'group': 2}
+        case_inputs[('meta','Fl_Phase')] = {'vals':8*[-50],'group':2}
+
+    elif tune == 'pc_mode':
+        # define omega, zeta
+        omega = np.linspace(.05,.25,8,endpoint=True).tolist()
+        zeta  = np.linspace(1,3,8,endpoint=True).tolist()
+        
+        # load default params          
+        weis_dir            = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        control_param_yaml  = os.path.join(weis_dir,'examples/OpenFAST_models/CT15MW-spar/ServoData/IEA15MW-CT-spar.yaml')
+        inps                = yaml.safe_load(open(control_param_yaml))
+        path_params         = inps['path_params']
+        turbine_params      = inps['turbine_params']
+        controller_params   = inps['controller_params']
+
+        # make default controller, turbine objects for ROSCO_toolbox
+        turbine             = ROSCO_turbine.Turbine(turbine_params)
+        turbine.load_from_fast( path_params['FAST_InputFile'],path_params['FAST_directory'], dev_branch=True)
+
+        controller          = ROSCO_controller.Controller(controller_params)
+
+        # tune default controller
+        controller.tune_controller(turbine)
+
+        # check if inputs are lists
+        if not isinstance(omega,list):
+            omega = [omega]
+        if not isinstance(zeta,list):
+            zeta = [zeta]
+
+        # Loop through and make PI gains
+        pc_kp = []
+        pc_ki = []
+        m_omega = []  # flattened (omega,zeta) pairs
+        m_zeta = []  # flattened (omega,zeta) pairs
+        for o in omega:
+            for z in zeta:
+                controller.omega_pc = o
+                controller.zeta_pc  = z
+                controller.tune_controller(turbine)
+                pc_kp.append(controller.pc_gain_schedule.Kp.tolist())
+                pc_ki.append(controller.pc_gain_schedule.Ki.tolist())
+                m_omega.append(o)
+                m_zeta.append(z)
+
+        # add control gains to case_list
+        case_inputs[('meta','omega')]          = {'vals': m_omega, 'group': 2}
+        case_inputs[('meta','zeta')]          = {'vals': m_zeta, 'group': 2}
+        case_inputs[('DISCON_in', 'PC_GS_KP')] = {'vals': pc_kp, 'group': 2}
+        case_inputs[('DISCON_in', 'PC_GS_KI')] = {'vals': pc_ki, 'group': 2}
 
     from weis.aeroelasticse.CaseGen_General import CaseGen_General
     case_list, case_name_list = CaseGen_General(case_inputs, dir_matrix=runDir, namebase=namebase)
 
-    channels = {}
-    for var in ["TipDxc1", "TipDyc1", "TipDzc1", "TipDxb1", "TipDyb1", "TipDxc2", "TipDyc2", \
-         "TipDzc2", "TipDxb2", "TipDyb2", "TipDxc3", "TipDyc3", "TipDzc3", "TipDxb3", "TipDyb3", \
-             "RootMxc1", "RootMyc1", "RootMzc1", "RootMxb1", "RootMyb1", "RootMxc2", "RootMyc2", \
-                 "RootMzc2", "RootMxb2", "RootMyb2", "RootMxc3", "RootMyc3", "RootMzc3", "RootMxb3",\
-                      "RootMyb3", "TwrBsMxt", "TwrBsMyt", "TwrBsMzt", "GenPwr", "GenTq", "RotThrust",\
-                           "RtAeroCp", "RtAeroCt", "RotSpeed", "BldPitch1", "TTDspSS", "TTDspFA", \
-                               "NcIMUTAxs", "NcIMUTAys", "NcIMUTAzs", "NcIMURAxs", "NcIMURAys", "NcIMURAzs", \
-                                "NacYaw", "Wind1VelX", "Wind1VelY", "Wind1VelZ", "LSSTipMxa","LSSTipMya",\
-                                   "LSSTipMza","LSSTipMxs","LSSTipMys","LSSTipMzs","LSShftFys","LSShftFzs", \
-                                       "TipRDxr", "TipRDyr", "TipRDzr"]:
-        channels[var] = True
+    channels = set_channels()
 
     return case_list, case_name_list, channels
 
@@ -462,6 +505,7 @@ def steps(discon_file,runDir, namebase,rosco_dll=''):
     case_inputs = {}
     # simulation settings
     case_inputs[("Fst","TMax")] = {'vals':[T_max], 'group':0}
+    case_inputs[("Fst","OutFileFmt")]        = {'vals':[2], 'group':0}
 
     # DOFs
     # case_inputs[("ElastoDyn","YawDOF")]      = {'vals':['True'], 'group':0}
@@ -524,18 +568,7 @@ def steps(discon_file,runDir, namebase,rosco_dll=''):
     from weis.aeroelasticse.CaseGen_General import CaseGen_General
     case_list, case_name_list = CaseGen_General(case_inputs, dir_matrix=runDir, namebase=namebase)
 
-    channels = {}
-    for var in ["TipDxc1", "TipDyc1", "TipDzc1", "TipDxb1", "TipDyb1", "TipDxc2", "TipDyc2", \
-         "TipDzc2", "TipDxb2", "TipDyb2", "TipDxc3", "TipDyc3", "TipDzc3", "TipDxb3", "TipDyb3", \
-             "RootMxc1", "RootMyc1", "RootMzc1", "RootMxb1", "RootMyb1", "RootMxc2", "RootMyc2", \
-                 "RootMzc2", "RootMxb2", "RootMyb2", "RootMxc3", "RootMyc3", "RootMzc3", "RootMxb3",\
-                      "RootMyb3", "TwrBsMxt", "TwrBsMyt", "TwrBsMzt", "GenPwr", "GenTq", "RotThrust",\
-                           "RtAeroCp", "RtAeroCt", "RotSpeed", "BldPitch1", "TTDspSS", "TTDspFA", \
-                               "NcIMUTAxs", "NcIMUTAys", "NcIMUTAzs", "NcIMURAxs", "NcIMURAys", "NcIMURAzs", \
-                                "NacYaw", "Wind1VelX", "Wind1VelY", "Wind1VelZ", "LSSTipMxa","LSSTipMya",\
-                                   "LSSTipMza","LSSTipMxs","LSSTipMys","LSSTipMzs","LSShftFys","LSShftFzs", \
-                                       "TipRDxr", "TipRDyr", "TipRDzr"]:
-        channels[var] = True
+    channels = set_channels()
 
     return case_list, case_name_list, channels
 
@@ -1120,6 +1153,20 @@ def RotorSE_steady_wind(fst_vt, runDir, namebase, TMax, turbine_class, turbulenc
     return case_list, case_name_list, channels
 
 
+def set_channels():
+    channels = {}
+    for var in ["TipDxc1", "TipDyc1", "TipDzc1", "TipDxb1", "TipDyb1", "TipDxc2", "TipDyc2", \
+         "TipDzc2", "TipDxb2", "TipDyb2", "TipDxc3", "TipDyc3", "TipDzc3", "TipDxb3", "TipDyb3", \
+             "RootMxc1", "RootMyc1", "RootMzc1", "RootMxb1", "RootMyb1", "RootMxc2", "RootMyc2", \
+                 "RootMzc2", "RootMxb2", "RootMyb2", "RootMxc3", "RootMyc3", "RootMzc3", "RootMxb3",\
+                      "RootMyb3", "TwrBsMxt", "TwrBsMyt", "TwrBsMzt", "GenPwr", "GenTq", "RotThrust",\
+                           "RtAeroCp", "RtAeroCt", "RotSpeed", "BldPitch1", "TTDspSS", "TTDspFA", \
+                               "NcIMUTAxs", "NcIMUTAys", "NcIMUTAzs", "NcIMURAxs", "NcIMURAys", "NcIMURAzs", \
+                                "NacYaw", "Wind1VelX", "Wind1VelY", "Wind1VelZ", "LSSTipMxa","LSSTipMya",\
+                                   "LSSTipMza","LSSTipMxs","LSSTipMys","LSSTipMzs","LSShftFys","LSShftFzs", \
+                                       "TipRDxr", "TipRDyr", "TipRDzr","RtVAvgxh"]:
+        channels[var] = True
+    return channels
 
 if __name__ == "__main__":
 

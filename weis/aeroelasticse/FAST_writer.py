@@ -1325,7 +1325,10 @@ class InputWriter_OpenFAST(InputWriter_Common):
         turbine.bld_flapwise_freq       = self.fst_vt['DISCON_in']['F_FlpCornerFreq'][0] * 3.
         turbine.bld_edgewise_freq       = self.fst_vt['DISCON_in']['F_LPFCornerFreq'] * 4.
         turbine.twr_freq                = self.fst_vt['DISCON_in']['F_NotchCornerFreq'] 
-        turbine.ptfm_freq               = self.fst_vt['DISCON_in']['F_FlCornerFreq'][0]
+        try:
+            turbine.ptfm_freq               = self.fst_vt['DISCON_in']['F_FlCornerFreq'][0]
+        except:
+            turbine.ptfm_freq               = self.fst_vt['DISCON_in']['F_FlCornerFreq']
         turbine.max_pitch_rate          = self.fst_vt['DISCON_in']['PC_MaxRat']
         turbine.min_pitch_rate          = self.fst_vt['DISCON_in']['PC_MinRat']
         turbine.max_torque_rate         = self.fst_vt['DISCON_in']['VS_MaxRat']
