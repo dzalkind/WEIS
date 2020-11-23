@@ -376,7 +376,14 @@ class FAST_IO():
                     info['attribute_units'] = [unit[1:-1] for unit in f.readline().split()]
 
             # Data, up to end of file or empty line (potential comment line at the end)
-            data = np.array([l.strip().split() for l in takewhile(lambda x: len(x.strip())>0, f.readlines())]).astype(np.float)
+            data = []
+            data_raw = [l.strip().split() for l in takewhile(lambda x: len(x.strip())>0, f.readlines())]
+            for d in data_raw:
+                try:
+                    data.append(np.array(d).astype(np.float))
+                except:     # just skip this timestep for now
+                    pass
+            data = np.array(data)
             return data, info
 
 
@@ -677,8 +684,10 @@ class FileProcessing():
         file.write('{:<13.5f}       ! F_LPFDamping		- Damping coefficient [used only when F_FilterType = 2]\n'.format(controller.F_LPFDamping))
         file.write('{:<13.5f}       ! F_NotchCornerFreq	- Natural frequency of the notch filter, [rad/s]\n'.format(turbine.twr_freq))
         file.write('{:<10.5f}{:<9.5f} ! F_NotchBetaNumDen	- Two notch damping values (numerator and denominator, resp) - determines the width and depth of the notch, [-]\n'.format(0.0,0.25))
-        file.write('{:<014.5f}      ! F_SSCornerFreq    - Corner frequency (-3dB point) in the first order low pass filter for the setpoint smoother, [rad/s].\n'.format(controller.ss_cornerfreq))
+        file.write('{:<014.5f}      ! F_SSCornerFreq    - Corner frequency (-3dB point) in the first order low pass filter for the setpoint smoother, [rad/s].\n'.format(controller.f_ss_cornerfreq))
+        file.write('{:<014.5f}      ! F_WECornerFreq    - Corner frequency (-3dB point) in the first order low pass filter for the wind speed estimate [rad/s].\n'.format(controller.f_we_cornerfreq))
         file.write('{:<10.5f}{:<9.5f} ! F_FlCornerFreq    - Natural frequency and damping in the second order low pass filter of the tower-top fore-aft motion for floating feedback control [rad/s, -].\n'.format(turbine.ptfm_freq, 1.0))
+        file.write('{:<014.5f}      ! F_FlHighPassFreq    - Natural frequency of first-order high-pass filter for nacelle fore-aft motion [rad/s].\n'.format(controller.f_fl_highpassfreq))
         file.write('{:<10.5f}{:<9.5f} ! F_FlpCornerFreq   - Corner frequency and damping in the second order low pass filter of the blade root bending moment for flap control [rad/s, -].\n'.format(turbine.bld_flapwise_freq*1/3, 1.0))
         
         file.write('\n')
@@ -1056,3 +1065,17 @@ class DataProcessing():
         DISCON_dict['Flp_MaxPit']       = controller.flp_maxpit
 
         return DISCON_dict
+
+
+if __name__ == "__main__":
+
+    fio = FAST_IO()
+    fpl = FAST_Plots()
+    ro_out = fio.load_fast_out('/Users/dzalkind/Tools/WEIS-3/results/CT-spar/DISCON_CT-spar_z2/fl_phase_2/step_07.RO.dbg')
+    # fa_out = fio.load_fast_out('/Users/dzalkind/Tools/WEIS-3/results/CT-spar/DISCON_CT-spar_z2/fl_phase_2/step_07.out')
+
+    cases = {}
+    cases['Plt. Control Sigs.'] = ['RotVAvgX', 'BldPitch1', 'Fl_Pitcom', 'FA_AccR','PtfmPitch','SS_dOmF']
+
+    fig, ax = fpl.plot_fast_out(cases, ro_out, showplot=True)
+
