@@ -16,7 +16,7 @@ from ROSCO_toolbox import utilities as ROSCO_utilities
 def run_Steps(turbine_model,control,save_dir,n_cores=1):
     
     # Specify rosco controller
-    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon_const_pwr.dylib'
+    rosco_dll = '/home/dzalkind/Tools/ROSCO/build/libdiscon.so'
 
     if not rosco_dll: # use WEIS ROSCO
         run_dir1            = os.path.dirname( os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ) ) + os.sep
@@ -65,12 +65,16 @@ def run_Steps(turbine_model,control,save_dir,n_cores=1):
         elif turbine_model == 'UMaine-Semi':
             fastBatch.FAST_directory    = os.path.join(model_dir, 'IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi')   # Path to fst directory files
             fastBatch.FAST_InputFile    = 'IEA-15-240-RWT-UMaineSemi.fst'   # FAST input file (ext=.fst)
+        elif turbine_model == 'CT-spar':
+            fastBatch.FAST_directory    = os.path.join(model_dir, 'CT15MW-spar')   # Path to fst directory files
+            fastBatch.FAST_InputFile    = 'CT15MW_spar.fst'   # FAST input file (ext=.fst)
 
         fastBatch.channels          = channels
         fastBatch.FAST_runDirectory = save_dir  # input!
         fastBatch.case_list         = case_list
         fastBatch.case_name_list    = case_name_list
         fastBatch.debug_level       = 2
+        fastBatch.FAST_exe          = '/home/dzalkind/Tools/openfast-master/install/bin/openfast'
 
         if MPI:
             fastBatch.run_mpi(comm_map_down)
@@ -100,14 +104,14 @@ if __name__ == "__main__":
 
     # set up cases
     turbine_mods = [
-                    'UMaine-Fixed',
-                    'UMaine-Fixed',
-                    'UMaine-Fixed'
+                    'CT-spar',
+                    # 'UMaine-Fixed',
+                    # 'UMaine-Fixed'
                     ]
     discon_list = [
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100.IN',
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080.IN',
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100_const_pwr.IN'
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080.IN',
+                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100_const_pwr.IN'
                     ]
 
     test_type_dir   = 'steps'
@@ -116,7 +120,7 @@ if __name__ == "__main__":
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_Steps(tm,co,sd,n_cores=4)
+        run_Steps(tm,co,sd,n_cores=18)
     
     
     
