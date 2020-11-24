@@ -7,12 +7,13 @@ Example script to run the DLCs in OpenFAST
 from weis.aeroelasticse.runFAST_pywrapper   import runFAST_pywrapper, runFAST_pywrapper_batch
 from weis.aeroelasticse.CaseGen_IEC         import CaseGen_IEC
 from wisdem.commonse.mpi_tools              import MPI
+from weis.aeroelasticse.CaseLibrary import *
 import sys, os, platform
 import numpy as np
 from ROSCO_toolbox import utilities as ROSCO_utilities
 
 
-def run_DLC_CT(turbine_model,control,save_dir,n_cores=1):
+def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full'):
     # Turbine inputs
     iec = CaseGen_IEC()
     iec.overwrite           = False
@@ -51,12 +52,19 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1):
     iec.init_cond[("HydroDyn","PtfmHeave")]['val'] = [0.5,0.5]
 
     # DLC inputs
-    wind_speeds = np.arange(int(cut_in), int(cut_out), 2)
     iec.dlc_inputs = {}
+    if dlc_type == 'full':
+        wind_speeds = [np.arange(int(cut_in), int(cut_out), 2)]
+        iec.dlc_inputs['Seeds'] = [1,2,3,4,5,6]
+        
+    elif dlc_type == 'lite':
+        wind_speeds = [12,14,16]
+        iec.dlc_inputs['Seeds'] = [[25]]
+    # iec.dlc_inputs['Seeds'] = [range(1,7), range(1,7),[],[], range(1,7), range(1,7), range(1,7)]
+
     iec.dlc_inputs['DLC']   = [1.1]
     iec.dlc_inputs['U']     = [wind_speeds]
-    iec.dlc_inputs['Seeds'] = [[1,2,3,4,5,6]]
-    # iec.dlc_inputs['Seeds'] = [range(1,7), range(1,7),[],[], range(1,7), range(1,7), range(1,7)]
+    
     iec.dlc_inputs['Yaw']   = [[]]
     iec.PC_MaxRat           = 2.
     iec.uniqueSeeds         = True
@@ -175,6 +183,14 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1):
     for discon_input in discon_vt:
         case_inputs[('DISCON_in',discon_input)] = {'vals': [discon_vt[discon_input]], 'group': 0}
 
+    # Control Tuning
+    # load default params          
+    control_param_yaml  = os.path.join(weis_dir,'examples/OpenFAST_models/CT15MW-spar/ServoData/IEA15MW-CT-spar.yaml')
+    omega = np.linspace(.05,.25,12,endpoint=True).tolist()
+    zeta  = [2.25]
+    control_case_inputs = sweep_pc_mode(control_param_yaml,omega,zeta,group=3)
+    case_inputs.update(control_case_inputs)
+
     # Aerodyn Params
     case_inputs[("AeroDyn15","TwrAero")]     = {'vals':["True"], 'group':0}
     case_inputs[("AeroDyn15","TwrPotent")]   = {'vals':[1], 'group':0}
@@ -217,6 +233,9 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1):
         elif turbine_model == 'UMaine-Semi':
             fastBatch.FAST_directory    = os.path.join(model_dir, 'IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi')   # Path to fst directory files
             fastBatch.FAST_InputFile    = 'IEA-15-240-RWT-UMaineSemi.fst'   # FAST input file (ext=.fst)
+        elif turbine_model == 'CT-spar':
+            fastBatch.FAST_directory    = os.path.join(model_dir, 'CT15MW-spar')   # Path to fst directory files
+            fastBatch.FAST_InputFile    = 'CT15MW_spar.fst'   # FAST input file (ext=.fst)
 
         fastBatch.channels          = channels
         fastBatch.FAST_runDirectory = save_dir  # input!
@@ -252,34 +271,21 @@ if __name__ == "__main__":
 
     # set up cases
     turbine_mods = [
-                    'UMaine-Fixed',
-                    'UMaine-Semi',
-                    'UMaine-Semi',
-                    'UMaine-Fixed',
-                    'UMaine-Fixed',
-                    'UMaine-Fixed',
-                    'UMaine-Semi',
-                    'UMaine-Semi',
-                    'UMaine-Semi',
+                    'CT-spar',
                     ]
     discon_list = [
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100_const_pwr.IN',
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080_const_pwr.IN',
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080.IN',
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps085_const_pwr.IN',
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps090_const_pwr.IN',
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps095_const_pwr.IN',
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps085_const_pwr.IN',
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps090_const_pwr.IN',
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps095_const_pwr.IN',
+                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_z2.IN',
                     ]
 
     test_type_dir   = 'ntm'
+
+    tune            = ''
+    dlc_type        = 'lite'
 
     save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],test_type_dir) \
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_DLC_CT(tm,co,sd,n_cores=6)
+        run_DLC_CT(tm,co,sd,n_cores=6,tune='pc_mode',dlc_type=dlc_type)
     
     
