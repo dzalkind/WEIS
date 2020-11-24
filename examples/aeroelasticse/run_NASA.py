@@ -20,7 +20,7 @@ from shutil import copyfile
 import numpy as np
 
 
-def NASA_runFAST_CaseGenIEC(TMD):
+def NASA_runFAST_CaseGenIEC(test_case='no_mass'):
 
     iec         = CaseGen_IEC()
     fastBatch   = runFAST_pywrapper_batch(FAST_ver='OpenFAST')
@@ -65,6 +65,7 @@ def NASA_runFAST_CaseGenIEC(TMD):
         iec.dlc_inputs['WaveSeeds'] = [[1,2,3,4,5,6],[11,12,13,14,15,16],[17,18,19,20,21,22],[23,24,25,26,27,28],\
                                         [29,30,31,32,33]]
         iec.dlc_inputs['Yaw']   = [[],[],[],[],[]]#,[],[]]  #[[], []]
+        iec.dlc_inputs['WaveDir'] = [[0.],[0.],[-90.,0.,90.],[0.],[0.]]
 
         iec.transient_dir_change        = 'both'  # '+','-','both': sign for transient events in EDC, EWS
         iec.transient_shear_orientation = 'both'  # 'v','h','both': vertical or horizontal shear for EWS
@@ -84,24 +85,25 @@ def NASA_runFAST_CaseGenIEC(TMD):
     iec.uniqueSeeds = True
     iec.uniqueWaveSeeds = True
     # Set up TMD Case
-    TMD_Case = TMD
+    # TMD_Case = TMD
 
 
     # Naming, file management, etc
-    iec.wind_dir = '/Users/dzalkind/Tools/WEIS/outputs/NASA/dlc_test'
-    iec.case_name_base = 'DLC_Test'
+    weis_dir     = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    iec.wind_dir = os.path.join(weis_dir,'results','NASA','wind')
+    iec.case_name_base = 'DLC'
     iec.Turbsim_exe = '/Users/dzalkind/Tools/openfast/build/modules/turbsim/turbsim'
     iec.debug_level = 2
-    iec.parallel_windfile_gen = True
+    iec.parallel_windfile_gen = False
     iec.cores = 4
-    iec.run_dir = '/Users/dzalkind/Tools/WEIS/outputs/NASA/test_fll'
+    iec.run_dir = os.path.join(weis_dir,'results','NASA',test_case)
     iec.overwrite = False
 
     # Run case generator / wind file writing
     case_inputs = {}
     case_inputs[('Fst','OutFileFmt')] = {'vals':[1], 'group':0}   
-    case_inputs[("Fst","OutFileFmt")]        = {'vals':[3], 'group':0}
-    # case_inputs[("Fst","TMax")]        = {'vals':[3600], 'group':0}
+    case_inputs[("Fst","OutFileFmt")]        = {'vals':[2], 'group':0}
+    case_inputs[("Fst","TMax")]        = {'vals':[60], 'group':0}
 
 
     case_inputs[('ElastoDyn','YawDOF')] = {'vals':[False], 'group':0}
@@ -128,35 +130,13 @@ def NASA_runFAST_CaseGenIEC(TMD):
         case_inputs[('HydroDyn','TMDFile')] = {'vals':tmd_files, 'group':3}
 
 
-
-    # if TMD_Case == 'A':
-    #     case_inputs[('ElastoDyn','PtfmCMzt')] = {'vals':[-2.8], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmMass')] = {'vals':[1.52989E+07], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmRIner')] = {'vals':[2.09344E+09], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmPIner')] = {'vals':[2.09344E+09], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmYIner')] = {'vals':[4.18455E+09], 'group':0}
-    # elif TMD_Case == 'B':
-    #     case_inputs[('ElastoDyn','PtfmCMzt')] = {'vals':[-2.8], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmMass')] = {'vals':[1.54117E+07], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmRIner')] = {'vals':[2.17492E+09], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmPIner')] = {'vals':[2.17492E+09], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmYIner')] = {'vals':[4.34751E+09], 'group':0}
-    # elif TMD_Case == 'C':
-    #     case_inputs[('ElastoDyn','PtfmCMzt')] = {'vals':[-2.8], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmMass')] = {'vals':[1.61682E+07], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmRIner')] = {'vals':[1.80011E+09], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmPIner')] = {'vals':[1.80011E+09], 'group':0}
-    #     case_inputs[('ElastoDyn','PtfmYIner')] = {'vals':[3.59751E+09], 'group':0}
-
-
     case_list, case_name_list, dlc_all = iec.execute(case_inputs=case_inputs)
 
     # Run FAST cases
     fastBatch.FAST_exe = '/Users/dzalkind/Tools/openfast-umaine/install/bin/openfast'   # Path to executable
     fastBatch.FAST_InputFile = 'NASA_Float.fst'   # FAST input file (ext=.fst)
-    fastBatch.FAST_directory = '/Users/dzalkind/Projects/NASA/OF_Model_2'   # Path to fst directory files
+    fastBatch.FAST_directory = os.path.join(os.path.dirname(os.path.dirname(__file__)),'OpenFAST_models/NASA_Float')
     fastBatch.FAST_runDirectory = iec.run_dir
-    fastBatch.Hull_TMD_File = 'Hull_TMD_Input.dat'
 
     # Add channels
     channels = {}
@@ -169,8 +149,8 @@ def NASA_runFAST_CaseGenIEC(TMD):
     fastBatch.dev_branch = True
     fastBatch.channels = channels
 
-    # fastBatch.run_serial()
-    fastBatch.run_multi(8)
+    fastBatch.run_serial()
+    # fastBatch.run_multi(8)
 
 
 if __name__=="__main__":
@@ -178,9 +158,20 @@ if __name__=="__main__":
     # example_runFAST_pywrapper()
     #example_runFAST_pywrapper_batch()
     #example_runFAST_CaseGenIEC()
+    
+    # Test Cases
+    # no_mass: turn off mass of TMDs
+    # sweep_wn: sweep TMD of worst case
+    # const_wn: set constant wn based on worst case
+    # ideal_wn: set constant wn based on known sea state
+    # controlled_wn: actively control wn
+    # c_pitch: tune pitch controller w/ various TMD settings
+    # c_peakshave: tune peak shaver w/ various TMD settings
+    # c_fl: tune floating feedback w/ various TMD settings
+    test_case = 'no_mass'
 
-    TMD_Configs = ['']   #['','A','B','C']
 
-    for TMD in TMD_Configs:
-        NASA_runFAST_CaseGenIEC(TMD)
+
+
+    NASA_runFAST_CaseGenIEC()
     # runFAST_TestROSCO()

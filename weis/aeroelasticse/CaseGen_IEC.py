@@ -314,6 +314,10 @@ class CaseGen_IEC():
             if len(self.dlc_inputs['Yaw'][i]) > 0:
                     case_inputs_i[("ElastoDyn","NacYaw")] = {'vals':self.dlc_inputs['Yaw'][i], 'group':2}
 
+            # Set wave direction if wanted, group: 3
+            if 'WaveDir' in self.dlc_inputs and self.dlc_inputs['WaveDir'][i]:
+                case_inputs_i[("HydroDyn","WaveDir")] = {'vals':self.dlc_inputs['WaveDir'][i], 'group':3}
+
             # Alter waves for DLC 1.6, specific to Maine
             if dlc == 1.6:
                 self.init_cond[('HydroDyn','WaveHs')] = {'U': [4., 6., 8., 10., 12., 14., 16., 18., 20., 22., 24.]}

@@ -29,7 +29,14 @@ class NASA_TMD(object):
 
         # TMD properties
         self.update_tmd_props()
-   
+
+
+        # Default TMD Control (lookup table: w_n vs. Tp)
+        self.omega_control = [0,11.7,12.7,20]
+        self.period_control = [1.36,1.1,0.5,.34]        
+
+
+
 
     def update_tmd_props(self):
         # TMD properties
@@ -47,7 +54,16 @@ class NASA_TMD(object):
                 f.write('{}\t{:10.1f}\t{:10.1f}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t\n'.format(self.m[iDamp],self.stiffness[iDamp],self.damping[iDamp],0,self.x[iDamp],\
                     self.y[iDamp],self.z[iDamp],self.r1[iDamp],self.r2[iDamp],self.r3[iDamp]))
             f.close()
+
+
+    def write_tmd_control(self,filename):
         
+        with open(filename,mode='w') as f:
+            f.write('! Period\tNatural Freq.\n')
+            f.write('! (sec.)\t(rad/s)\n')
+
+            for bp,co in zip(self.omega_control,self.period_control):
+                f.write('{:.3f}\t\t{:.3f}\n'.format(bp,co))
 
 
 
@@ -60,5 +76,14 @@ if __name__ == '__main__':  # testing script
     nt.damper_freq = 0.3
     nt.update_tmd_props()
     nt.write_tmd_input('/Users/dzalkind/Tools/WEIS/weis/aeroelasticse/test_tmd_input_0d3.dat')
+    nt.period_control = [0]
+    nt.omega_control  = [1]
+
+    nt.mass_per_tank  = 0
+    nt.update_tmd_props()
+    
+    nt.write_tmd_control('/Users/dzalkind/Tools/WEIS/weis/aeroelasticse/test_tmd_control.dat')
+    nt.write_tmd_input('/Users/dzalkind/Tools/WEIS/weis/aeroelasticse/test_tmd_no_mass.dat')
+
     print('here')
 
