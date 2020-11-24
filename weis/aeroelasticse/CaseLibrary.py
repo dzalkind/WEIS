@@ -339,6 +339,8 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
     case_inputs = {}
     # simulation settings
     case_inputs[("Fst","TMax")] = {'vals':[T_max], 'group':0}
+    case_inputs[("Fst","OutFileFmt")]        = {'vals':[2], 'group':0}
+    case_inputs[("Fst","DT")]        = {'vals':[1/80], 'group':0}
 
     # DOFs
     # case_inputs[("ElastoDyn","YawDOF")]      = {'vals':['True'], 'group':0}
@@ -414,6 +416,14 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
         omega = np.linspace(.05,.25,8,endpoint=True).tolist()
         zeta  = np.linspace(1,3,8,endpoint=True).tolist()
         
+        control_case_inputs = sweep_pc_mode(omega,zeta)
+        case_inputs.update(control_case_inputs)
+
+
+    elif tune == 'ps_perc':
+        # Set sweep limits here
+        ps_perc = np.linspace(.75,1,num=8,endpoint=True).tolist()
+        
         # load default params          
         weis_dir            = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
         control_param_yaml  = os.path.join(weis_dir,'examples/OpenFAST_models/CT15MW-spar/ServoData/IEA15MW-CT-spar.yaml')
@@ -431,32 +441,22 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
         # tune default controller
         controller.tune_controller(turbine)
 
-        # check if inputs are lists
-        if not isinstance(omega,list):
-            omega = [omega]
-        if not isinstance(zeta,list):
-            zeta = [zeta]
-
-        # Loop through and make PI gains
-        pc_kp = []
-        pc_ki = []
-        m_omega = []  # flattened (omega,zeta) pairs
-        m_zeta = []  # flattened (omega,zeta) pairs
-        for o in omega:
-            for z in zeta:
-                controller.omega_pc = o
-                controller.zeta_pc  = z
-                controller.tune_controller(turbine)
-                pc_kp.append(controller.pc_gain_schedule.Kp.tolist())
-                pc_ki.append(controller.pc_gain_schedule.Ki.tolist())
-                m_omega.append(o)
-                m_zeta.append(z)
+        # Loop through and make min pitch tables
+        ps_ws = []
+        ps_mp = []
+        m_ps  = []  # flattened (omega,zeta) pairs
+        for p in ps_perc:
+            controller.ps_percent = p
+            controller.tune_controller(turbine)
+            m_ps.append(controller.ps_min_bld_pitch)
 
         # add control gains to case_list
-        case_inputs[('meta','omega')]          = {'vals': m_omega, 'group': 2}
-        case_inputs[('meta','zeta')]          = {'vals': m_zeta, 'group': 2}
-        case_inputs[('DISCON_in', 'PC_GS_KP')] = {'vals': pc_kp, 'group': 2}
-        case_inputs[('DISCON_in', 'PC_GS_KI')] = {'vals': pc_ki, 'group': 2}
+        case_inputs[('meta','ps_perc')]          = {'vals': ps_perc, 'group': 2}
+        case_inputs[('DISCON_in', 'PS_BldPitchMin')] = {'vals': m_ps, 'group': 2}
+
+        # file.write('{}              ! PS_WindSpeeds     - Wind speeds corresponding to minimum blade pitch angles [m/s]\n'.format(''.join('{:<4.2f} '.format(controller.v[i]) for i in range(len(controller.v)))))
+        # file.write('{}              ! PS_BldPitchMin    - Minimum blade pitch angles [rad]\n'.format(''.join('{:<10.8f} '.format(controller.ps_min_bld_pitch[i]) for i in range(len(controller.ps_min_bld_pitch)))))
+
 
     from weis.aeroelasticse.CaseGen_General import CaseGen_General
     case_list, case_name_list = CaseGen_General(case_inputs, dir_matrix=runDir, namebase=namebase)
@@ -572,6 +572,53 @@ def steps(discon_file,runDir, namebase,rosco_dll=''):
 
     return case_list, case_name_list, channels
 
+
+def sweep_pc_mode(cont_yaml,omega=np.linspace(.05,.35,8,endpoint=True).tolist(),zeta=[1.5],group=2):
+    
+    
+    inps                = yaml.safe_load(open(cont_yaml))
+    path_params         = inps['path_params']
+    turbine_params      = inps['turbine_params']
+    controller_params   = inps['controller_params']
+
+    # make default controller, turbine objects for ROSCO_toolbox
+    turbine             = ROSCO_turbine.Turbine(turbine_params)
+    turbine.load_from_fast( path_params['FAST_InputFile'],path_params['FAST_directory'], dev_branch=True)
+
+    controller          = ROSCO_controller.Controller(controller_params)
+
+    # tune default controller
+    controller.tune_controller(turbine)
+
+    # check if inputs are lists
+    if not isinstance(omega,list):
+        omega = [omega]
+    if not isinstance(zeta,list):
+        zeta = [zeta]
+
+    # Loop through and make PI gains
+    pc_kp = []
+    pc_ki = []
+    m_omega = []  # flattened (omega,zeta) pairs
+    m_zeta = []  # flattened (omega,zeta) pairs
+    for o in omega:
+        for z in zeta:
+            controller.omega_pc = o
+            controller.zeta_pc  = z
+            controller.tune_controller(turbine)
+            pc_kp.append(controller.pc_gain_schedule.Kp.tolist())
+            pc_ki.append(controller.pc_gain_schedule.Ki.tolist())
+            m_omega.append(o)
+            m_zeta.append(z)
+
+    # add control gains to case_list
+    case_inputs = {}
+    case_inputs[('meta','omega')]          = {'vals': m_omega, 'group': group}
+    case_inputs[('meta','zeta')]          = {'vals': m_zeta, 'group': group}
+    case_inputs[('DISCON_in', 'PC_GS_KP')] = {'vals': pc_kp, 'group': group}
+    case_inputs[('DISCON_in', 'PC_GS_KI')] = {'vals': pc_ki, 'group': group}
+
+    return case_inputs
 
 
 def RotorSE_rated(fst_vt, runDir, namebase, TMax, turbine_class, turbulence_class, Vrated, U_init=[], Omega_init=[], pitch_init=[], Turbsim_exe='', ptfm_U_init=[], ptfm_pitch_init=[], ptfm_surge_init=[], ptfm_heave_init=[], metocean_U_init=[], metocean_Hs_init=[], metocean_Tp_init=[]):
