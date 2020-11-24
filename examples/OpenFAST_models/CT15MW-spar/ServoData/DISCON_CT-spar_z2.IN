@@ -78,7 +78,7 @@
 1.0                 ! WE_GearboxRatio	- Gearbox ratio [>=1],  [-]
 313842119.00000      ! WE_Jtot			- Total drivetrain inertia, including blades, hub and casted generator inertia to LSS, [kg m^2]
 1.225               ! WE_RhoAir			- Air density, [kg m^-3]
-"/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/Cp_Ct_Cq.IEA15MW.txt"      ! PerfFileName      - File containing rotor performance tables (Cp,Ct,Cq)
+"/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/Cp_Ct_Cq.IEA15MW.txt"      ! PerfFileName      - File containing rotor performance tables (Cp,Ct,Cq)
 104     72          ! PerfTableSize     - Size of rotor performance tables, first number refers to number of blade pitch angles, second number referse to number of tip-speed ratios
 44                  ! WE_FOPoles_N      - Number of first-order system poles used in EKF
 3.00 3.50 4.00 4.50 5.00 5.50 6.00 6.50 7.00 7.50 8.00 8.50 9.00 9.50 10.00 10.50 11.09 11.59 12.09 12.59 13.09 13.59 14.09 14.59 15.09 15.59 16.09 16.59 17.09 17.59 18.09 18.59 19.09 19.59 20.09 20.59 21.09 21.59 22.09 22.59 23.09 23.59 24.09 24.59               ! WE_FOPoles_v      - Wind speeds corresponding to first-order system poles [m/s]

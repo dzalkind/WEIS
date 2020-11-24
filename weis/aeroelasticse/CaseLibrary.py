@@ -177,6 +177,8 @@ def power_curve(fst_vt, runDir, namebase, TMax, turbine_class, turbulence_class,
 
     case_inputs[("Fst","TMax")] = {'vals':[T], 'group':0}
     case_inputs[("Fst","TStart")] = {'vals':[TStart], 'group':0}
+    case_inputs[("Fst","OutFileFmt")] = {'vals':[2], 'group':0}
+    
     # case_inputs[("Fst","DT")] = {'vals':dt, 'group':1}
     # case_inputs[("ElastoDyn","YawDOF")]      = {'vals':['True'], 'group':0}
     # case_inputs[("ElastoDyn","FlapDOF1")]    = {'vals':['False'], 'group':0}
@@ -242,6 +244,7 @@ def power_curve_control(discon_file,runDir, namebase,rosco_dll=''):
     case_inputs = {}
     # simulation settings
     case_inputs[("Fst","TMax")] = {'vals':[T_max], 'group':0}
+    case_inputs[("Fst","OutFileFmt")] = {'vals':[2], 'group':0}
 
     # DOFs
     # case_inputs[("ElastoDyn","YawDOF")]      = {'vals':['True'], 'group':0}
@@ -339,6 +342,7 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
     case_inputs = {}
     # simulation settings
     case_inputs[("Fst","TMax")] = {'vals':[T_max], 'group':0}
+    case_inputs[("Fst","OutFileFmt")] = {'vals':[2], 'group':0}
 
     # DOFs
     # case_inputs[("ElastoDyn","YawDOF")]      = {'vals':['True'], 'group':0}
