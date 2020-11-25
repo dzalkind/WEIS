@@ -163,7 +163,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     case_inputs[('ServoDyn', 'GenModel')] = {'vals': [1], 'group': 0}
 
     # Specify rosco controller
-    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon_const_pwr.dylib'
+    rosco_dll = '/home/dzalkind/Tools/ROSCO-CT/build/libdiscon.so'
 
     if rosco_dll:
         case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[rosco_dll], 'group':0}
@@ -184,12 +184,13 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
         case_inputs[('DISCON_in',discon_input)] = {'vals': [discon_vt[discon_input]], 'group': 0}
 
     # Control Tuning
-    # load default params          
-    control_param_yaml  = os.path.join(weis_dir,'examples/OpenFAST_models/CT15MW-spar/ServoData/IEA15MW-CT-spar.yaml')
-    omega = np.linspace(.05,.25,12,endpoint=True).tolist()
-    zeta  = [2.25]
-    control_case_inputs = sweep_pc_mode(control_param_yaml,omega,zeta,group=3)
-    case_inputs.update(control_case_inputs)
+    # load default params       
+    if tune == 'pc_mode':   
+        control_param_yaml  = os.path.join(weis_dir,'examples/OpenFAST_models/CT15MW-spar/ServoData/IEA15MW-CT-spar.yaml')
+        omega = np.linspace(.05,.25,12,endpoint=True).tolist()
+        zeta  = [2.25]
+        control_case_inputs = sweep_pc_mode(control_param_yaml,omega,zeta,group=3)
+        case_inputs.update(control_case_inputs)
 
     # Aerodyn Params
     case_inputs[("AeroDyn15","TwrAero")]     = {'vals':["True"], 'group':0}
@@ -242,6 +243,8 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
         fastBatch.case_list         = case_list
         fastBatch.case_name_list    = case_name_list
         fastBatch.debug_level       = 2
+        fastBatch.FAST_exe          = '/home/dzalkind/Tools/openfast-master/install/bin/openfast'
+
 
         if MPI:
             fastBatch.run_mpi(comm_map_down)
@@ -274,18 +277,17 @@ if __name__ == "__main__":
                     'CT-spar',
                     ]
     discon_list = [
-                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_z2.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_z2.IN',
                     ]
 
     test_type_dir   = 'ntm'
 
-    tune            = ''
     dlc_type        = 'lite'
 
     save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],test_type_dir) \
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_DLC_CT(tm,co,sd,n_cores=6,tune='pc_mode',dlc_type=dlc_type)
+        run_DLC_CT(tm,co,sd,n_cores=36,tune='pc_mode',dlc_type=dlc_type)
     
     

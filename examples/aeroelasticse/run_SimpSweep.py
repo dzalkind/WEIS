@@ -16,7 +16,7 @@ from ROSCO_toolbox import utilities as ROSCO_utilities
 def run_Simp(turbine_model,control,save_dir,n_cores=1,tune=''):
     
     # Specify rosco controller
-    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon.dylib'
+    rosco_dll = '/home/dzalkind/Tools/ROSCO-CT/build/libdiscon.so'
 
     if not rosco_dll: # use WEIS ROSCO
         run_dir1            = os.path.dirname( os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ) ) + os.sep
@@ -75,7 +75,7 @@ def run_Simp(turbine_model,control,save_dir,n_cores=1,tune=''):
         fastBatch.case_list         = case_list
         fastBatch.case_name_list    = case_name_list
         fastBatch.debug_level       = 2
-        fastBatch.FAST_exe          = '/Users/dzalkind/Tools/openfast/install/bin/openfast'
+        fastBatch.FAST_exe          = '/home/dzalkind/Tools/openfast-master/install/bin/openfast'
 
         if MPI:
             fastBatch.run_mpi(comm_map_down)
@@ -116,7 +116,7 @@ if __name__ == "__main__":
                     # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100.IN',
                     # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080_const_pwr.IN',
                     # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080.IN',
-                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_z2.IN'
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_z2.IN'
 
                     ]
     # tuning choices: fl_gain, fl_phase
@@ -128,7 +128,7 @@ if __name__ == "__main__":
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_Simp(tm,co,sd,n_cores=1,tune=test_type_dir)
+        run_Simp(tm,co,sd,n_cores=36,tune=test_type_dir)
     
     
     
