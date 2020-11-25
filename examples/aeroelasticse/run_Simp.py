@@ -16,7 +16,7 @@ from ROSCO_toolbox import utilities as ROSCO_utilities
 def run_Simp(turbine_model,control,save_dir,n_cores=1):
     
     # Specify rosco controller
-    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon_const_pwr.dylib'
+    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon.dylib'
 
     if not rosco_dll: # use WEIS ROSCO
         run_dir1            = os.path.dirname( os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ) ) + os.sep
@@ -75,6 +75,7 @@ def run_Simp(turbine_model,control,save_dir,n_cores=1):
         fastBatch.case_list         = case_list
         fastBatch.case_name_list    = case_name_list
         fastBatch.debug_level       = 2
+        # fastBatch.FAST_exe          = '/Users/dzalkind/Tools/openfast/install/bin/openfast'
 
         if MPI:
             fastBatch.run_mpi(comm_map_down)
@@ -104,16 +105,20 @@ if __name__ == "__main__":
 
     # set up cases
     turbine_mods = [
+                    'UMaine-Fixed',
                     'CT-spar',
                     'CT-spar',
                     # 'UMaine-Fixed',
-                    # 'UMaine-Fixed'
+                    # 'UMaine-Semi',
+                    # 'UMaine-Semi'
                     ]
     discon_list = [
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100_const_pwr.IN',
-                    '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080_const_pwr.IN',
-                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080.IN',
-                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100_const_pwr.IN'
+                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100_constTq.IN',
+                    # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi/DISCON_fixed_ps100.IN',
+                    # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi/DISCON_fixed_ps100_const_pwr.IN',
+                    # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi/DISCON_fixed_ps100.IN',
                     ]
 
     test_type_dir   = 'simp'
@@ -122,7 +127,7 @@ if __name__ == "__main__":
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_Simp(tm,co,sd,n_cores=2)
+        run_Simp(tm,co,sd,n_cores=1)
     
     
     
