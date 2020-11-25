@@ -60,12 +60,14 @@ class NASA_TMD(object):
 
 
     def write_tmd_control(self,filename):
-        
+        if not os.path.isdir(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
+
         with open(filename,mode='w') as f:
             f.write('! Period\tNatural Freq.\n')
             f.write('! (sec.)\t(rad/s)\n')
 
-            for bp,co in zip(self.omega_control,self.period_control):
+            for bp,co in zip(self.period_control,self.omega_control):
                 f.write('{:.3f}\t\t{:.3f}\n'.format(bp,co))
 
 

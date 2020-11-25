@@ -77,9 +77,9 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
         iec.dlc_inputs['Yaw']   = [[],[],[],[],[]]#,[],[]]  #[[], []]
         iec.TMax    = 3600
     else:  # reduced set
-        iec.dlc_inputs['DLC']   = [6.1]#,6.1,6.3]
+        iec.dlc_inputs['DLC']   = [6.5]#,6.1,6.3]
         iec.dlc_inputs['U']     = [[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
-        iec.dlc_inputs['Seeds'] = [[69]]#,[],[]] #[[5, 6, 7], []]
+        iec.dlc_inputs['Seeds'] = [[1,2,3]]#,[],[]] #[[5, 6, 7], []]
         iec.dlc_inputs['Yaw']   = [[]]#,[],[]]  #[[], []]
 
     iec.uniqueSeeds = True
@@ -143,7 +143,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
             nt.write_tmd_control(tmd_con_filename)
 
             # collect name for case_input
-            tmd_files.append(tmd_fitmd_con_filenamelename)
+            tmd_files.append(tmd_con_filename)
 
         case_inputs[('HydroDyn','TMDControlFile')] = {'vals':tmd_files, 'group':3}
 
