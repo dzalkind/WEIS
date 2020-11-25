@@ -3,6 +3,7 @@
 
 '''
 import numpy as np
+import os
 
 
 class NASA_TMD(object):
@@ -45,7 +46,9 @@ class NASA_TMD(object):
         self.damping     = (2 * self.damping_ratio * np.sqrt(np.array(self.stiffness) * np.array(self.m))).tolist()
 
     def write_tmd_input(self,filename):
-        
+        if not os.path.isdir(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
+
         with open(filename,mode='w') as f:
             f.write('Num. of Dampers\n')
             f.write('{}\n'.format(self.num_dampers))

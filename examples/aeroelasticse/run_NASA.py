@@ -20,7 +20,7 @@ from shutil import copyfile
 import numpy as np
 
 
-def NASA_runFAST_CaseGenIEC(test_case='no_mass'):
+def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
 
     iec         = CaseGen_IEC()
     fastBatch   = runFAST_pywrapper_batch(FAST_ver='OpenFAST')
@@ -65,7 +65,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass'):
         iec.dlc_inputs['WaveSeeds'] = [[1,2,3,4,5,6],[11,12,13,14,15,16],[17,18,19,20,21,22],[23,24,25,26,27,28],\
                                         [29,30,31,32,33]]
         iec.dlc_inputs['Yaw']   = [[],[],[],[],[]]#,[],[]]  #[[], []]
-        iec.dlc_inputs['WaveDir'] = [[0.],[0.],[-90.,0.,90.],[0.],[0.]]
+        iec.dlc_inputs['WaveDir'] = [[0.],[0.],[-90.,-45,0.,45,90.],[0.],[0.]]
 
         iec.transient_dir_change        = 'both'  # '+','-','both': sign for transient events in EDC, EWS
         iec.transient_shear_orientation = 'both'  # 'v','h','both': vertical or horizontal shear for EWS
@@ -94,10 +94,17 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass'):
     iec.case_name_base = 'DLC'
     iec.Turbsim_exe = '/Users/dzalkind/Tools/openfast/build/modules/turbsim/turbsim'
     iec.debug_level = 2
-    iec.parallel_windfile_gen = False
-    iec.cores = 4
+    if n_cores == 1:
+        iec.parallel_windfile_gen = False
+        iec.cores = 1
+    else:
+        iec.parallel_windfile_gen = True
+        iec.cores = n_cores
+
     iec.run_dir = os.path.join(weis_dir,'results','NASA',test_case)
     iec.overwrite = False
+
+    # print(iec.run_dir)
 
     # Run case generator / wind file writing
     case_inputs = {}
@@ -160,8 +167,10 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass'):
     fastBatch.dev_branch = True
     fastBatch.channels = channels
 
-    fastBatch.run_serial()
-    # fastBatch.run_multi(8)
+    if n_cores == 1:
+        fastBatch.run_serial()
+    else:
+        fastBatch.run_multi(n_cores)
 
 
 if __name__=="__main__":
@@ -172,6 +181,7 @@ if __name__=="__main__":
     
     # Test Cases
     # no_mass: turn off mass of TMDs (implemented, running)
+    # as_shipped: what UM originall sent, no control
     # sweep_wn: sweep TMD of worst case
     # const_wn: set constant wn based on worst case
     # ideal_wn: set constant wn based on known sea state
@@ -184,5 +194,5 @@ if __name__=="__main__":
 
 
 
-    NASA_runFAST_CaseGenIEC(test_case)
+    NASA_runFAST_CaseGenIEC(test_case,n_cores=1)
     # runFAST_TestROSCO()
