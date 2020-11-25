@@ -103,31 +103,42 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass'):
     case_inputs = {}
     case_inputs[('Fst','OutFileFmt')] = {'vals':[1], 'group':0}   
     case_inputs[("Fst","OutFileFmt")]        = {'vals':[2], 'group':0}
-    case_inputs[("Fst","TMax")]        = {'vals':[60], 'group':0}
+    # case_inputs[("Fst","TMax")]        = {'vals':[60], 'group':0}
 
 
     case_inputs[('ElastoDyn','YawDOF')] = {'vals':[False], 'group':0}
 
     # TMD Cases
+    # no mass
+    if test_case == 'no_mass':
+        nt      = NASA_TMD()
+        nt.mass_per_tank = 0
+        nt.update_tmd_props()
+        nt.write_tmd_input(os.path.join(iec.run_dir,'TMD_NoMass.dat'))
+        case_inputs[('HydroDyn','TMDFile')] = {'vals':[os.path.join(iec.run_dir,'TMD_NoMass.dat')], 'group':0}
+
     # sweep natural frequency
-    if False:
+    elif test_case == 'sweep_wn':
         w_sweep = np.linspace(0.05,1.55,num=24)
 
         nt      = NASA_TMD()
         tmd_files = []
         for i, w_tmd in enumerate(w_sweep):
             # write TMD File to directory
-            nt.damper_freq = w_tmd
-            nt.update_tmd_props()
-            tmd_filename = os.path.join(iec.run_dir,'TMD_Inp_w{:3.3f}.dat'.format(w_tmd)) 
+            # nt.damper_freq = w_tmd
+            # nt.update_tmd_props()
+            nt.period_control   = [0]
+            nt.omega_control    = [w_tmd]
+            tmd_con_filename    = os.path.join(iec.run_dir,'TMD_Con_w{:3.3f}.dat'.format(w_tmd)) 
+
+            # tmd_filename = os.path.join(iec.run_dir,'TMD_Inp_w{:3.3f}.dat'.format(w_tmd)) 
             # tmd_filename = os.path.join(iec.run_dir,'TMD_Inp_{}.dat'.format(i)) 
-            nt.write_tmd_input(tmd_filename)
+            nt.write_tmd_control(tmd_con_filename)
 
             # collect name for case_input
-            tmd_files.append(tmd_filename)
+            tmd_files.append(tmd_fitmd_con_filenamelename)
 
-
-        case_inputs[('HydroDyn','TMDFile')] = {'vals':tmd_files, 'group':3}
+        case_inputs[('HydroDyn','TMDControlFile')] = {'vals':tmd_files, 'group':3}
 
 
     case_list, case_name_list, dlc_all = iec.execute(case_inputs=case_inputs)
@@ -160,7 +171,7 @@ if __name__=="__main__":
     #example_runFAST_CaseGenIEC()
     
     # Test Cases
-    # no_mass: turn off mass of TMDs
+    # no_mass: turn off mass of TMDs (implemented, running)
     # sweep_wn: sweep TMD of worst case
     # const_wn: set constant wn based on worst case
     # ideal_wn: set constant wn based on known sea state
@@ -168,10 +179,10 @@ if __name__=="__main__":
     # c_pitch: tune pitch controller w/ various TMD settings
     # c_peakshave: tune peak shaver w/ various TMD settings
     # c_fl: tune floating feedback w/ various TMD settings
-    test_case = 'no_mass'
+    test_case = 'sweep_wn'
 
 
 
 
-    NASA_runFAST_CaseGenIEC()
+    NASA_runFAST_CaseGenIEC(test_case)
     # runFAST_TestROSCO()
