@@ -79,7 +79,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
     else:  # reduced set
         iec.dlc_inputs['DLC']   = [6.5]#,6.1,6.3]
         iec.dlc_inputs['U']     = [[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
-        iec.dlc_inputs['Seeds'] = [[1,2,3]]#,[],[]] #[[5, 6, 7], []]
+        iec.dlc_inputs['Seeds'] = [[1,2,3,4,5,6]]#,[],[]] #[[5, 6, 7], []]
         iec.dlc_inputs['Yaw']   = [[]]#,[],[]]  #[[], []]
 
     iec.uniqueSeeds = True
@@ -92,7 +92,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
     weis_dir     = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     iec.wind_dir = os.path.join(weis_dir,'results','NASA','wind')
     iec.case_name_base = 'DLC'
-    iec.Turbsim_exe = '/Users/dzalkind/Tools/openfast/build/modules/turbsim/turbsim'
+    iec.Turbsim_exe = '/home/dzalkind/Tools/openfast-umaine/build/modules/turbsim/turbsim'
     iec.debug_level = 2
     if n_cores == 1:
         iec.parallel_windfile_gen = False
@@ -126,7 +126,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
 
     # sweep natural frequency
     elif test_case == 'sweep_wn':
-        w_sweep = np.linspace(0.05,1.55,num=24)
+        w_sweep = np.linspace(0.05,1.55,num=24).tolist()
 
         nt      = NASA_TMD()
         tmd_files = []
@@ -146,12 +146,13 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
             tmd_files.append(tmd_con_filename)
 
         case_inputs[('HydroDyn','TMDControlFile')] = {'vals':tmd_files, 'group':3}
+        case_inputs[('HydroDyn','omega_TMD')] = {'vals':w_sweep, 'group':3}
 
 
     case_list, case_name_list, dlc_all = iec.execute(case_inputs=case_inputs)
 
     # Run FAST cases
-    fastBatch.FAST_exe = '/Users/dzalkind/Tools/openfast-umaine/install/bin/openfast'   # Path to executable
+    fastBatch.FAST_exe = '/home/dzalkind/Tools/openfast-umaine/install/bin/openfast'   # Path to executable
     fastBatch.FAST_InputFile = 'NASA_Float.fst'   # FAST input file (ext=.fst)
     fastBatch.FAST_directory = os.path.join(os.path.dirname(os.path.dirname(__file__)),'OpenFAST_models/NASA_Float')
     fastBatch.FAST_runDirectory = iec.run_dir
@@ -194,5 +195,5 @@ if __name__=="__main__":
 
 
 
-    NASA_runFAST_CaseGenIEC(test_case,n_cores=1)
+    NASA_runFAST_CaseGenIEC(test_case,n_cores=36)
     # runFAST_TestROSCO()
