@@ -14,6 +14,7 @@ from weis.aeroelasticse.NASA_TMD import NASA_TMD
 from weis.aeroelasticse.CaseGen_IEC         import CaseGen_IEC
 # from weis.aeroelasticse.FAST_post import return_timeseries
 from weis.aeroelasticse.runFAST_pywrapper  import runFAST_pywrapper, runFAST_pywrapper_batch
+from weis.aeroelasticse.Util.FileTools import load_case_matrix, load_yaml
 
 from shutil import copyfile
 
@@ -70,12 +71,12 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
         iec.transient_dir_change        = 'both'  # '+','-','both': sign for transient events in EDC, EWS
         iec.transient_shear_orientation = 'both'  # 'v','h','both': vertical or horizontal shear for EWS
         
-    elif False:
+    elif True:
         iec.dlc_inputs['DLC']   = [1.2,1.6,6.1,6.3,6.5]#,6.1,6.3]
         iec.dlc_inputs['U']     = [[8,12,24],[20.,24.],[],[],[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
         iec.dlc_inputs['Seeds'] = [[3],[5],[12],[50],[60]]#,[],[]] #[[5, 6, 7], []]
         iec.dlc_inputs['Yaw']   = [[],[],[],[],[]]#,[],[]]  #[[], []]
-        iec.TMax    = 3600
+        iec.TMax    = 300
     else:  # reduced set
         iec.dlc_inputs['DLC']   = [6.5]#,6.1,6.3]
         iec.dlc_inputs['U']     = [[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
@@ -146,8 +147,27 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
             tmd_files.append(tmd_con_filename)
 
         case_inputs[('HydroDyn','TMDControlFile')] = {'vals':tmd_files, 'group':3}
+        case_inputs[('meta','omega_TMD')] = {'vals':w_sweep, 'group':3}
+
+    elif test_case == 'const_wn':
+        nt      = NASA_TMD()
+        
+        nt.damper_freq = .44
+        nt.update_tmd_props()
+        
+        nt.period_control   = [0]
+        nt.omega_control    = [.44]
+        tmd_con_filename    = os.path.join(iec.run_dir,'TMD_Con_w{:3.3f}.dat'.format(nt.damper_freq)) 
+        
+        nt.write_tmd_input(os.path.join(iec.run_dir,'TMD_Const.dat'))
+        nt.write_tmd_control(tmd_con_filename)
+        
+        case_inputs[('HydroDyn','TMDFile')] = {'vals':[os.path.join(iec.run_dir,'TMD_Const.dat')], 'group':0}
+        case_inputs[('HydroDyn','TMDControlFile')] = {'vals':[tmd_con_filename], 'group':0}
 
 
+    
+    # Make IEC cases
     case_list, case_name_list, dlc_all = iec.execute(case_inputs=case_inputs)
 
     # Run FAST cases
@@ -189,7 +209,7 @@ if __name__=="__main__":
     # c_pitch: tune pitch controller w/ various TMD settings
     # c_peakshave: tune peak shaver w/ various TMD settings
     # c_fl: tune floating feedback w/ various TMD settings
-    test_case = 'sweep_wn'
+    test_case = 'const_wn'
 
 
 
