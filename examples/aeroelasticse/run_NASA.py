@@ -165,6 +165,13 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
         case_inputs[('HydroDyn','TMDFile')] = {'vals':[os.path.join(iec.run_dir,'TMD_Const.dat')], 'group':0}
         case_inputs[('HydroDyn','TMDControlFile')] = {'vals':[tmd_con_filename], 'group':0}
 
+    elif test_case == 'controlled_wn':
+        nt                  = NASA_TMD()
+        tmd_con_filename    = os.path.join(iec.run_dir,'TMD_BL_Control.dat')
+
+        nt.write_tmd_control(tmd_con_filename)
+        case_inputs[('HydroDyn','TMDControlFile')] = {'vals':[tmd_con_filename], 'group':0}
+
 
     
     # Make IEC cases
@@ -223,7 +230,7 @@ if __name__=="__main__":
     # c_pitch: tune pitch controller w/ various TMD settings
     # c_peakshave: tune peak shaver w/ various TMD settings
     # c_fl: tune floating feedback w/ various TMD settings
-    test_case = 'ideal_wn'
+    test_case = 'controlled_wn'
 
 
 
