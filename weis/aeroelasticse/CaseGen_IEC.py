@@ -79,7 +79,7 @@ class CaseGen_IEC():
                 IEC_WindType = 'NTM'
                 alpha = 0.2
                 iecwind = pyIECWind_turb()
-                TMax = 630.
+                TMax = 800.
 
             elif dlc in [1.3, 6.1, 6.3, 6.5]:
                 if self.Turbine_Class == 'I':
@@ -93,19 +93,19 @@ class CaseGen_IEC():
                 IEC_WindType = '%uETM'%x
                 alpha = 0.11
                 iecwind = pyIECWind_turb()
-                TMax = 630.
+                TMax = 800.
 
             elif dlc == 1.4:
                 IEC_WindType = 'ECD'
                 alpha = 0.2
                 iecwind = pyIECWind_extreme()
-                TMax = 90.
+                TMax = 290.
 
             elif dlc == 1.5:
                 IEC_WindType = 'EWS'
                 alpha = 0.2
                 iecwind = pyIECWind_extreme()
-                TMax = 90.
+                TMax = 290.
 
             # Windfile generation setup
             if self.TMax == 0.:
