@@ -33,8 +33,8 @@ class NASA_TMD(object):
 
 
         # Default TMD Control (lookup table: w_n vs. Tp)
-        self.omega_control = [0,11.7,12.7,20]
-        self.period_control = [1.36,1.1,0.5,.34]        
+        self.period_control = [0,11.7,12.7,20]
+        self.omega_control  = [1.36,1.1,0.5,.34]        
 
 
 
@@ -70,6 +70,11 @@ class NASA_TMD(object):
             for bp,co in zip(self.period_control,self.omega_control):
                 f.write('{:.3f}\t\t{:.3f}\n'.format(bp,co))
 
+    def ideal_control(self,Tp):
+        if len(self.period_control) > 1:
+            return np.interp(Tp,self.period_control,self.omega_control,left=self.omega_control[0],right=self.omega_control[-1])
+        else:
+            return self.omega_control[0]
 
 
 if __name__ == '__main__':  # testing script
@@ -81,14 +86,16 @@ if __name__ == '__main__':  # testing script
     nt.damper_freq = 0.3
     nt.update_tmd_props()
     nt.write_tmd_input('/Users/dzalkind/Tools/WEIS/weis/aeroelasticse/test_tmd_input_0d3.dat')
-    nt.period_control = [0]
-    nt.omega_control  = [1]
+    # nt.period_control = [0,8]
+    # nt.omega_control  = [1,2]
 
     nt.mass_per_tank  = 0
     nt.update_tmd_props()
     
     nt.write_tmd_control('/Users/dzalkind/Tools/WEIS/weis/aeroelasticse/test_tmd_control.dat')
     nt.write_tmd_input('/Users/dzalkind/Tools/WEIS/weis/aeroelasticse/test_tmd_no_mass.dat')
+
+    con = nt.ideal_control(7.44)
 
     print('here')
 

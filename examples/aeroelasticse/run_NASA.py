@@ -170,6 +170,20 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
     # Make IEC cases
     case_list, case_name_list, dlc_all = iec.execute(case_inputs=case_inputs)
 
+    # To set ideal control, loop through cases and extract Tp
+    if test_case == 'ideal_wn':
+        
+        for case in case_list:
+            nt = NASA_TMD()
+            w_ideal             = nt.ideal_control(case[('HydroDyn','WaveTp')])
+            nt.period_control   = [0]  # constant control
+            nt.omega_control    = [w_ideal]
+            tmd_con_filename    = os.path.join(iec.run_dir,'TMD_Con_w{:3.3f}.dat'.format(w_ideal))
+            
+            nt.write_tmd_control(tmd_con_filename)
+            case[('HydroDyn','TMDControlFile')] = tmd_con_filename          
+
+
     # Run FAST cases
     fastBatch.FAST_exe = '/Users/dzalkind/Tools/openfast-umaine/install/bin/openfast'   # Path to executable
     fastBatch.FAST_InputFile = 'NASA_Float.fst'   # FAST input file (ext=.fst)
@@ -209,7 +223,7 @@ if __name__=="__main__":
     # c_pitch: tune pitch controller w/ various TMD settings
     # c_peakshave: tune peak shaver w/ various TMD settings
     # c_fl: tune floating feedback w/ various TMD settings
-    test_case = 'const_wn'
+    test_case = 'ideal_wn'
 
 
 
