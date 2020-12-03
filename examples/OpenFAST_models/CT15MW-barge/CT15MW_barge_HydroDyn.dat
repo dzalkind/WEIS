@@ -1,0 +1,382 @@
+------- HydroDyn v2.03.* Input File -------------------------------------------- 
+CT 15 MW barge, Ramboll 2020
+True            Echo           - Echo the input file data (flag) 
+---------------------- ENVIRONMENTAL CONDITIONS -------------------------------- 
+        1025     WtrDens        - Water density (kg/m^3) 
+         150     WtrDpth        - Water depth (meters) 
+           0     MSL2SWL        - Offset between still-water level and mean sea level (meters) [positive upward; unused when WaveMod = 6; must be zero if PotMod=1 or 2] 
+---------------------- WAVES --------------------------------------------------- 
+           0     WaveMod     - Incident wave kinematics model {0: none=still water, 1: plane progressive (regular), 2: JONSWAP/Pierson-Moskowitz spectrum (irregular), 3: user-defind spectrum from routine UserWaveSpctrm (irregular)} (switch) 
+           0     WaveStMod      - Model for stretching incident wave kinematics to instantaneous free surface {0: none=no stretching, 1: vertical stretching, 2: extrapolation stretching, 3: Wheeler stretching} (switch) [unused when WaveMod=0 or when PotMod/=0] 
+     3600.0  WaveTMax       - Analysis time for incident wave calculations (sec) [unused when WaveMod=0; determines WaveDOmega=2Pi/WaveTMax in the IFFT] 
+           0.25  WaveDT         - Time step for incident wave calculations     (sec) [unused when WaveMod=0; 0.1<=WaveDT<=1.0 recommended; determines WaveOmegaMax=Pi/WaveDT in the IFFT] 
+           10.22  WaveHs      - Significant wave height of incident waves (meters) [used only when WaveMod=1 or 2] 
+           14.59  WaveTp      - Peak spectral period of incident waves (sec) [used only when WaveMod=1 or 2] 
+           1.65  WavePkShp      - Peak-shape parameter of incident wave spectrum (-) or DEFAULT (string) [used only when WaveMod=2; use 1.0 for Pierson-Moskowitz]   
+       0.111527  WvLowCOff      - Low  cut-off frequency or lower frequency limit of the wave spectrum beyond which the wave spectrum is zeroed (rad/s) [unused when WaveMod=0, 1, or 6] 
+       0.783827  WvHiCOff       - High cut-off frequency or upper frequency limit of the wave spectrum beyond which the wave spectrum is zeroed (rad/s) [unused when WaveMod=0, 1, or 6] 
+          0  WaveDir        - Incident wave propagation heading direction                         (degrees) [unused when WaveMod=0 or 6]   
+           0     WaveDirMod     - Directional spreading function {0: none, 1: COS2S}                  (-)       [only used when WaveMod=2,3, or 4] 
+           1     WaveDirSpread  - Wave direction spreading coefficient ( > 0 )                        (-)       [only used when WaveMod=2,3, or 4 and WaveDirMod=1] 
+           1     WaveNDir       - Number of wave directions                                           (-)       [only used when WaveMod=2,3, or 4 and WaveDirMod=1; odd number only] 
+          90     WaveDirRange   - Range of wave directions (full range: WaveDir +/- 1/2*WaveDirRange) (degrees) [only used when WaveMod=2,3,or 4 and WaveDirMod=1] 
+  -561580799     WaveSeed(1)    - First  random seed of incident waves [-2147483648 to 2147483647]    (-)       [unused when WaveMod=0, 5, or 6] 
+ -1669871451     WaveSeed(2)    - Second random seed of incident waves [-2147483648 to 2147483647]    (-)       [unused when WaveMod=0, 5, or 6] 
+        TRUE     WaveNDAmp      - Flag for normally distributed amplitudes                            (flag)    [only used when WaveMod=2, 3, or 4] 
+       "none"    WvKinFile      - Root name of externally generated wave data file(s)        (quoted string)    [used only when WaveMod=5 or 6] 
+           1     NWaveElev      - Number of points where the incident wave elevations can be computed (-)       [maximum of 9 output locations] 
+           0     WaveElevxi     - List of xi-coordinates for points where the incident wave elevations can be output (meters) [NWaveElev points, separated by commas or white space; usused if NWaveElev = 0] 
+           0     WaveElevyi     - List of yi-coordinates for points where the incident wave elevations can be output (meters) [NWaveElev points, separated by commas or white space; usused if NWaveElev = 0] 
+---------------------- 2ND-ORDER WAVES ----------------------------------------- [unused with WaveMod=0 or 6] 
+        False    WvDiffQTF      - Full difference-frequency 2nd-order wave kinematics (flag) 
+        False    WvSumQTF       - Full summation-frequency  2nd-order wave kinematics (flag) 
+           0     WvLowCOffD     - Low  frequency cutoff used in the difference-frequencies (rad/s) [Only used with a difference-frequency method] 
+      0.737863   WvHiCOffD      - High frequency cutoff used in the difference-frequencies (rad/s) [Only used with a difference-frequency method] 
+      0.314159   WvLowCOffS     - Low  frequency cutoff used in the summation-frequencies  (rad/s) [Only used with a summation-frequency  method] 
+      3.2        WvHiCOffS      - High frequency cutoff used in the summation-frequencies  (rad/s) [Only used with a summation-frequency  method] 
+---------------------- CURRENT ------------------------------------------------- [unused with WaveMod=6] 
+           0     CurrMod        - Current profile model {0: none=no current, 1: standard, 2: user-defined from routine UserCurrent} (switch) 
+           0     CurrSSV0       - Sub-surface current velocity at still water level  (m/s) [used only when CurrMod=1] 
+    "DEFAULT"    CurrSSDir      - Sub-surface current heading direction (degrees) or DEFAULT (string) [used only when CurrMod=1] 
+          20     CurrNSRef      - Near-surface current reference depth            (meters) [used only when CurrMod=1] 
+           0     CurrNSV0       - Near-surface current velocity at still water level (m/s) [used only when CurrMod=1] 
+           0     CurrNSDir      - Near-surface current heading direction         (degrees) [used only when CurrMod=1] 
+           0     CurrDIV        - Depth-independent current velocity                 (m/s) [used only when CurrMod=1] 
+           0     CurrDIDir      - Depth-independent current heading direction    (degrees) [used only when CurrMod=1] 
+---------------------- FLOATING PLATFORM --------------------------------------- [unused with WaveMod=6] 
+           1     PotMod         - Potential-flow model {0: none=no potential flow, 1: frequency-to-time-domain transforms based on WAMIT output, 2: fluid-impulse theory (FIT)} (switch) 
+"HydroData/barge"         PotFile        - Root name of potential-flow model data; WAMIT output files containing the linear, nondimensionalized, hydrostatic restoring matrix (.hst), frequency-dependent hydrodynamic added mass matrix and damping matrix (.1), and frequency- and direction-dependent wave excitation force vector per unit wave amplitude (.3) (quoted string) [MAKE SURE THE FREQUENCIES INHERENT IN THESE WAMIT FILES SPAN THE PHYSICALLY-SIGNIFICANT RANGE OF FREQUENCIES FOR THE GIVEN PLATFORM; THEY MUST CONTAIN THE ZERO- AND INFINITE-FREQUENCY LIMITS!] 
+           1     WAMITULEN      - Characteristic body length scale used to redimensionalize WAMIT output (meters) [only used when PotMod=1] 
+15359.304          PtfmVol0       - Displaced volume of water when the platform is in its undisplaced position (m^3) [only used when PotMod=1; USE THE SAME VALUE COMPUTED BY WAMIT AS OUTPUT IN THE .OUT FILE!] 
+        20.0     PtfmCOBxt      - The xt offset of the center of buoyancy (COB) from the platform reference point (meters)  [only used when PotMod=1] 
+           0     PtfmCOByt      - The yt offset of the center of buoyancy (COB) from the platform reference point (meters)  [only used when PotMod=1] 
+           1     ExctnMod         - Wave Excitation model {0: None, 1: DFT, 2: state-space} (switch) [only used when PotMod=1; STATE-SPACE REQUIRES *.ssexctn INPUT FILE] 
+           1     Radiation memory-effect model {0: no memory-effect calculation, 1: convolution, 2: state-space} (switch) [only used when PotMod=1; STATE-SPACE REQUIRES *.ss INPUT FILE]  
+         250     RdtnTMax       - Analysis time for wave radiation kernel calculations (sec) [only used when PotMod=1; determines RdtnDOmega=Pi/RdtnTMax in the cosine transform; MAKE SURE THIS IS LONG ENOUGH FOR THE RADIATION IMPULSE RESPONSE FUNCTIONS TO DECAY TO NEAR-ZERO FOR THE GIVEN PLATFORM!] 
+    "DEFAULT"    RdtnDT         - Time step for wave radiation kernel calculations (sec) [only used when PotMod=1; DT<=RdtnDT<=0.1 recommended; determines RdtnOmegaMax=Pi/RdtnDT in the cosine transform] 
+---------------------- 2ND-ORDER FLOATING PLATFORM FORCES ---------------------- [unused with WaveMod=0 or 6, or PotMod=0 or 2] 
+           0     MnDrift        - Mean-drift 2nd-order forces computed                                       {0: None; [7, 8, 9, 10, 11, or 12]: WAMIT file to use} [Only one of MnDrift, NewmanApp, or DiffQTF can be non-zero] 
+           0     NewmanApp      - Mean- and slow-drift 2nd-order forces computed with Newman's approximation {0: None; [7, 8, 9, 10, 11, or 12]: WAMIT file to use} [Only one of MnDrift, NewmanApp, or DiffQTF can be non-zero. Used only when WaveDirMod=0] 
+		   0     DiffQTF        - Full difference-frequency 2nd-order forces computed with full QTF          {0: None; [10, 11, or 12]: WAMIT file to use}          [Only one of MnDrift, NewmanApp, or DiffQTF can be non-zero]  
+           0     SumQTF         - Full summation -frequency 2nd-order forces computed with full QTF          {0: None; [10, 11, or 12]: WAMIT file to use} 
+---------------------- FLOATING PLATFORM FORCE FLAGS  -------------------------- [unused with WaveMod=6] 
+True             PtfmSgF        - Platform horizontal surge translation force (flag) or DEFAULT 
+True             PtfmSwF        - Platform horizontal sway translation force (flag) or DEFAULT 
+True             PtfmHvF        - Platform vertical heave translation force (flag) or DEFAULT 
+True             PtfmRF         - Platform roll tilt rotation force (flag) or DEFAULT 
+True             PtfmPF         - Platform pitch tilt rotation force (flag) or DEFAULT 
+True             PtfmYF         - Platform yaw rotation force (flag) or DEFAULT 
+---------------------- PLATFORM ADDITIONAL STIFFNESS AND DAMPING  -------------- 
+             0             0             0             0             0             0   AddF0    - Additional preload (N, N-m) 
+             0             0             0             0             0             0   AddCLin  - Additional linear stiffness (N/m, N/rad, N-m/m, N-m/rad) 
+             0             0             0             0             0             0 
+             0             0             0             0             0             0 
+             0             0             0             0             0             0 
+             0             0             0             0             0             0 
+             0             0             0             0             0             0 
+             0             0             0             0             0             0   AddBLin  - Additional linear damping(N/(m/s), N/(rad/s), N-m/(m/s), N-m/(rad/s)) 
+             0             0             0             0             0             0 
+             0             0             0             0             0             0 
+             0             0             0             0             0             0 
+             0             0             0             0             0             0 
+             0             0             0             0             0             0 
+             0             0             0             0             0             0 AddBQuad - Additional quadratic drag(N/(m/s)^2, N/(rad/s)^2, N-m(m/s)^2, N-m/(rad/s)^2) 
+             0             0             0             0             0             0
+             0             0             0             0             0             0
+             0             0             0             0             0             0
+             0             0             0             0             0             0
+             0             0             0             0             0             0
+---------------------- AXIAL COEFFICIENTS --------------------------------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+             1   NAxCoef        - Number of axial coefficients (-)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+AxCoefID  AxCd     AxCa     AxCp                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+   (-)    (-)      (-)      (-)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+    1     5.00     0.00     0.00  
+---------------------- MEMBER JOINTS -------------------------------------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+             152   NJoints        - Number of joints (-)   [must be exactly 0 or at least 2]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+JointID   Jointxi     Jointyi     Jointzi  JointAxID   JointOvrlp   [JointOvrlp= 0: do nothing at joint, 1: eliminate overlaps by calculating super member]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+   (-)     (m)         (m)         (m)        (-)       (switch)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+1	47.5	27.5	-8	1	0
+2	47.5	27.5	-7.9	1	0
+3	44.44444444	27.5	-8	1	0
+4	44.44444444	27.5	-7.9	1	0
+5	41.38888889	27.5	-8	1	0
+6	41.38888889	27.5	-7.9	1	0
+7	38.33333333	27.5	-8	1	0
+8	38.33333333	27.5	-7.9	1	0
+9	35.27777778	27.5	-8	1	0
+10	35.27777778	27.5	-7.9	1	0
+11	32.22222222	27.5	-8	1	0
+12	32.22222222	27.5	-7.9	1	0
+13	29.16666667	27.5	-8	1	0
+14	29.16666667	27.5	-7.9	1	0
+15	26.11111111	27.5	-8	1	0
+16	26.11111111	27.5	-7.9	1	0
+17	23.05555556	27.5	-8	1	0
+18	23.05555556	27.5	-7.9	1	0
+19	20	27.5	-8	1	0
+20	20	27.5	-7.9	1	0
+21	16.94444444	27.5	-8	1	0
+22	16.94444444	27.5	-7.9	1	0
+23	13.88888889	27.5	-8	1	0
+24	13.88888889	27.5	-7.9	1	0
+25	10.83333333	27.5	-8	1	0
+26	10.83333333	27.5	-7.9	1	0
+27	7.777777778	27.5	-8	1	0
+28	7.777777778	27.5	-7.9	1	0
+29	4.722222222	27.5	-8	1	0
+30	4.722222222	27.5	-7.9	1	0
+31	1.666666667	27.5	-8	1	0
+32	1.666666667	27.5	-7.9	1	0
+33	-1.388888889	27.5	-8	1	0
+34	-1.388888889	27.5	-7.9	1	0
+35	-4.444444444	27.5	-8	1	0
+36	-4.444444444	27.5	-7.9	1	0
+37	-7.5	27.5	-8	1	0
+38	-7.5	27.5	-7.9	1	0
+39	47.5	27.5	-8	1	0
+40	47.5	27.5	-7.9	1	0
+41	47.5	24.44444444	-8	1	0
+42	47.5	24.44444444	-7.9	1	0
+43	47.5	21.38888889	-8	1	0
+44	47.5	21.38888889	-7.9	1	0
+45	47.5	18.33333333	-8	1	0
+46	47.5	18.33333333	-7.9	1	0
+47	47.5	15.27777778	-8	1	0
+48	47.5	15.27777778	-7.9	1	0
+49	47.5	12.22222222	-8	1	0
+50	47.5	12.22222222	-7.9	1	0
+51	47.5	9.166666667	-8	1	0
+52	47.5	9.166666667	-7.9	1	0
+53	47.5	6.111111111	-8	1	0
+54	47.5	6.111111111	-7.9	1	0
+55	47.5	3.055555556	-8	1	0
+56	47.5	3.055555556	-7.9	1	0
+57	47.5	-5.32907E-15	-8	1	0
+58	47.5	-5.32907E-15	-7.9	1	0
+59	47.5	-3.055555556	-8	1	0
+60	47.5	-3.055555556	-7.9	1	0
+61	47.5	-6.111111111	-8	1	0
+62	47.5	-6.111111111	-7.9	1	0
+63	47.5	-9.166666667	-8	1	0
+64	47.5	-9.166666667	-7.9	1	0
+65	47.5	-12.22222222	-8	1	0
+66	47.5	-12.22222222	-7.9	1	0
+67	47.5	-15.27777778	-8	1	0
+68	47.5	-15.27777778	-7.9	1	0
+69	47.5	-18.33333333	-8	1	0
+70	47.5	-18.33333333	-7.9	1	0
+71	47.5	-21.38888889	-8	1	0
+72	47.5	-21.38888889	-7.9	1	0
+73	47.5	-24.44444444	-8	1	0
+74	47.5	-24.44444444	-7.9	1	0
+75	47.5	-27.5	-8	1	0
+76	47.5	-27.5	-7.9	1	0
+77	47.5	-27.5	-8	1	0
+78	47.5	-27.5	-7.9	1	0
+79	44.44444444	-27.5	-8	1	0
+80	44.44444444	-27.5	-7.9	1	0
+81	41.38888889	-27.5	-8	1	0
+82	41.38888889	-27.5	-7.9	1	0
+83	38.33333333	-27.5	-8	1	0
+84	38.33333333	-27.5	-7.9	1	0
+85	35.27777778	-27.5	-8	1	0
+86	35.27777778	-27.5	-7.9	1	0
+87	32.22222222	-27.5	-8	1	0
+88	32.22222222	-27.5	-7.9	1	0
+89	29.16666667	-27.5	-8	1	0
+90	29.16666667	-27.5	-7.9	1	0
+91	26.11111111	-27.5	-8	1	0
+92	26.11111111	-27.5	-7.9	1	0
+93	23.05555556	-27.5	-8	1	0
+94	23.05555556	-27.5	-7.9	1	0
+95	20	-27.5	-8	1	0
+96	20	-27.5	-7.9	1	0
+97	16.94444444	-27.5	-8	1	0
+98	16.94444444	-27.5	-7.9	1	0
+99	13.88888889	-27.5	-8	1	0
+100	13.88888889	-27.5	-7.9	1	0
+101	10.83333333	-27.5	-8	1	0
+102	10.83333333	-27.5	-7.9	1	0
+103	7.777777778	-27.5	-8	1	0
+104	7.777777778	-27.5	-7.9	1	0
+105	4.722222222	-27.5	-8	1	0
+106	4.722222222	-27.5	-7.9	1	0
+107	1.666666667	-27.5	-8	1	0
+108	1.666666667	-27.5	-7.9	1	0
+109	-1.388888889	-27.5	-8	1	0
+110	-1.388888889	-27.5	-7.9	1	0
+111	-4.444444444	-27.5	-8	1	0
+112	-4.444444444	-27.5	-7.9	1	0
+113	-7.5	-27.5	-8	1	0
+114	-7.5	-27.5	-7.9	1	0
+115	-7.5	-27.5	-8	1	0
+116	-7.5	-27.5	-7.9	1	0
+117	-7.5	-24.44444444	-8	1	0
+118	-7.5	-24.44444444	-7.9	1	0
+119	-7.5	-21.38888889	-8	1	0
+120	-7.5	-21.38888889	-7.9	1	0
+121	-7.5	-18.33333333	-8	1	0
+122	-7.5	-18.33333333	-7.9	1	0
+123	-7.5	-15.27777778	-8	1	0
+124	-7.5	-15.27777778	-7.9	1	0
+125	-7.5	-12.22222222	-8	1	0
+126	-7.5	-12.22222222	-7.9	1	0
+127	-7.5	-9.166666667	-8	1	0
+128	-7.5	-9.166666667	-7.9	1	0
+129	-7.5	-6.111111111	-8	1	0
+130	-7.5	-6.111111111	-7.9	1	0
+131	-7.5	-3.055555556	-8	1	0
+132	-7.5	-3.055555556	-7.9	1	0
+133	-7.5	5.32907E-15	-8	1	0
+134	-7.5	5.32907E-15	-7.9	1	0
+135	-7.5	3.055555556	-8	1	0
+136	-7.5	3.055555556	-7.9	1	0
+137	-7.5	6.111111111	-8	1	0
+138	-7.5	6.111111111	-7.9	1	0
+139	-7.5	9.166666667	-8	1	0
+140	-7.5	9.166666667	-7.9	1	0
+141	-7.5	12.22222222	-8	1	0
+142	-7.5	12.22222222	-7.9	1	0
+143	-7.5	15.27777778	-8	1	0
+144	-7.5	15.27777778	-7.9	1	0
+145	-7.5	18.33333333	-8	1	0
+146	-7.5	18.33333333	-7.9	1	0
+147	-7.5	21.38888889	-8	1	0
+148	-7.5	21.38888889	-7.9	1	0
+149	-7.5	24.44444444	-8	1	0
+150	-7.5	24.44444444	-7.9	1	0
+151	-7.5	27.5	-8	1	0
+152	-7.5	27.5	-7.9	1	0
+---------------------- MEMBER CROSS-SECTION PROPERTIES -------------------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+             1   NPropSets      - Number of member property sets (-)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+PropSetID    PropD         PropThck                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+   (-)        (m)            (m)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+    1         3         0.000001 	
+---------------------- SIMPLE HYDRODYNAMIC COEFFICIENTS (model 1) --------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+     SimplCd    SimplCdMG    SimplCa    SimplCaMG    SimplCp    SimplCpMG   SimplAxCa  SimplAxCaMG  SimplAxCp   SimplAxCpMG                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+       (-)         (-)         (-)         (-)         (-)         (-)         (-)         (-)         (-)         (-)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+       0        0.00        0.00        0.00        0.00        0.00        0.00        0.00        0.00        0.00                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+---------------------- DEPTH-BASED HYDRODYNAMIC COEFFICIENTS (model 2) ---------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+             0   NCoefDpth       - Number of depth-dependent coefficients (-)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+Dpth      DpthCd   DpthCdMG   DpthCa   DpthCaMG       DpthCp   DpthCpMG   DpthAxCa   DpthAxCaMG       DpthAxCp   DpthAxCpMG                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+(m)       (-)      (-)        (-)      (-)            (-)      (-)          (-)        (-)              (-)         (-)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+---------------------- MEMBER-BASED HYDRODYNAMIC COEFFICIENTS (model 3) --------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+             0  NCoefMembers       - Number of member-based coefficients (-)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+MemberID    MemberCd1     MemberCd2    MemberCdMG1   MemberCdMG2    MemberCa1     MemberCa2    MemberCaMG1   MemberCaMG2    MemberCp1     MemberCp2    MemberCpMG1   MemberCpMG2   MemberAxCa1   MemberAxCa2  MemberAxCaMG1 MemberAxCaMG2  MemberAxCp1  MemberAxCp2   MemberAxCpMG1   MemberAxCpMG2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+   (-)         (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+---------------- MEMBERS -------------------------------------------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+             76   NMembers       - Number of members (-)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+MemberID  MJointID1  MJointID2  MPropSetID1  MPropSetID2  MDivSize   MCoefMod  PropPot   [MCoefMod=1: use simple coeff table, 2: use depth-based coeff table, 3: use member-based coeff table] [ PropPot/=0 if member is modeled with potential-flow theory]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+  (-)        (-)        (-)         (-)          (-)        (m)      (switch)   (flag)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+1	1	2	1	1	1	1	TRUE
+2	3	4	1	1	1	1	TRUE
+3	5	6	1	1	1	1	TRUE
+4	7	8	1	1	1	1	TRUE
+5	9	10	1	1	1	1	TRUE
+6	11	12	1	1	1	1	TRUE
+7	13	14	1	1	1	1	TRUE
+8	15	16	1	1	1	1	TRUE
+9	17	18	1	1	1	1	TRUE
+10	19	20	1	1	1	1	TRUE
+11	21	22	1	1	1	1	TRUE
+12	23	24	1	1	1	1	TRUE
+13	25	26	1	1	1	1	TRUE
+14	27	28	1	1	1	1	TRUE
+15	29	30	1	1	1	1	TRUE
+16	31	32	1	1	1	1	TRUE
+17	33	34	1	1	1	1	TRUE
+18	35	36	1	1	1	1	TRUE
+19	37	38	1	1	1	1	TRUE
+20	39	40	1	1	1	1	TRUE
+21	41	42	1	1	1	1	TRUE
+22	43	44	1	1	1	1	TRUE
+23	45	46	1	1	1	1	TRUE
+24	47	48	1	1	1	1	TRUE
+25	49	50	1	1	1	1	TRUE
+26	51	52	1	1	1	1	TRUE
+27	53	54	1	1	1	1	TRUE
+28	55	56	1	1	1	1	TRUE
+29	57	58	1	1	1	1	TRUE
+30	59	60	1	1	1	1	TRUE
+31	61	62	1	1	1	1	TRUE
+32	63	64	1	1	1	1	TRUE
+33	65	66	1	1	1	1	TRUE
+34	67	68	1	1	1	1	TRUE
+35	69	70	1	1	1	1	TRUE
+36	71	72	1	1	1	1	TRUE
+37	73	74	1	1	1	1	TRUE
+38	75	76	1	1	1	1	TRUE
+39	77	78	1	1	1	1	TRUE
+40	79	80	1	1	1	1	TRUE
+41	81	82	1	1	1	1	TRUE
+42	83	84	1	1	1	1	TRUE
+43	85	86	1	1	1	1	TRUE
+44	87	88	1	1	1	1	TRUE
+45	89	90	1	1	1	1	TRUE
+46	91	92	1	1	1	1	TRUE
+47	93	94	1	1	1	1	TRUE
+48	95	96	1	1	1	1	TRUE
+49	97	98	1	1	1	1	TRUE
+50	99	100	1	1	1	1	TRUE
+51	101	102	1	1	1	1	TRUE
+52	103	104	1	1	1	1	TRUE
+53	105	106	1	1	1	1	TRUE
+54	107	108	1	1	1	1	TRUE
+55	109	110	1	1	1	1	TRUE
+56	111	112	1	1	1	1	TRUE
+57	113	114	1	1	1	1	TRUE
+58	115	116	1	1	1	1	TRUE
+59	117	118	1	1	1	1	TRUE
+60	119	120	1	1	1	1	TRUE
+61	121	122	1	1	1	1	TRUE
+62	123	124	1	1	1	1	TRUE
+63	125	126	1	1	1	1	TRUE
+64	127	128	1	1	1	1	TRUE
+65	129	130	1	1	1	1	TRUE
+66	131	132	1	1	1	1	TRUE
+67	133	134	1	1	1	1	TRUE
+68	135	136	1	1	1	1	TRUE
+69	137	138	1	1	1	1	TRUE
+70	139	140	1	1	1	1	TRUE
+71	141	142	1	1	1	1	TRUE
+72	143	144	1	1	1	1	TRUE
+73	145	146	1	1	1	1	TRUE
+74	147	148	1	1	1	1	TRUE
+75	149	150	1	1	1	1	TRUE
+76	151	152	1	1	1	1	TRUE
+---------------------- FILLED MEMBERS ------------------------------------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+             0   NFillGroups     - Number of filled member groups (-) [If FillDens = DEFAULT, then FillDens = WtrDens; FillFSLoc is related to MSL2SWL]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+FillNumM FillMList             FillFSLoc     FillDens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+(-)      (-)                   (m)           (kg/m^3)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+---------------------- MARINE GROWTH -------------------------------------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+             0   NMGDepths      - Number of marine-growth depths specified (-)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+MGDpth     MGThck       MGDens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+(m)        (m)         (kg/m^3)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+---------------------- MEMBER OUTPUT LIST --------------------------------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+             0   NMOutputs      - Number of member outputs (-) [must be < 10]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+MemberID   NOutLoc    NodeLocs [NOutLoc < 10; node locations are normalized distance from the start of the member, and must be >=0 and <= 1] [unused if NMOutputs=0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+  (-)        (-)        (-)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+---------------------- JOINT OUTPUT LIST ---------------------------------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+             0   NJOutputs      - Number of joint outputs [Must be < 10]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+   1 2           JOutLst        - List of JointIDs which are to be output (-)[unused if NJOutputs=0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+---------------------- OUTPUT --------------------------------------------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+TRUE             HDSum          - Output a summary file [flag]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+False            OutAll         - Output all user-specified member and joint loads (only at each member end, not interior locations) [flag]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+             2   OutSwtch       - Output requested channels to: [1=Hydrodyn.out, 2=GlueCode.out, 3=both files]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+"ES11.4e2"       OutFmt         - Output format for numerical results (quoted string) [not checked for validity!]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+"A11"            OutSFmt        - Output format for header strings (quoted string) [not checked for validity!]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+---------------------- OUTPUT CHANNELS -----------------------------------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+"Wave1Elev"               - Wave elevation at the platform reference point (  0,  0)
+"WavesF1xi" 
+"WavesF1zi" 
+"WavesM1yi" 
+"WavesF2xi" 
+"WavesF2zi" 
+"WavesM2yi"      
+"WavesF2xi"
+"WavesF2yi"
+"WavesF2zi"
+"WavesM2xi"
+"WavesM2yi"
+"WavesM2zi" 
+END of output channels and end of file. (the word "END" must appear in the first 3 columns of this line)   

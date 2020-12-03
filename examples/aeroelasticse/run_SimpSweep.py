@@ -6,7 +6,7 @@ Example script to run the DLCs in OpenFAST
 
 from weis.aeroelasticse.runFAST_pywrapper   import runFAST_pywrapper, runFAST_pywrapper_batch
 from weis.aeroelasticse.CaseGen_IEC         import CaseGen_IEC
-from weis.aeroelasticse.CaseLibrary         import steps, simp_step
+from weis.aeroelasticse.CaseLibrary         import *
 from wisdem.commonse.mpi_tools              import MPI
 import sys, os, platform
 import numpy as np
@@ -59,15 +59,7 @@ def run_Simp(turbine_model,control,save_dir,n_cores=1,tune=''):
         # Select Turbine Model
         model_dir                   = os.path.join(os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ), 'OpenFAST_models')
 
-        if turbine_model == 'UMaine-Fixed':
-            fastBatch.FAST_directory    = os.path.join(model_dir, 'IEA-15-240-RWT/IEA-15-240-RWT-Monopile')   # Path to fst directory files
-            fastBatch.FAST_InputFile    = 'IEA-15-240-RWT-Monopile.fst'   # FAST input file (ext=.fst)
-        elif turbine_model == 'UMaine-Semi':
-            fastBatch.FAST_directory    = os.path.join(model_dir, 'IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi')   # Path to fst directory files
-            fastBatch.FAST_InputFile    = 'IEA-15-240-RWT-UMaineSemi.fst'   # FAST input file (ext=.fst)
-        elif turbine_model == 'CT-spar':
-            fastBatch.FAST_directory    = os.path.join(model_dir, 'CT15MW-spar')   # Path to fst directory files
-            fastBatch.FAST_InputFile    = 'CT15MW_spar.fst'   # FAST input file (ext=.fst)
+        fastBatch.select_CT_model(turbine_model,model_dir)
             
 
         fastBatch.channels          = channels
@@ -121,7 +113,7 @@ if __name__ == "__main__":
     # tuning choices: fl_gain, fl_phase
 
 
-    test_type_dir   = 'pc_mode'
+    test_type_dir   = 'ps_perc'
 
     save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],test_type_dir) \
         for tm, dl in zip(turbine_mods,discon_list)]

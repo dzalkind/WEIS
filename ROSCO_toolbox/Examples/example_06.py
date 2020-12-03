@@ -19,7 +19,7 @@ from ROSCO_toolbox import sim as ROSCO_sim
 from ROSCO_toolbox import utilities as ROSCO_utilities
 
 # Load yaml file 
-parameter_filename = 'NREL5MW_example.yaml'
+parameter_filename = '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/IEA15MW-CT-spar.yaml'
 inps = yaml.safe_load(open(parameter_filename))
 path_params         = inps['path_params']
 turbine_params      = inps['turbine_params']
@@ -38,7 +38,7 @@ turbine.load_from_fast(path_params['FAST_InputFile'],path_params['FAST_directory
 controller.tune_controller(turbine)
 
 # Write parameter input file
-param_file = 'DISCON.IN'   # This must be named DISCON.IN to be seen by the compiled controller binary. 
+param_file = '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_lowBW.IN'   # This must be named DISCON.IN to be seen by the compiled controller binary. 
 file_processing.write_DISCON(turbine,controller,param_file=param_file, txt_filename=path_params['rotor_performance_filename'])
 
 # Run OpenFAST
