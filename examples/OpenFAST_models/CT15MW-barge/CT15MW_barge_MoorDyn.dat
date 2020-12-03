@@ -1,0 +1,70 @@
+--------------------- MoorDyn Input File ------------------------------------                                           
+CT 15 MW barge, Ramboll 2020                                         
+FALSE    Echo      - echo the input file data (flag)                                            
+----------------------- LINE TYPES ------------------------------------------                                           
+1        NTypes    - number of LineTypes                                            
+Name  Diam      MassDen  EA       BA/-zeta  Can   Cat   Cdn   Cdt         
+(-)   (m)       (kg/m)   (N)      (N-s/-)   (-)   (-)   (-)   (-)         
+main  0.300841   558.0  2.2046E+09    -1   1.00  0.5  1.33  0.11        
+---------------------- CONNECTION PROPERTIES --------------------------------                                           
+12     NConnects - number of connections including anchors and fairleads                                            
+Node Type      X         Y       Z       M    V    FX   FY   FZ  CdA   CA
+(-)  (-)      (m)       (m)     (m)    (kg) (m^3) (kN) (kN) (kN) (m^2) (-)
+1   Vessel    46.	     0.	    -8       0    0    0    0    0    0    0
+2   Vessel    46.	     0.	    -8       0    0    0    0    0    0    0
+3   Vessel    -6.	    26.	    -8       0    0    0    0    0    0    0
+4   Vessel    -6.	    26.	    -8       0    0    0    0    0    0    0
+5   Vessel    -6.	   -26.	    -8       0    0    0    0    0    0    0
+6   Vessel    -6.	   -26.	    -8       0    0    0    0    0    0    0
+7   Fixed    808.2	 -103.77	-150     0    0    0    0    0    0    0
+8   Fixed    808.2	  103.77	-150     0    0    0    0    0    0    0
+9   Fixed    -284.23 734.48	-150     0    0    0    0    0    0    0
+10  Fixed    -463.97 630.72	-150     0    0    0    0    0    0    0
+11  Fixed    -463.97 -630.72	-150     0    0    0    0    0    0    0
+12  Fixed    -284.23 -734.48	-150     0    0    0    0    0    0    0
+---------------------- LINE PROPERTIES --------------------------------------                                           
+6           NLines    - number of line objects                                      
+Line  LineType  UnstrLen  NumSegs  NodeAnch  NodeFair  Flags/Outputs                   
+(-)   (-)       (m)       (-)      (-)       (-)       (-)                 
+1     main      800.    50        1         7         -                   
+2     main      800.    50        2         8         -                   
+3     main      800.    50        3         9         -         
+4     main      800.    50        4         10         -   
+5     main      800.    50        5         11         -   
+6     main      800.    50        6         12         -             
+---------------------- SOLVER OPTIONS ---------------------------------------                                           
+0.001    dtM       - time step to use in mooring integration (s)
+3.0e6    kbot      - bottom stiffness (Pa/m)
+3.0e5    cbot      - bottom damping (Pa-s/m)
+1.0      dtIC      - time interval for analyzing convergence during IC gen (s)
+60.0     TmaxIC    - max time for ic gen (s)
+4.0      CdScaleIC - factor by which to scale drag coefficients during dynamic relaxation (-)
+0.001     threshIC  - threshold for IC convergence (-)                                          
+------------------------ OUTPUTS --------------------------------------------                                           
+FairTen1                                            
+FairTen2                                            
+FairTen3                                            
+AnchTen1                                            
+AnchTen2                                            
+AnchTen3
+Con1fx                                          
+Con3fx                                          
+Con5fx      
+Con1fy                                          
+Con3fy                                          
+Con5fy                                          
+Con1fz                                          
+Con3fz                                          
+Con5fz  
+Con2fx                                          
+Con4fx                                          
+Con6fx      
+Con2fy                                          
+Con4fy                                          
+Con6fy                                          
+Con2fz                                          
+Con4fz                                          
+Con6fz                                    
+END                                         
+------------------------- need this line --------------------------------------                                                                                     
+                                            

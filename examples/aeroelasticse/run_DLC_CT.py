@@ -163,7 +163,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     case_inputs[('ServoDyn', 'GenModel')] = {'vals': [1], 'group': 0}
 
     # Specify rosco controller
-    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon_const_pwr.dylib'
+    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon.dylib'
 
     if rosco_dll:
         case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[rosco_dll], 'group':0}
@@ -227,15 +227,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
         # Select Turbine Model
         model_dir                   = os.path.join(os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ), 'OpenFAST_models')
 
-        if turbine_model == 'UMaine-Fixed':
-            fastBatch.FAST_directory    = os.path.join(model_dir, 'IEA-15-240-RWT/IEA-15-240-RWT-Monopile')   # Path to fst directory files
-            fastBatch.FAST_InputFile    = 'IEA-15-240-RWT-Monopile.fst'   # FAST input file (ext=.fst)
-        elif turbine_model == 'UMaine-Semi':
-            fastBatch.FAST_directory    = os.path.join(model_dir, 'IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi')   # Path to fst directory files
-            fastBatch.FAST_InputFile    = 'IEA-15-240-RWT-UMaineSemi.fst'   # FAST input file (ext=.fst)
-        elif turbine_model == 'CT-spar':
-            fastBatch.FAST_directory    = os.path.join(model_dir, 'CT15MW-spar')   # Path to fst directory files
-            fastBatch.FAST_InputFile    = 'CT15MW_spar.fst'   # FAST input file (ext=.fst)
+        fastBatch.select_CT_model(turbine_model,model_dir)
 
         fastBatch.channels          = channels
         fastBatch.FAST_runDirectory = save_dir  # input!

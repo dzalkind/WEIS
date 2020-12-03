@@ -6,7 +6,7 @@ Example script to run the DLCs in OpenFAST
 
 from weis.aeroelasticse.runFAST_pywrapper   import runFAST_pywrapper, runFAST_pywrapper_batch
 from weis.aeroelasticse.CaseGen_IEC         import CaseGen_IEC
-from weis.aeroelasticse.CaseLibrary         import steps
+from weis.aeroelasticse.CaseLibrary         import *
 from wisdem.commonse.mpi_tools              import MPI
 import sys, os, platform
 import numpy as np
@@ -59,12 +59,7 @@ def run_Steps(turbine_model,control,save_dir,n_cores=1):
         # Select Turbine Model
         model_dir                   = os.path.join(os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ), 'OpenFAST_models')
 
-        if turbine_model == 'UMaine-Fixed':
-            fastBatch.FAST_directory    = os.path.join(model_dir, 'IEA-15-240-RWT/IEA-15-240-RWT-Monopile')   # Path to fst directory files
-            fastBatch.FAST_InputFile    = 'IEA-15-240-RWT-Monopile.fst'   # FAST input file (ext=.fst)
-        elif turbine_model == 'UMaine-Semi':
-            fastBatch.FAST_directory    = os.path.join(model_dir, 'IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi')   # Path to fst directory files
-            fastBatch.FAST_InputFile    = 'IEA-15-240-RWT-UMaineSemi.fst'   # FAST input file (ext=.fst)
+        fastBatch.select_CT_model(turbine_model,model_dir)
 
         fastBatch.channels          = channels
         fastBatch.FAST_runDirectory = save_dir  # input!
