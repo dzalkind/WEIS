@@ -105,20 +105,19 @@ if __name__ == "__main__":
 
     # set up cases
     turbine_mods = [
-                    'CT-spar',
-                    # 'CT-spar',
                     # 'UMaine-Fixed',
+                    # 'CT-spar',
+                    'CT-spar',
+                    # 'UMaine-Fixed',
+                    # 'UMaine-Semi',
                     # 'UMaine-Semi'
                     ]
     discon_list = [
-                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100.IN',
-                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100.IN',
-                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100.IN',
-                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080_const_pwr.IN',
-                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080.IN',
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_z2.IN'
-
+                    # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100_constTq.IN',
                     ]
+                    
     # tuning choices: fl_gain, fl_phase
 
 

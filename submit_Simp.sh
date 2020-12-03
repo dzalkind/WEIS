@@ -21,4 +21,4 @@ module load gcc/7.4.0 intel-parallel-studio/cluster.2018.4
 conda activate weis-env3
 
 
-python /scratch/dzalkind/WEIS-3/examples/aeroelasticse/run_SimpSweep.py
+python /scratch/dzalkind/WEIS-3/examples/aeroelasticse/run_Simp.py

@@ -59,7 +59,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
         
     elif dlc_type == 'lite':
         wind_speeds = [12,14,16]
-        iec.dlc_inputs['Seeds'] = [[25]]
+        iec.dlc_inputs['Seeds'] = [[25,28,33]]
     # iec.dlc_inputs['Seeds'] = [range(1,7), range(1,7),[],[], range(1,7), range(1,7), range(1,7)]
 
     iec.dlc_inputs['DLC']   = [1.1]
@@ -274,12 +274,18 @@ if __name__ == "__main__":
 
     # set up cases
     turbine_mods = [
+                    'UMaine-Fixed',
                     'CT-spar',
+                    'CT-spar',
+                    # 'UMaine-Fixed',
+                    # 'UMaine-Semi',
+                    # 'UMaine-Semi'
                     ]
     discon_list = [
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_z2.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100_constTq.IN',
                     ]
-
     test_type_dir   = 'ntm'
 
     dlc_type        = 'lite'
@@ -288,6 +294,6 @@ if __name__ == "__main__":
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_DLC_CT(tm,co,sd,n_cores=36,tune='pc_mode',dlc_type=dlc_type)
+        run_DLC_CT(tm,co,sd,n_cores=1,tune='pc_mode',dlc_type=dlc_type)
     
     
