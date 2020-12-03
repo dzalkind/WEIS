@@ -24,3 +24,6 @@ wind/
 # Temp
 *Temp*
 *temp*
+
+# Jupyter
+*.ipynb_checkpoints*
