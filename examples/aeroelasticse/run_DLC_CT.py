@@ -54,8 +54,8 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     # DLC inputs
     iec.dlc_inputs = {}
     if dlc_type == 'full':
-        wind_speeds = [np.arange(int(cut_in), int(cut_out), 2)]
-        iec.dlc_inputs['Seeds'] = [1,2,3,4,5,6]
+        wind_speeds = np.arange(int(cut_in), int(cut_out), 2).tolist()
+        iec.dlc_inputs['Seeds'] = [[1,2,3,4,5,6]]
         
     elif dlc_type == 'lite':
         wind_speeds = [12,14,16]
@@ -266,26 +266,27 @@ if __name__ == "__main__":
 
     # set up cases
     turbine_mods = [
-                    'UMaine-Fixed',
-                    'CT-spar',
+                    # 'UMaine-Fixed',
+                    # 'CT-spar',
                     'CT-spar',
                     # 'UMaine-Fixed',
                     # 'UMaine-Semi',
                     # 'UMaine-Semi'
                     ]
     discon_list = [
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100_constTq.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_lowBW.IN',
+                    # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100_constTq.IN',
                     ]
     test_type_dir   = 'ntm'
 
-    dlc_type        = 'lite'
+    dlc_type        = 'full'
+
 
     save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],test_type_dir) \
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_DLC_CT(tm,co,sd,n_cores=1,tune='pc_mode',dlc_type=dlc_type)
+        run_DLC_CT(tm,co,sd,n_cores=36,tune='',dlc_type=dlc_type)
     
     
