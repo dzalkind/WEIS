@@ -105,23 +105,37 @@ if __name__ == "__main__":
                     'CT-barge',
                     ]
     discon_list = [
-                    # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100.IN',
+                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100.IN',
+                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100.IN',
+                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080_const_pwr.IN',
+                    # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080.IN',
+                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_lowBW.IN'
+
                     ]
                     
     # tuning choices: fl_gain, fl_phase
 
+    test_type_dir = 'simp'
 
+<<<<<<< HEAD
     test_type_dir   = 'pc_mode'
+=======
+    tune   = 'max_tq'
+
+    if tune:
+        test_type_dir += '+'+tune
+>>>>>>> b03331eeef3765f503a8dc39b98fe6437758b07c
 
     save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],'simp+'+test_type_dir) \
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
+<<<<<<< HEAD
         run_Simp(tm,co,sd,n_cores=36,tune=test_type_dir)
+=======
+        run_Simp(tm,co,sd,n_cores=8,tune=tune)
+>>>>>>> b03331eeef3765f503a8dc39b98fe6437758b07c
     
     
     
