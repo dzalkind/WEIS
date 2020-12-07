@@ -7,22 +7,18 @@ Originally created by Andrew Ning on 2012-01-20.
 Copyright (c) NREL. All rights reserved.
 """
 
-from __future__ import print_function
-
 import numpy as np
 import openmdao.api as om
 import copy
 
-from wisdem.commonse.WindWaveDrag import AeroHydroLoads, CylinderWindDrag, CylinderWaveDrag
+from wisdem.commonse.wind_wave_drag import AeroHydroLoads, CylinderWindDrag, CylinderWaveDrag
 
 from wisdem.commonse.environment import LinearWaves, TowerSoil, PowerWind, LogWind
-from wisdem.commonse.tube import CylindricalShellProperties
+from wisdem.commonse.cross_sections import CylindricalShellProperties
 from wisdem.commonse.utilities import assembleI, unassembleI, nodal2sectional, interp_with_deriv, sectionalInterp
-from wisdem.commonse import gravity, eps
-
 from wisdem.commonse.vertical_cylinder import CylinderDiscretization, CylinderMass, CylinderFrame3DD, NFREQ, get_nfull, RIGID
 
-import wisdem.commonse.UtilizationSupplement as Util
+import wisdem.commonse.utilization_constraints as util_con
 
 
 def find_nearest(array, value):
@@ -260,12 +256,14 @@ class DiscretizationYAML(om.ExplicitComponent):
 
             # Get the index into the material list
             imat  = mat_names.index( iname )
+
+            imass = rho[imat] * twall[k,:]
             
             # For density, take mass weighted layer
-            rho_param += rho[imat] * twall[k,:]
+            rho_param += imass
             
             # For cost, take mass weighted layer
-            cost_param += rho[imat] * twall[k,:] * cost[imat]
+            cost_param += imass * cost[imat]
 
             # Store the value associated with this thickness
             E_param[k,:] = E[imat]
@@ -325,7 +323,7 @@ class MonopileFoundation(om.ExplicitComponent):
         self.add_input('suctionpile_depth', 0.0, units='m')
         self.add_input('suctionpile_depth_diam_ratio', 0.0)
         self.add_input('foundation_height', 0.0, units='m')
-        self.add_input('diameter', 0.0, units='m', src_indices=[0])
+        self.add_input('diameter', 0.0, units='m')
 
         self.add_output('z_start', 0.0, units='m')
         
@@ -510,7 +508,7 @@ class TowerMass(om.ExplicitComponent):
 
         self.add_output('structural_cost', val=0.0, units='USD')
         self.add_output('structural_mass', val=0.0, units='kg')
-        self.add_output('tower_raw_cost', val=0.0, units='USD')
+        self.add_output('tower_cost', val=0.0, units='USD')
         self.add_output('tower_mass', val=0.0, units='kg')
         self.add_output('tower_center_of_mass', val=0.0, units='m')
         self.add_output('tower_section_center_of_mass', val=np.zeros(nFull-1), units='m')
@@ -535,7 +533,7 @@ class TowerMass(om.ExplicitComponent):
         outputs['monopile_mass']  += inputs['transition_piece_mass'] + inputs['gravity_foundation_mass']
         outputs['monopile_length'] = inputs['transition_piece_height'] - inputs['z_full'][0]
 
-        outputs['tower_raw_cost']  = outputs['structural_cost'] - outputs['monopile_cost']
+        outputs['tower_cost']      = outputs['structural_cost'] - outputs['monopile_cost']
         outputs['tower_mass']      = outputs['structural_mass'] - outputs['monopile_mass']
         outputs['tower_I_base']         = inputs['cylinder_I_base']
         outputs['tower_I_base'][:2]    += inputs['transition_piece_mass']*(inputs['transition_piece_height']-inputs['foundation_height'])**2
@@ -872,6 +870,10 @@ class TowerPostFrame(om.ExplicitComponent):
         fatigue life of tower
     freqs : numpy array[NFREQ], [Hz]
         Natural frequencies of the structure
+    x_mode_freqs : numpy array[NFREQ2]
+        Frequencies associated with mode shapes in the x-direction
+    y_mode_freqs : numpy array[NFREQ2]
+        Frequencies associated with mode shapes in the y-direction
     x_mode_shapes : numpy array[NFREQ2, 5]
         6-degree polynomial coefficients of mode shapes in the x-direction
     y_mode_shapes : numpy array[NFREQ2, 5]
@@ -881,6 +883,10 @@ class TowerPostFrame(om.ExplicitComponent):
     -------
     structural_frequencies : numpy array[NFREQ], [Hz]
         First and second natural frequency
+    fore_aft_freqs : numpy array[NFREQ2]
+        Frequencies associated with mode shapes in the tower fore-aft direction
+    side_side_freqs : numpy array[NFREQ2]
+        Frequencies associated with mode shapes in the tower side-side direction
     fore_aft_modes : numpy array[NFREQ2, 5]
         6-degree polynomial coefficients of mode shapes in the tower fore-aft direction
         (without constant term)
@@ -990,6 +996,8 @@ class TowerPostFrame(om.ExplicitComponent):
         self.declare_partials('shell_buckling', ['axial_stress', 'd_full', 'hoop_stress', 'shear_stress', 'sigma_y_full', 't_full'], method='fd')
         self.declare_partials('stress', ['axial_stress', 'hoop_stress', 'shear_stress', 'sigma_y_full'], method='fd')
         self.declare_partials('structural_frequencies', ['freqs'], method='fd')
+        self.declare_partials('fore_aft_freqs', ['x_mode_freqs'], method='fd')
+        self.declare_partials('side_side_freqs', ['y_mode_freqs'], method='fd')
         self.declare_partials('fore_aft_modes', ['x_mode_shapes'], method='fd')
         self.declare_partials('side_side_modes', ['y_mode_shapes'], method='fd')
         self.declare_partials('top_deflection', ['top_deflection_in'], method='fd')
@@ -1014,6 +1022,8 @@ class TowerPostFrame(om.ExplicitComponent):
 
         # Frequencies and mode shapes (with x^2 term first)
         outputs['structural_frequencies'] = inputs['freqs']
+        outputs['fore_aft_freqs']         = inputs['x_mode_freqs']
+        outputs['side_side_freqs']        = inputs['y_mode_freqs']
         outputs['fore_aft_modes']         = inputs['x_mode_shapes']
         outputs['side_side_modes']        = inputs['y_mode_shapes']
 
@@ -1024,16 +1034,16 @@ class TowerPostFrame(om.ExplicitComponent):
         outputs['top_deflection'] = inputs['top_deflection_in']
         
         # von mises stress
-        outputs['stress'] = Util.vonMisesStressUtilization(axial_stress, hoop_stress, shear_stress, gamma_f*gamma_m*gamma_n, sigma_y)
+        outputs['stress'] = util_con.vonMisesStressUtilization(axial_stress, hoop_stress, shear_stress, gamma_f*gamma_m*gamma_n, sigma_y)
 
         # shell buckling
-        outputs['shell_buckling'] = Util.shellBucklingEurocode(d, t, axial_stress, hoop_stress,
+        outputs['shell_buckling'] = util_con.shellBucklingEurocode(d, t, axial_stress, hoop_stress,
                                                                 shear_stress, L_reinforced, E, sigma_y, gamma_f, gamma_b)
 
         # global buckling
         tower_height = inputs['z_full'][-1] - inputs['z_full'][0]
         M = np.sqrt(inputs['Mxx']**2 + inputs['Myy']**2)
-        outputs['global_buckling'] = Util.bucklingGL(d, t, inputs['Fz'], M, tower_height, E, sigma_y, gamma_f, gamma_b)
+        outputs['global_buckling'] = util_con.bucklingGL(d, t, inputs['Fz'], M, tower_height, E, sigma_y, gamma_f, gamma_b)
 
         # fatigue
         N_DEL = 365.0*24.0*3600.0*inputs['life'] * np.ones(len(t))
@@ -1042,7 +1052,7 @@ class TowerPostFrame(om.ExplicitComponent):
         #if any(inputs['M_DEL']):
         #    M_DEL = np.interp(z_section, inputs['z_DEL'], inputs['M_DEL'])
 
-        #    outputs['damage'] = Util.fatigue(M_DEL, N_DEL, d, inputs['t'], inputs['m_SN'],
+        #    outputs['damage'] = util_con.fatigue(M_DEL, N_DEL, d, inputs['t'], inputs['m_SN'],
         #                                      inputs['DC'], gamma_fatigue, stress_factor=1.0, weld_factor=True)
 
     def compute_distprop(self, outputs, z_in, d_in, thk_in, E_in, G_in, rho_in):
@@ -1143,7 +1153,7 @@ class TowerLeanSE(om.Group):
             
         
         # If doing fixed bottom monopile, we add an additional point for the pile (even for gravity foundations)
-        self.add_subsystem('predisc', MonopileFoundation(monopile=monopile), promotes=['*', ('diameter', 'tower_outer_diameter')])
+        self.add_subsystem('predisc', MonopileFoundation(monopile=monopile), promotes=['*', ('diameter', 'monopile_base_diameter')])
             
         # Promote all but foundation_height so that we can override
         self.add_subsystem('geometry', CylinderDiscretization(nPoints=n_height), promotes=['z_param','z_full','d_full','t_full',('section_height', 'tower_section_height'), ('diameter', 'tower_outer_diameter'), ('wall_thickness', 'tower_wall_thickness')])
@@ -1153,11 +1163,12 @@ class TowerLeanSE(om.Group):
         self.add_subsystem('cm', CylinderMass(nPoints=nFull), promotes=['z_full','d_full','t_full',
                                                                         'labor_cost_rate','painting_cost_rate'])
         self.add_subsystem('tm', TowerMass(n_height=n_height), promotes=['z_full',
-                                                                   'tower_mass','tower_center_of_mass','tower_section_center_of_mass','tower_I_base',
-                                                                   'tower_raw_cost','gravity_foundation_mass','foundation_height',
-                                                                   'transition_piece_mass','transition_piece_cost','transition_piece_height',
-                                                                   'monopile_mass','monopile_cost','monopile_length'])
-        self.add_subsystem('gc', Util.GeometricConstraints(nPoints=n_height), promotes=['min_d_to_t','max_taper','constr_taper','constr_d_to_t','slope',('d', 'tower_outer_diameter'),('t', 'tower_wall_thickness')])
+                                                                         'tower_mass','tower_center_of_mass','tower_section_center_of_mass','tower_I_base',
+                                                                         'tower_cost','gravity_foundation_mass','foundation_height',
+                                                                         'transition_piece_mass','transition_piece_cost','transition_piece_height',
+                                                                         'monopile_mass','monopile_cost','monopile_length','structural_mass','structural_cost'])
+        self.add_subsystem('gc', util_con.GeometricConstraints(nPoints=n_height),
+                           promotes=['constr_taper','constr_d_to_t','slope',('d', 'tower_outer_diameter'),('t', 'tower_wall_thickness')])
         
         self.add_subsystem('turb', TurbineMass(), promotes=['turbine_mass','monopile_mass',
                                                             'tower_mass','tower_center_of_mass','tower_I_base',
@@ -1174,8 +1185,9 @@ class TowerLeanSE(om.Group):
         self.connect('cm.center_of_mass', 'tm.cylinder_center_of_mass')
         self.connect('cm.section_center_of_mass','tm.cylinder_section_center_of_mass')
         self.connect('cm.I_base','tm.cylinder_I_base')
+        self.connect('tower_outer_diameter','monopile_base_diameter',src_indices=[0])
 
-        
+
 class TowerSE(om.Group):
     """
     This is the main TowerSE group that performs analysis of the tower.
@@ -1301,6 +1313,8 @@ class TowerSE(om.Group):
             self.connect('soil.k', 'pre'+lc+'.k_monopile')
 
             self.connect('tower'+lc+'.freqs', 'post'+lc+'.freqs')
+            self.connect('tower'+lc+'.x_mode_freqs', 'post'+lc+'.x_mode_freqs')
+            self.connect('tower'+lc+'.y_mode_freqs', 'post'+lc+'.y_mode_freqs')
             self.connect('tower'+lc+'.x_mode_shapes', 'post'+lc+'.x_mode_shapes')
             self.connect('tower'+lc+'.y_mode_shapes', 'post'+lc+'.y_mode_shapes')
             self.connect('tower'+lc+'.Fz_out', 'post'+lc+'.Fz')

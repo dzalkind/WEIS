@@ -5,8 +5,9 @@ import copy
 from wisdem.commonse.utilities import nodal2sectional, sectional2nodal, assembleI, unassembleI, sectionalInterp
 import wisdem.commonse.frustum as frustum
 import wisdem.commonse.manufacturing as manufacture
-from wisdem.commonse.UtilizationSupplement import shellBuckling_withStiffeners, GeometricConstraints
-from wisdem.commonse import gravity, eps, AeroHydroLoads, CylinderWindDrag, CylinderWaveDrag
+from wisdem.commonse.utilization_constraints import shellBuckling_withStiffeners, GeometricConstraints
+from wisdem.commonse.wind_wave_drag import AeroHydroLoads, CylinderWindDrag, CylinderWaveDrag
+from wisdem.commonse import gravity, eps
 from wisdem.commonse.vertical_cylinder import CylinderDiscretization, CylinderMass, get_nfull
 from wisdem.commonse.environment import PowerWind, LinearWaves
 
@@ -123,18 +124,15 @@ class DiscretizationYAML(om.ExplicitComponent):
     def compute(self, inputs, outputs, discrete_inputs, discrete_outputs):
         # Unpack dimensions
         n_height = self.options['n_height']
-        n_layers = self.options['n_layers']
 
         # Unpack values
         h_col  = inputs['height']
-        lthick = inputs['layer_thickness']
-        lmat   = copy.copy( discrete_inputs['layer_materials'] )
         
         outputs['section_height'] = np.diff( h_col * inputs['s'] )
         outputs['wall_thickness'] = np.sum(inputs['layer_thickness'], axis=0)
         outputs['outer_diameter'] = inputs['outer_diameter_in']
         twall     = inputs['layer_thickness']
-        layer_mat = discrete_inputs['layer_materials']
+        layer_mat = copy.copy( discrete_inputs['layer_materials'] )
 
         # Check to make sure we have good values
         if np.any(outputs['section_height'] <= 0.0):
@@ -1551,7 +1549,7 @@ class Column(om.Group):
         # TODO: Use reference axis and curvature, s, instead of assuming everything is vertical on z
         self.add_subsystem('yaml', DiscretizationYAML(n_height=n_height, n_layers=n_layers, n_mat=n_mat), promotes=['*'])
             
-        self.add_subsystem('gc', GeometricConstraints(nPoints=n_height, diamFlag=True), promotes=['max_taper','min_d_to_t','constr_taper','constr_d_to_t'])
+        self.add_subsystem('gc', GeometricConstraints(nPoints=n_height, diamFlag=True), promotes=['constr_taper','constr_d_to_t'])
 
         self.add_subsystem('cyl_geom', CylinderDiscretization(nPoints=n_height), promotes=['section_height','diameter','wall_thickness',
                                                                                            'foundation_height','d_full','t_full'])
@@ -1574,7 +1572,7 @@ class Column(om.Group):
 
         self.add_subsystem('col', ColumnProperties(n_height=n_height), promotes=['*'])
 
-        self.add_subsystem('wind', PowerWind(nPoints=n_full), promotes=[('Uref', 'wind_reference_speed'), ('zref', 'wind_reference_height'), 'shearExp', ('z0', 'wind_z0')])
+        self.add_subsystem('wind', PowerWind(nPoints=n_full), promotes=['Uref', 'zref', 'shearExp', ('z0', 'wind_z0')])
         self.add_subsystem('wave', LinearWaves(nPoints=n_full), promotes=['Uc','hsig_wave','Tsig_wave','rho_water', ('z_floor', 'water_depth'), ('z_surface', 'wave_z0')])
         self.add_subsystem('windLoads', CylinderWindDrag(nPoints=n_full), promotes=['cd_usr','beta_wind','rho_air','mu_air'])
         self.add_subsystem('waveLoads', CylinderWaveDrag(nPoints=n_full), promotes=['cm','cd_usr','beta_wave','rho_water','mu_water'])

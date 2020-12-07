@@ -4,7 +4,6 @@ A script to post process a batch run and generate stats and load rankings
 
 # Python Modules and instantiation
 import numpy as np
-# from wisdem.aeroelasticse.CaseLibrary import ROSCO_Test
 import os
 
 from weis.aeroelasticse.FAST_reader import InputReader_Common, InputReader_OpenFAST, InputReader_FAST7
@@ -14,12 +13,6 @@ from weis.aeroelasticse.CaseGen_General import CaseGen_General
 from weis.aeroelasticse.CaseGen_IEC import CaseGen_IEC
 from pCrunch import pdTools
 from pCrunch import Processing, Analysis
-from weis.aeroelasticse.Util import FileTools
-# Instantiate fast_IO
-from ROSCO_toolbox import utilities as ROSCO_utilities
-fast_io = ROSCO_utilities.FAST_IO()
-fast_pl = ROSCO_utilities.FAST_Plots()
-import pandas as pd
 
 
 # Define input files paths
@@ -96,7 +89,6 @@ def post_BatchRun(test_dirs):
     
 
 
-if __name__ == '__main__':
 
 
     test_dir = [
@@ -128,7 +120,7 @@ if __name__ == '__main__':
 # #  --- Time domain analysis --- 
 # filenames = [outfiles[0][2], outfiles[1][2]] # select the 2nd run from each dataset
 # cases = {'Baseline': ['Wind1VelX', 'GenPwr', 'BldPitch1', 'GenTq', 'RotSpeed']}
-# fast_dict = fast_io.load_FAST_out(filenames, tmin=30)
+# fast_dict = fast_io.load_fast_out(filenames, tmin=30)
 # fast_pl.plot_fast_out(cases, fast_dict)
 
 # # Plot some spectral cases

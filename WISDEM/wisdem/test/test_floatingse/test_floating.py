@@ -128,8 +128,6 @@ class TestOC3Mass(unittest.TestCase):
 
         # Design constraints
         prob['max_draft'] = 200.0                # For manufacturability of rolling steel
-        prob['max_taper'] = 0.4                # For manufacturability of rolling steel
-        prob['min_d_to_t'] = 120.0 # For weld-ability
 
         # API 2U flag
         prob['loading'] = 'axial' #'hydrostatic'
@@ -160,6 +158,8 @@ class TestOC3Mass(unittest.TestCase):
         prob['yaw']                   = 0.0    # Turbine yaw angle
         prob['beta_wind']             = prob['beta_wave'] = 0.0
         prob['cd_usr']                = -1.0 # Compute drag coefficient
+        prob['Uref'] = 10.0
+        prob['zref'] = 100.0
 
         # Porperties of turbine tower
         nTower = prob.model.options['modeling_options']['tower']['n_height']-1

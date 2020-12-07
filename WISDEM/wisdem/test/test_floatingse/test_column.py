@@ -647,8 +647,8 @@ class TestGroup(unittest.TestCase):
         prob['wave_z0'] = -100.0
         prob['hsig_wave'] = 5.0
         prob['wind_z0'] = 0.0
-        prob['wind_reference_height'] = 100.0
-        prob['wind_reference_speed'] = 10.0
+        prob['zref'] = 100.0
+        prob['Uref'] = 10.0
         prob['rho_air'] = 1.0
         prob['mu_air'] = 1e-5
 
@@ -660,8 +660,6 @@ class TestGroup(unittest.TestCase):
         prob['painting_cost_rate'] = 20.0
         prob['outfitting_cost_rate'] = 300.0
         prob['loading'] = 'hydrostatic'
-        prob['max_taper'] = 0.4
-        prob['min_d_to_t'] = 120.0
         prob['shearExp'] = 0.1
         prob['beta_wind'] = 0.0
         prob['cd_usr'] = -1.0

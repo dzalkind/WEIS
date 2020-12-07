@@ -8,7 +8,6 @@ Copyright (c) NREL. All rights reserved.
 from __future__ import print_function
 import numpy as np
 from scipy.linalg import solve_banded
-from scipy.optimize import curve_fit
 
 
 def mode_fit(x, c2, c3, c4, c5, c6):
@@ -32,7 +31,7 @@ def get_modal_coefficients(x, y, deg=6):
     
     return p6
     
-def get_mode_shapes(r, freqs, xdsp, ydsp, zdsp, xmpf, ympf, zmpf):
+def get_xy_mode_shapes(r, freqs, xdsp, ydsp, zdsp, xmpf, ympf, zmpf):
     # Number of frequencies and modes
     nfreq = len(freqs)
     
@@ -62,8 +61,6 @@ def get_mode_shapes(r, freqs, xdsp, ydsp, zdsp, xmpf, ympf, zmpf):
             mshapes_y[iy,:] = ypolys[m,:]
             freq_y[   iy  ] = freqs[m]
             iy += 1
-        else:
-            print('Warning: Unknown mode shape')
 
     return freq_x, freq_y, mshapes_x, mshapes_y
 
@@ -289,6 +286,36 @@ def assembleI(I):
 def unassembleI(I):
     return np.r_[I[0, 0], I[1, 1], I[2, 2], I[0, 1], I[0, 2], I[1, 2]]
 
+def rotateI(I, th, axis='z'):
+    # https://en.wikipedia.org/wiki/Moment_of_inertia
+    # With rotation matrix R, then I = R * I_0 * R^T
+
+    # Build inertia tensor
+    if I.ndim == 2 and I.shape[0] == 3 and I.shape[1] == 3:
+        Iin = unassemble(I)
+    elif I.ndim == 1 and I.size==3:
+        Iin = np.r_[I, np.zeros(3)]
+    elif I.ndim == 1 and I.size==6:
+        Iin = I.copy()
+    else:
+        raise ValueError('Unknown size for input, I:',I)
+    Imat = np.asmatrix( assembleI( Iin ) )
+
+    # Build rotation matrix
+    ct = np.cos(th)
+    st = np.sin(th)
+    if axis in ['z','Z',2]:
+        R = np.asmatrix(np.array( [[ct,-st,0],[st,ct,0],[0,0,1]] )) 
+    elif axis in ['y','Y',1]:
+        R = np.asmatrix(np.array( [[ct,0,st],[0,1,0],[-st,0,ct]] ))
+    elif axis in ['x','X',0]:
+        R = np.asmatrix(np.array( [[1,0,0],[0,ct,-st],[0,st,ct]] ))
+    else:
+        raise ValueError('Axis must be either x/y/z or 0/1/2')
+
+    Iout = unassembleI( R*Imat*R.T )
+
+    return Iout
 
 def cubic_with_deriv(x, xp, yp):
     """deprecated"""

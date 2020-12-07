@@ -459,7 +459,6 @@ class CCBladeTwist(ExplicitComponent):
             # plt.ylabel('Eff (-)')
             # plt.legend(loc='upper left')
             # plt.show()
-            # exit()
 
             get_twist = CCBlade(inputs['r'], inputs['chord'], np.zeros_like(inputs['chord']), af, inputs['Rhub'], inputs['Rtip'], discrete_inputs['nBlades'], inputs['rho'], inputs['mu'], inputs['precone'], inputs['tilt'], inputs['yaw'], inputs['shearExp'], inputs['hub_height'], discrete_inputs['nSector'], inputs['precurve'], inputs['precurveTip'],inputs['presweep'], inputs['presweepTip'], discrete_inputs['tiploss'], discrete_inputs['hubloss'],discrete_inputs['wakerotation'], discrete_inputs['usecd'])        
             
@@ -779,8 +778,8 @@ class AeroHubLoads(ExplicitComponent):
             myF = DirectionVector.fromArray(outputs['Fxyz_blade_aero'][i_blade,:]).azimuthToHub(azimuth_blades[i_blade])
             myM = DirectionVector.fromArray(outputs['Mxyz_blade_aero'][i_blade,:]).azimuthToHub(azimuth_blades[i_blade])
             
-            F_hub_tot += myF.toArray()
-            M_hub_tot += myM.toArray()
+            F_hub_tot += myF.toArray().flatten()
+            M_hub_tot += myM.toArray().flatten()
 
         # Now sum over all blades
         outputs['Fxyz_hub_aero'] = F_hub_tot

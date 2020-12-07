@@ -7,5 +7,23 @@ local
 .DS_Store
 __pycache__
 
-outputs/
 results/
+outputs/
+wind/
+
+# Openfast
+*.outb
+*.out
+*.sum
+*.ech
+*.dbg
+
+# vs code
+.vscode
+
+# Temp
+*Temp*
+*temp*
+
+# Jupyter
+*.ipynb_checkpoints*

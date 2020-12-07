@@ -250,6 +250,26 @@ class runFAST_pywrapper_batch(object):
 
         return output
 
+    def select_CT_model(self,turbine_model,model_dir):
+        if turbine_model == 'UMaine-Fixed':
+            self.FAST_directory    = os.path.join(model_dir, 'IEA-15-240-RWT/IEA-15-240-RWT-Monopile')   # Path to fst directory files
+            self.FAST_InputFile    = 'IEA-15-240-RWT-Monopile.fst'   # FAST input file (ext=.fst)
+        elif turbine_model == 'UMaine-Semi':
+            self.FAST_directory    = os.path.join(model_dir, 'IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi')   # Path to fst directory files
+            self.FAST_InputFile    = 'IEA-15-240-RWT-UMaineSemi.fst'   # FAST input file (ext=.fst)
+        elif turbine_model == 'CT-spar':
+            self.FAST_directory    = os.path.join(model_dir, 'CT15MW-spar')   # Path to fst directory files
+            self.FAST_InputFile    = 'CT15MW_spar.fst'   # FAST input file (ext=.fst)
+        elif turbine_model == 'CT-barge':
+            self.FAST_directory    = os.path.join(model_dir, 'CT15MW-barge')   # Path to fst directory files
+            self.FAST_InputFile    = 'CT15MW_barge.fst'   # FAST input file (ext=.fst)
+        elif turbine_model == 'CT-semi':
+            self.FAST_directory    = os.path.join(model_dir, 'CT15MW-semi')   # Path to fst directory files
+            self.FAST_InputFile    = 'CT15MW_semi.fst'   # FAST input file (ext=.fst)
+        elif turbine_model == 'CT-TLP':
+            self.FAST_directory    = os.path.join(model_dir, 'CT15MW-TLP')   # Path to fst directory files
+            self.FAST_InputFile    = 'CT15MW_tlp.fst'   # FAST input file (ext=.fst)
+
 
     # def run_mpi(self, comm=None):
     #     # Run in parallel with mpi

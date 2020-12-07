@@ -62,8 +62,8 @@ class CaseGen_IEC():
         self.mpi_run                     = False
         self.comm_map_down               = []
 
-        run_dir          = os.path.dirname( os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ) ) + os.sep
-        self.Turbsim_exe = os.path.join(run_dir, 'local/bin/turbsim')
+        self.run_dir          = os.path.dirname( os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ) ) + os.sep
+        self.Turbsim_exe = os.path.join(self.run_dir, 'local/bin/turbsim')
 
 
     def execute(self, case_inputs={}):
@@ -245,7 +245,7 @@ class CaseGen_IEC():
             matrix_out = np.asarray(matrix_out)
 
             # change seed manually to not mess up indexing above, 600
-            if self.uniqueSeeds and dlc in [1.1, 1.2, 1.6, 5.1, 1.3]:
+            if self.uniqueSeeds and dlc in [1.1, 1.2, 1.6, 5.1, 1.3, 6.1, 6.3, 6.5]:
                 for idx, row in enumerate(matrix_out):
                     matrix_out[idx][1] = idx + 600
             

@@ -35,17 +35,18 @@ class TestTowerSE(unittest.TestCase):
         self.modeling_options['tower']['gamma_b'] = 1.0
         self.modeling_options['tower']['gamma_fatigue'] = 1.0
 
+        # Simplified the options available to the user
         self.modeling_options['tower']['frame3dd']            = {}
-        self.modeling_options['tower']['frame3dd']['DC']      = 80.0
+        #self.modeling_options['tower']['frame3dd']['DC']      = 80.0
         self.modeling_options['tower']['frame3dd']['shear']   = True
         self.modeling_options['tower']['frame3dd']['geom']    = True
-        self.modeling_options['tower']['frame3dd']['dx']      = -1
-        self.modeling_options['tower']['frame3dd']['nM']      = 6
-        self.modeling_options['tower']['frame3dd']['Mmethod'] = 1
-        self.modeling_options['tower']['frame3dd']['lump']    = 0
+        #self.modeling_options['tower']['frame3dd']['dx']      = -1
+        #self.modeling_options['tower']['frame3dd']['nM']      = 6
+        #self.modeling_options['tower']['frame3dd']['Mmethod'] = 1
+        #self.modeling_options['tower']['frame3dd']['lump']    = 0
         self.modeling_options['tower']['frame3dd']['tol']     = 1e-9
-        self.modeling_options['tower']['frame3dd']['shift']   = 0.0
-        self.modeling_options['tower']['frame3dd']['add_gravity'] = True
+        #self.modeling_options['tower']['frame3dd']['shift']   = 0.0
+        #self.modeling_options['tower']['frame3dd']['add_gravity'] = True
 
         self.modeling_options['monopile'] = {}
         self.modeling_options['monopile']['n_height'] = 0
@@ -321,7 +322,7 @@ class TestTowerSE(unittest.TestCase):
         self.assertEqual(self.outputs['monopile_cost'], self.inputs['cylinder_cost']*2.5/4.0+1e3)
         self.assertEqual(self.outputs['monopile_length'], 70.0)
         self.assertEqual(self.outputs['tower_mass'], 1e3*(4-2.5))
-        self.assertEqual(self.outputs['tower_raw_cost'], self.inputs['cylinder_cost']*1.5/4.0)
+        self.assertEqual(self.outputs['tower_cost'], self.inputs['cylinder_cost']*1.5/4.0)
 
 
     def testPreFrame(self):
@@ -459,8 +460,6 @@ class TestTowerSE(unittest.TestCase):
         prob['rho_air'] = 1.225
         prob['mu_air'] = 1.7934e-5
         prob['shearExp'] = 0.2
-        prob['min_d_to_t'] = 120.0
-        prob['max_taper'] = 0.2
         prob['wind.Uref'] = 15.0
         prob['pre.rna_F'] = 1e3*np.array([2., 3., 4.,])
         prob['pre.rna_M'] = 1e4*np.array([2., 3., 4.,])
@@ -472,7 +471,7 @@ class TestTowerSE(unittest.TestCase):
         npt.assert_equal(prob['z_param'], np.array([0., 40., 80.]))
         
         self.assertEqual(prob['height_constraint'], 0.0)
-        self.assertEqual(prob['tower_raw_cost'], prob['cm.cost'])
+        self.assertEqual(prob['tower_cost'], prob['cm.cost'])
         npt.assert_equal(prob['tower_I_base'], prob['cm.I_base'])
         npt.assert_almost_equal(prob['tower_center_of_mass'], 40.0)
         npt.assert_equal(prob['tower_section_center_of_mass'], prob['cm.section_center_of_mass'])
@@ -564,8 +563,6 @@ class TestTowerSE(unittest.TestCase):
         prob['beta_wind'] = prob['beta_wave'] = 0.0
         prob['hsig_wave'] = 0.0
         prob['Tsig_wave'] = 1e3
-        prob['min_d_to_t'] = 120.0
-        prob['max_taper'] = 0.2
         prob['wind.Uref'] = 15.0
         prob['pre.rna_F'] = 1e3*np.array([2., 3., 4.,])
         prob['pre.rna_M'] = 1e4*np.array([2., 3., 4.,])
@@ -578,12 +575,12 @@ class TestTowerSE(unittest.TestCase):
         npt.assert_equal(prob['z_param'], np.array([-45., -30., 0., 30., 60.]))
         
         self.assertEqual(prob['height_constraint'], 20.0)
-        self.assertEqual(prob['tower_raw_cost'], (40./105.)*prob['cm.cost'])
+        npt.assert_almost_equal(prob['tower_cost'], (45./105.)*prob['cm.cost'])
         npt.assert_equal(prob['tower_I_base'][:2], prob['cm.I_base'][:2]+1e2*45**2)
         npt.assert_equal(prob['tower_I_base'][2:], prob['cm.I_base'][2:])
         npt.assert_almost_equal(prob['tower_center_of_mass'], (7.5*mass_dens*105.+15.*1e2+1e4*-30.)/(mass_dens*105+1e2+1e4))
         npt.assert_equal(prob['tower_section_center_of_mass'], prob['cm.section_center_of_mass'])
-        self.assertEqual(prob['monopile_cost'], (60./105.)*prob['cm.cost']+1e3)
+        npt.assert_almost_equal(prob['monopile_cost'], (60./105.)*prob['cm.cost']+1e3)
         self.assertEqual(prob['monopile_length'], 60.0)
         npt.assert_almost_equal(prob['monopile_mass'], mass_dens*60.0 + 1e2+1e4)
         npt.assert_almost_equal(prob['tower_mass'], mass_dens*45.0)
@@ -676,8 +673,6 @@ class TestTowerSE(unittest.TestCase):
         prob['beta_wind'] = prob['beta_wave'] = 0.0
         prob['hsig_wave'] = 0.0
         prob['Tsig_wave'] = 1e3
-        prob['min_d_to_t'] = 120.0
-        prob['max_taper'] = 0.2
         prob['wind.Uref'] = 15.0
         prob['pre.rna_F'] = 1e3*np.array([2., 3., 4.,])
         prob['pre.rna_M'] = 1e4*np.array([2., 3., 4.,])
@@ -755,8 +750,6 @@ class TestTowerSE(unittest.TestCase):
         prob['wind.Uref'] = 0.0 #20.00138038
         prob['pre.rna_F'] = np.zeros(3) #np.array([3569257.70891496, -22787.83765441, -404483.54819059])
         prob['pre.rna_M'] = np.zeros(3) #np.array([68746553.1515807, 16045443.38557568, 1811078.988995])
-        prob['min_d_to_t'] = 120.0
-        prob['max_taper']  = 0.2
 
         # # --- run ---
         prob.run_model()
@@ -848,11 +841,6 @@ class TestTowerSE(unittest.TestCase):
         life = 20.0
         # ---------------
 
-        # --- constraints ---
-        min_d_to_t   = 120.0
-        max_taper    = 0.2
-        # ---------------
-
         self.modeling_options['tower']['n_height'] = len(d_param)
         self.modeling_options['tower']['n_layers'] = 1
         self.modeling_options['tower']['nLC'] = 2
@@ -917,11 +905,6 @@ class TestTowerSE(unittest.TestCase):
         prob['life'] = life
         # ---------------
 
-        # --- constraints ---
-        prob['min_d_to_t'] = min_d_to_t
-        prob['max_taper'] = max_taper
-        # ---------------
-
         # # --- loading case 1: max Thrust ---
         prob['wind1.Uref'] = wind_Uref1
 
@@ -944,20 +927,20 @@ class TestTowerSE(unittest.TestCase):
         
         npt.assert_almost_equal(prob['tower_mass'], [370541.14008246])
         npt.assert_almost_equal(prob['tower_center_of_mass'], [38.78441074])
-        npt.assert_almost_equal(prob['constr_d_to_t'], [-0.40192308, -0.34386447])
-        npt.assert_almost_equal(prob['constr_taper'], [0.6225   , 0.5841945])
+        npt.assert_almost_equal(prob['constr_d_to_t'], [168.23076923, 161.26373626])
+        npt.assert_almost_equal(prob['constr_taper'], [0.8225, 0.78419453])
         npt.assert_almost_equal(prob['wind1.Uref'], [11.73732])
         npt.assert_almost_equal(prob['tower1.f1'], [0.33214436],5)
         npt.assert_almost_equal(prob['post1.top_deflection'], [0.69728181])
-        npt.assert_almost_equal(prob['post1.stress'], [0.45829084, 0.41279851, 0.35017739, 0.31497515, 0.17978168, 0.12035124], 5)
+        npt.assert_almost_equal(prob['post1.stress'], [0.45829036, 0.41279744, 0.35017613, 0.31497356, 0.17978006, 0.12034969])
         npt.assert_almost_equal(prob['post1.global_buckling'], [0.50459926, 0.47009267, 0.42172339, 0.40495796, 0.29807777, 0.25473308])
-        npt.assert_almost_equal(prob['post1.shell_buckling'], [0.32499642, 0.25914569, 0.18536257, 0.17036815, 0.06343523, 0.03259229])
+        npt.assert_almost_equal(prob['post1.shell_buckling'], [0.32499783, 0.25914943, 0.18536693, 0.17037662, 0.06344361, 0.03260026])
         npt.assert_almost_equal(prob['wind2.Uref'], [70.])
         npt.assert_almost_equal(prob['tower2.f1'], [0.33218936],5)
         npt.assert_almost_equal(prob['post2.top_deflection'], [0.64374406])
-        npt.assert_almost_equal(prob['post2.stress'], [0.44627896, 0.38220803, 0.30583361, 0.25654412, 0.13137214, 0.10615505])
-        npt.assert_almost_equal(prob['post2.global_buckling'], [0.49412205, 0.4442257,  0.38450749, 0.35599809, 0.25784865, 0.24625576])
-        npt.assert_almost_equal(prob['post2.shell_buckling'], [0.31189934, 0.22790801, 0.14712692, 0.12152703, 0.03909944, 0.02623264])
+        npt.assert_almost_equal(prob['post2.stress'], [0.44626187, 0.3821702 , 0.30578917, 0.25648781, 0.13131541, 0.10609859])
+        npt.assert_almost_equal(prob['post2.global_buckling'], [0.49412205, 0.4442257 , 0.38450749, 0.35599809, 0.25784865, 0.24625576])
+        npt.assert_almost_equal(prob['post2.shell_buckling'], [0.31204018, 0.22828066, 0.14756271, 0.12234901, 0.03991668, 0.02701307])
         npt.assert_almost_equal(prob['tower1.base_F'], [ 1.29980269e+06,  1.39698386e-09, -6.31005811e+06], 2)
         npt.assert_almost_equal(prob['tower1.base_M'], [ 4.14769959e+06,  1.10756769e+08, -3.46781682e+05], 0)
         npt.assert_almost_equal(prob['tower2.base_F'], [ 1.61668069e+06,  6.98491931e-10, -6.27903939e+06], 2)
