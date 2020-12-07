@@ -73,14 +73,14 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
         
     elif True:
         iec.dlc_inputs['DLC']   = [1.2,1.6,6.1,6.3,6.5]#,6.1,6.3]
-        iec.dlc_inputs['U']     = [[8,12,24],[20.,24.],[],[],[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
+        iec.dlc_inputs['U']     = [[8,12,24],[12,20.,24.],[],[],[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
         iec.dlc_inputs['Seeds'] = [[3],[5],[12],[50],[60]]#,[],[]] #[[5, 6, 7], []]
         iec.dlc_inputs['Yaw']   = [[],[],[],[],[]]#,[],[]]  #[[], []]
-        iec.TMax    = 300
+        iec.TMax    = 800
     else:  # reduced set
         iec.dlc_inputs['DLC']   = [6.5]#,6.1,6.3]
         iec.dlc_inputs['U']     = [[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
-        iec.dlc_inputs['Seeds'] = [[1,2,3]]#,[],[]] #[[5, 6, 7], []]
+        iec.dlc_inputs['Seeds'] = [[1,2,3,4,5,6]]#,[],[]] #[[5, 6, 7], []]
         iec.dlc_inputs['Yaw']   = [[]]#,[],[]]  #[[], []]
 
     iec.uniqueSeeds = True
@@ -91,9 +91,10 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
 
     # Naming, file management, etc
     weis_dir     = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    print(weis_dir)
     iec.wind_dir = os.path.join(weis_dir,'results','NASA','wind')
     iec.case_name_base = 'DLC'
-    iec.Turbsim_exe = '/Users/dzalkind/Tools/openfast/build/modules/turbsim/turbsim'
+    iec.Turbsim_exe = '/home/dzalkind/Tools/openfast-umaine/build/modules/turbsim/turbsim'
     iec.debug_level = 2
     if n_cores == 1:
         iec.parallel_windfile_gen = False
@@ -127,7 +128,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
 
     # sweep natural frequency
     elif test_case == 'sweep_wn':
-        w_sweep = np.linspace(0.05,1.55,num=24)
+        w_sweep = np.linspace(0.05,1.55,num=24).tolist()
 
         nt      = NASA_TMD()
         tmd_files = []
@@ -147,7 +148,8 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
             tmd_files.append(tmd_con_filename)
 
         case_inputs[('HydroDyn','TMDControlFile')] = {'vals':tmd_files, 'group':3}
-        case_inputs[('meta','omega_TMD')] = {'vals':w_sweep, 'group':3}
+        case_inputs[('HydroDyn','omega_TMD')] = {'vals':w_sweep, 'group':3}
+
 
     elif test_case == 'const_wn':
         nt      = NASA_TMD()
@@ -165,6 +167,21 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
         case_inputs[('HydroDyn','TMDFile')] = {'vals':[os.path.join(iec.run_dir,'TMD_Const.dat')], 'group':0}
         case_inputs[('HydroDyn','TMDControlFile')] = {'vals':[tmd_con_filename], 'group':0}
 
+    elif test_case == 'as_shipped':
+        nt      = NASA_TMD()
+        
+        nt.damper_freq = .9
+        nt.update_tmd_props()
+        
+        nt.period_control   = [0]
+        nt.omega_control    = [nt.damper_freq]
+        tmd_con_filename    = os.path.join(iec.run_dir,'TMD_Con_w{:3.3f}.dat'.format(nt.damper_freq)) 
+        
+        nt.write_tmd_input(os.path.join(iec.run_dir,'TMD_Const.dat'))
+        nt.write_tmd_control(tmd_con_filename)
+        
+        case_inputs[('HydroDyn','TMDFile')] = {'vals':[os.path.join(iec.run_dir,'TMD_Const.dat')], 'group':0}
+        
     elif test_case == 'controlled_wn':
         nt                  = NASA_TMD()
         tmd_con_filename    = os.path.join(iec.run_dir,'TMD_BL_Control.dat')
@@ -192,7 +209,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
 
 
     # Run FAST cases
-    fastBatch.FAST_exe = '/Users/dzalkind/Tools/openfast-umaine/install/bin/openfast'   # Path to executable
+    fastBatch.FAST_exe = '/home/dzalkind/Tools/openfast-umaine/install/bin/openfast'   # Path to executable
     fastBatch.FAST_InputFile = 'NASA_Float.fst'   # FAST input file (ext=.fst)
     fastBatch.FAST_directory = os.path.join(os.path.dirname(os.path.dirname(__file__)),'OpenFAST_models/NASA_Float')
     fastBatch.FAST_runDirectory = iec.run_dir
@@ -230,10 +247,10 @@ if __name__=="__main__":
     # c_pitch: tune pitch controller w/ various TMD settings
     # c_peakshave: tune peak shaver w/ various TMD settings
     # c_fl: tune floating feedback w/ various TMD settings
-    test_case = 'controlled_wn'
+    test_case = 'sweep_wn'
 
 
 
 
-    NASA_runFAST_CaseGenIEC(test_case,n_cores=1)
+    NASA_runFAST_CaseGenIEC(test_case,n_cores=36)
     # runFAST_TestROSCO()
