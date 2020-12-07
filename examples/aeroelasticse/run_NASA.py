@@ -57,7 +57,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
     iec.dlc_inputs = {}
 
     # full set
-    if True:  
+    if False:  
         iec.dlc_inputs['DLC']   = [1.2,1.6,6.1,6.3,6.5]#,6.1,6.3]
         iec.dlc_inputs['U']     = [[4,6,8,10,12,14,16,18,20,22,24],[4,6,8,10,12,14,16,18,20,22,24],[], \
                                         [],[]]#,[],[]]  #[[10, 12, 14], [12]]
@@ -73,10 +73,10 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
         
     elif True:
         iec.dlc_inputs['DLC']   = [1.2,1.6,6.1,6.3,6.5]#,6.1,6.3]
-        iec.dlc_inputs['U']     = [[8,12,24],[20.,24.],[],[],[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
+        iec.dlc_inputs['U']     = [[8,12,24],[12,20.,24.],[],[],[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
         iec.dlc_inputs['Seeds'] = [[3],[5],[12],[50],[60]]#,[],[]] #[[5, 6, 7], []]
         iec.dlc_inputs['Yaw']   = [[],[],[],[],[]]#,[],[]]  #[[], []]
-        iec.TMax    = 300
+        iec.TMax    = 800
     else:  # reduced set
         iec.dlc_inputs['DLC']   = [6.5]#,6.1,6.3]
         iec.dlc_inputs['U']     = [[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
@@ -247,7 +247,7 @@ if __name__=="__main__":
     # c_pitch: tune pitch controller w/ various TMD settings
     # c_peakshave: tune peak shaver w/ various TMD settings
     # c_fl: tune floating feedback w/ various TMD settings
-    test_case = 'controlled_wn'
+    test_case = 'sweep_wn'
 
 
 
