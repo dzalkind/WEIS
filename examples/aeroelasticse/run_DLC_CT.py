@@ -60,6 +60,12 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     elif dlc_type == 'lite':
         wind_speeds = [12,14,16]
         iec.dlc_inputs['Seeds'] = [[25]]
+
+    else:
+        wind_speeds = [20]
+        iec.dlc_inputs['Seeds'] = [[25]]
+
+
     # iec.dlc_inputs['Seeds'] = [range(1,7), range(1,7),[],[], range(1,7), range(1,7), range(1,7)]
 
     iec.dlc_inputs['DLC']   = [1.1]
@@ -163,7 +169,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     case_inputs[('ServoDyn', 'GenModel')] = {'vals': [1], 'group': 0}
 
     # Specify rosco controller
-    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon.dylib'
+    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon_carbon_trust.dylib'
 
     if rosco_dll:
         case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[rosco_dll], 'group':0}
@@ -184,17 +190,21 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
         case_inputs[('DISCON_in',discon_input)] = {'vals': [discon_vt[discon_input]], 'group': 0}
 
     # Control Tuning
-    # load default params          
-    control_param_yaml  = os.path.join(weis_dir,'examples/OpenFAST_models/CT15MW-spar/ServoData/IEA15MW-CT-spar.yaml')
-    omega = np.linspace(.05,.25,12,endpoint=True).tolist()
-    zeta  = [2.25]
-    control_case_inputs = sweep_pc_mode(control_param_yaml,omega,zeta,group=3)
-    case_inputs.update(control_case_inputs)
+    # load default params     
+    # 
+    if tune == 'pc_mode':     
+        control_param_yaml  = os.path.join(weis_dir,'examples/OpenFAST_models/CT15MW-spar/ServoData/IEA15MW-CT-spar.yaml')
+        omega = np.linspace(.05,.25,12,endpoint=True).tolist()
+        zeta  = [2.25]
+        control_case_inputs = sweep_pc_mode(control_param_yaml,omega,zeta,group=3)
+        case_inputs.update(control_case_inputs)
+    elif tune == 'max_tq':
+        case_inputs[('DISCON_in','VS_MaxTq')] = {'vals': [19624046.66639, 1.5*19624046.66639], 'group': 3}
 
     # Aerodyn Params
-    case_inputs[("AeroDyn15","TwrAero")]     = {'vals':["True"], 'group':0}
-    case_inputs[("AeroDyn15","TwrPotent")]   = {'vals':[1], 'group':0}
-    case_inputs[("AeroDyn15","TwrShadow")]   = {'vals':["True"], 'group':0}
+    # case_inputs[("AeroDyn15","TwrAero")]     = {'vals':["True"], 'group':0}
+    # case_inputs[("AeroDyn15","TwrPotent")]   = {'vals':[1], 'group':0}
+    # case_inputs[("AeroDyn15","TwrShadow")]   = {'vals':["True"], 'group':0}
     # case_inputs[("Fst","CompHydro")]         = {'vals':[1], 'group':0}
     # case_inputs[("HydroDyn","WaveMod")]      = {'vals':[2], 'group':0}
     # case_inputs[("HydroDyn","WvDiffQTF")]    = {'vals':["False"], 'group':0}
@@ -266,18 +276,21 @@ if __name__ == "__main__":
                     'CT-spar',
                     ]
     discon_list = [
-                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_z2.IN',
+                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_lowBW.IN',
                     ]
 
     test_type_dir   = 'ntm'
 
-    tune            = ''
-    dlc_type        = 'lite'
+    tune            = 'max_tq'
+    dlc_type        = ''
+
+    if tune:
+        test_type_dir += '+'+tune
 
     save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],test_type_dir) \
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_DLC_CT(tm,co,sd,n_cores=6,tune='pc_mode',dlc_type=dlc_type)
+        run_DLC_CT(tm,co,sd,n_cores=6,tune=tune,dlc_type=dlc_type)
     
     

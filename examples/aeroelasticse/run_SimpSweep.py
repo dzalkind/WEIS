@@ -108,19 +108,23 @@ if __name__ == "__main__":
                     # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100.IN',
                     # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080_const_pwr.IN',
                     # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080.IN',
-                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_z2.IN'
+                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_lowBW.IN'
 
                     ]
     # tuning choices: fl_gain, fl_phase
 
+    test_type_dir = 'simp'
 
-    test_type_dir   = 'ps_perc'
+    tune   = 'max_tq'
+
+    if tune:
+        test_type_dir += '+'+tune
 
     save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],test_type_dir) \
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_Simp(tm,co,sd,n_cores=8,tune=test_type_dir)
+        run_Simp(tm,co,sd,n_cores=8,tune=tune)
     
     
     

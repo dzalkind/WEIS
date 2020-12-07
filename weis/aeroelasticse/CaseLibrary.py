@@ -454,8 +454,9 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
         case_inputs[('meta','ps_perc')]          = {'vals': ps_perc, 'group': 2}
         case_inputs[('DISCON_in', 'PS_BldPitchMin')] = {'vals': m_ps, 'group': 2}
 
-        # file.write('{}              ! PS_WindSpeeds     - Wind speeds corresponding to minimum blade pitch angles [m/s]\n'.format(''.join('{:<4.2f} '.format(controller.v[i]) for i in range(len(controller.v)))))
-        # file.write('{}              ! PS_BldPitchMin    - Minimum blade pitch angles [rad]\n'.format(''.join('{:<10.8f} '.format(controller.ps_min_bld_pitch[i]) for i in range(len(controller.ps_min_bld_pitch)))))
+    elif tune == 'max_tq':
+        case_inputs[('DISCON_in','VS_MaxTq')] = {'vals': [19624046.66639, 1.5*19624046.66639], 'group': 3}
+
 
 
     from weis.aeroelasticse.CaseGen_General import CaseGen_General
