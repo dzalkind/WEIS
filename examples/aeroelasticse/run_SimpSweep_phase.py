@@ -76,7 +76,7 @@ def run_Simp(turbine_model,control,save_dir,n_cores=1,tune=''):
         fastBatch.case_name_list    = case_name_list
         fastBatch.debug_level       = 2
         fastBatch.FAST_exe          = '/home/dzalkind/Tools/openfast-master/install/bin/openfast'
-        fastBatch.overwrite_outfiles = False
+        # fastBatch.overwrite_outfiles = False
 
         if MPI:
             fastBatch.run_mpi(comm_map_down)
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     # tuning choices: fl_gain, fl_phase
 
 
-    test_type_dir   = 'fl_lpf'
+    test_type_dir   = 'fl_gain'
 
     save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],'simp+'+test_type_dir) \
         for tm, dl in zip(turbine_mods,discon_list)]

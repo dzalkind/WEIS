@@ -6,18 +6,17 @@ Example script to run the DLCs in OpenFAST
 
 from weis.aeroelasticse.runFAST_pywrapper   import runFAST_pywrapper, runFAST_pywrapper_batch
 from weis.aeroelasticse.CaseGen_IEC         import CaseGen_IEC
-from weis.aeroelasticse.CaseLibrary         import *
+from weis.aeroelasticse.CaseLibrary         import steps, simp_step
 from wisdem.commonse.mpi_tools              import MPI
 import sys, os, platform
 import numpy as np
 from ROSCO_toolbox import utilities as ROSCO_utilities
 
 
-def run_Simp(turbine_model,control,save_dir,n_cores=1):
+def run_Simp(turbine_model,control,save_dir,n_cores=1,tune=''):
     
     # Specify rosco controller
     rosco_dll = '/home/dzalkind/Tools/ROSCO-CT/build/libdiscon.so'
-
 
     if not rosco_dll: # use WEIS ROSCO
         run_dir1            = os.path.dirname( os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ) ) + os.sep
@@ -29,7 +28,7 @@ def run_Simp(turbine_model,control,save_dir,n_cores=1):
             rosco_dll = os.path.join(run_dir1, 'local/lib/libdiscon.so')
 
     # Set up cases from CaseLibrary
-    case_list, case_name_list, channels = simp_step(control,save_dir,'step',rosco_dll=rosco_dll)
+    case_list, case_name_list, channels = simp_step(control,save_dir,'step',rosco_dll=rosco_dll,tune=tune)
 
     # Management of parallelization, leave in for now
     if MPI:
@@ -60,14 +59,16 @@ def run_Simp(turbine_model,control,save_dir,n_cores=1):
         # Select Turbine Model
         model_dir                   = os.path.join(os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ), 'OpenFAST_models')
 
-        fastBatch.select_CT_model(turbine_model,model_dir)
-        
+        fastBatch.select_CT_model()
+            
+
         fastBatch.channels          = channels
         fastBatch.FAST_runDirectory = save_dir  # input!
         fastBatch.case_list         = case_list
         fastBatch.case_name_list    = case_name_list
         fastBatch.debug_level       = 2
         fastBatch.FAST_exe          = '/home/dzalkind/Tools/openfast-master/install/bin/openfast'
+        # fastBatch.overwrite_outfiles = False
 
         if MPI:
             fastBatch.run_mpi(comm_map_down)
@@ -98,34 +99,28 @@ if __name__ == "__main__":
     # set up cases
     turbine_mods = [
                     # 'UMaine-Fixed',
-                    # 'CT-spar',
-                    'CT-TLP',
                     'CT-semi',
-                    # 'CT-spar',
                     'CT-barge',
                     # 'UMaine-Fixed',
                     # 'UMaine-Semi',
                     # 'UMaine-Semi'
                     ]
     discon_list = [
-                    # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
                     '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
                     '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps080.IN',
-                    # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi/DISCON_fixed_ps100.IN',
-                    # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi/DISCON_fixed_ps100_const_pwr.IN',
-                    # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi/DISCON_fixed_ps100.IN',
+                    # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_lowBW.IN',
                     ]
+                    
+    # tuning choices: fl_gain, fl_phase
 
-    test_type_dir   = 'simp'
 
-    save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],test_type_dir) \
+    test_type_dir   = 'pc_mode'
+
+    save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],'simp+'+test_type_dir) \
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_Simp(tm,co,sd,n_cores=36)
+        run_Simp(tm,co,sd,n_cores=1,tune=test_type_dir)
     
     
     

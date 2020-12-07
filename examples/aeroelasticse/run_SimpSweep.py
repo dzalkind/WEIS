@@ -99,23 +99,25 @@ if __name__ == "__main__":
     turbine_mods = [
                     # 'UMaine-Fixed',
                     # 'CT-spar',
-                    'CT-spar',
-                    # 'UMaine-Fixed',
-                    # 'UMaine-Semi',
-                    # 'UMaine-Semi'
+                    # 'CT-TLP',
+                    'CT-semi',
+                    # 'CT-spar',
+                    'CT-barge',
                     ]
     discon_list = [
                     # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
                     # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100_constTq.IN',
+                    # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
                     ]
                     
     # tuning choices: fl_gain, fl_phase
 
 
-    test_type_dir   = 'ps_perc'
+    test_type_dir   = 'pc_mode'
 
-    save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],test_type_dir) \
+    save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],'simp+'+test_type_dir) \
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
