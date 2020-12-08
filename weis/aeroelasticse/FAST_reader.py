@@ -1055,7 +1055,7 @@ class InputReader_OpenFAST(InputReader_Common):
         # Dynamic Blade-Element/Momentum Theory Options 
         f.readline()
         self.fst_vt['AeroDyn15']['DBEMT_Mod']          = int(f.readline().split()[0])
-        self.fst_vt['AeroDyn15']['tau1_const']         = int(f.readline().split()[0])
+        self.fst_vt['AeroDyn15']['tau1_const']         = float_read(f.readline().split()[0])
 
         # Olaf -- cOnvecting LAgrangian Filaments (Free Vortex Wake) Theory Options
         f.readline()
@@ -1169,15 +1169,15 @@ class InputReader_OpenFAST(InputReader_Common):
             polar = {}
 
             polar['InterpOrd']      = int_read(readline_filterComments(f).split()[0])
-            polar['NonDimArea']     = int_read(readline_filterComments(f).split()[0])
-            polar['NumCoords']      = readline_filterComments(f).split()[0]
+            polar['NonDimArea']     = float_read(readline_filterComments(f).split()[0])
+            polar['NumCoords']      = float_read(readline_filterComments(f).split()[0])
             polar['BL_file']        = readline_filterComments(f).split()[0]
             polar['NumTabs']        = int_read(readline_filterComments(f).split()[0])
             self.fst_vt['AeroDyn15']['af_data'][afi] = [None]*polar['NumTabs']
 
             for tab in range(polar['NumTabs']): # For multiple tables
                 polar['Re']             = float_read(readline_filterComments(f).split()[0])
-                polar['Ctrl']           = int_read(readline_filterComments(f).split()[0])
+                polar['Ctrl']           = float_read(readline_filterComments(f).split()[0])
                 polar['InclUAdata']     = bool_read(readline_filterComments(f).split()[0])
 
                 # Unsteady Aero Data

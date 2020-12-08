@@ -262,6 +262,9 @@ class runFAST_pywrapper_batch(object):
         elif turbine_model == 'CT-TLP':
             self.FAST_directory    = os.path.join(model_dir, 'CT15MW-TLP')   # Path to fst directory files
             self.FAST_InputFile    = 'CT15MW_tlp.fst'   # FAST input file (ext=.fst)
+        elif turbine_model == 'CART':
+            self.FAST_directory    = os.path.join(model_dir, 'CART')   # Path to fst directory files
+            self.FAST_InputFile    = 'CART3.fst'   # FAST input file (ext=.fst)
 
 
     # def run_mpi(self, comm=None):
