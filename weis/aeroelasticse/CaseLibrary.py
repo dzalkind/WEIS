@@ -323,8 +323,8 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
     hh_step.wind_directory = runDir
 
     # Run conditions
-    U_start     = [10,11,12,16] #, 16]
-    U_end       = [11,12,13,17] #, 17]
+    U_start     = [10]#[10,11,12,16] #, 16]
+    U_end       = [11]#[11,12,13,17] #, 17]
     step_wind_files = []
 
     for u_s,u_e in zip(U_start,U_end):
@@ -340,7 +340,7 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
     # simulation settings
     case_inputs[("Fst","TMax")] = {'vals':[T_max], 'group':0}
     case_inputs[("Fst","OutFileFmt")]        = {'vals':[2], 'group':0}
-    case_inputs[("Fst","DT")]        = {'vals':[1/80], 'group':0}
+    # case_inputs[("Fst","DT")]        = {'vals':[1/80], 'group':0}
 
     # DOFs
     # case_inputs[("ElastoDyn","YawDOF")]      = {'vals':['True'], 'group':0}
@@ -403,7 +403,7 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
 
     # Tune Floating Feedback Gain
     if tune == 'fl_gain':
-        case_inputs[('DISCON_in','Fl_Kp')] = {'vals': np.linspace(0,-25,10,endpoint=True).tolist(), 'group': 2}
+        case_inputs[('DISCON_in','Fl_Kp')] = {'vals': np.linspace(0,-18,6,endpoint=True).tolist(), 'group': 2}
 
     elif tune == 'fl_phase':
         case_inputs[('DISCON_in','Fl_Kp')] = {'vals': 8*[-25], 'group': 2}
@@ -456,6 +456,9 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
 
     elif tune == 'max_tq':
         case_inputs[('DISCON_in','VS_MaxTq')] = {'vals': [19624046.66639, 1.5*19624046.66639], 'group': 3}
+
+    elif tune == 'yaw':
+        case_inputs[('ElastoDyn','NacYaw')]     = {'vals': [-10,0,10], 'group': 3}
 
 
 
