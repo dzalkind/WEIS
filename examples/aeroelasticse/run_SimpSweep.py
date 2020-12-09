@@ -118,7 +118,7 @@ if __name__ == "__main__":
 
     test_type_dir = 'simp'
 
-    tune   = 'max_tq'
+    tune   = 'fl_gain'
 
     if tune:
         test_type_dir += '+'+tune

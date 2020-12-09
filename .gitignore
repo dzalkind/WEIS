@@ -17,6 +17,8 @@ wind/
 *.sum
 *.ech
 *.dbg
+*/CMakeCache.txt
+*.check_cache
 
 # vs code
 .vscode
