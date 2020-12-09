@@ -16,7 +16,7 @@ from ROSCO_toolbox import utilities as ROSCO_utilities
 def run_Steps(turbine_model,control,save_dir,n_cores=1):
     
     # Specify rosco controller
-    rosco_dll = '/home/dzalkind/Tools/ROSCO/build/libdiscon.so'
+    rosco_dll = '/home/dzalkind/Tools/ROSCO-CT/build/libdiscon.so'
 
     if not rosco_dll: # use WEIS ROSCO
         run_dir1            = os.path.dirname( os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ) ) + os.sep
@@ -101,7 +101,7 @@ if __name__ == "__main__":
                     # 'UMaine-Fixed'
                     ]
     discon_list = [
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_lowBW.IN',
                     # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps080.IN',
                     # '/Users/dzalkind/Projects/CarbonTrust/Control_Inputs/DISCON_fixed_ps100_const_pwr.IN'
                     ]
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_Steps(tm,co,sd,n_cores=18)
+        run_Steps(tm,co,sd,n_cores=36)
     
     
     

@@ -118,24 +118,16 @@ if __name__ == "__main__":
 
     test_type_dir = 'simp'
 
-<<<<<<< HEAD
-    test_type_dir   = 'pc_mode'
-=======
     tune   = 'max_tq'
 
     if tune:
         test_type_dir += '+'+tune
->>>>>>> b03331eeef3765f503a8dc39b98fe6437758b07c
 
     save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],'simp+'+test_type_dir) \
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-<<<<<<< HEAD
         run_Simp(tm,co,sd,n_cores=36,tune=test_type_dir)
-=======
-        run_Simp(tm,co,sd,n_cores=8,tune=tune)
->>>>>>> b03331eeef3765f503a8dc39b98fe6437758b07c
     
     
     

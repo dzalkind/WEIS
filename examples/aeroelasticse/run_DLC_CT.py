@@ -284,13 +284,14 @@ if __name__ == "__main__":
                     ]
     discon_list = [
                     '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_lowBW.IN',
+                    # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-Monopile/DISCON_UM-Fixed_ps100.IN',
                     # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
                     # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100_constTq.IN',
                     ]
     test_type_dir   = 'ntm'
 
-    tune            = 'max_tq'
-    dlc_type        = ''
+    tune            = ''
+    dlc_type        = 'full'
 
     if tune:
         test_type_dir += '+'+tune

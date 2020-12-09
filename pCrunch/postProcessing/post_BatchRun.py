@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
 
     test_dir = [
-        '/scratch/dzalkind/WEIS-3/results/CT-spar/DISCON_CT-spar_lowBW/fl_phase'
+        '/scratch/dzalkind/WEIS-3/results/CT-spar/DISCON_CT-spar_lowBW/ntm'
         ]
 
 

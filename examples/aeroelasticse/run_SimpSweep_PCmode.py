@@ -59,7 +59,7 @@ def run_Simp(turbine_model,control,save_dir,n_cores=1,tune=''):
         # Select Turbine Model
         model_dir                   = os.path.join(os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ), 'OpenFAST_models')
 
-        fastBatch.select_CT_model()
+        fastBatch.select_CT_model(turbine_model,model_dir)
             
 
         fastBatch.channels          = channels
@@ -101,14 +101,17 @@ if __name__ == "__main__":
                     # 'UMaine-Fixed',
                     'CT-semi',
                     'CT-barge',
+                    'CT-spar',
+                    'CT-TLP',
                     # 'UMaine-Fixed',
                     # 'UMaine-Semi',
                     # 'UMaine-Semi'
                     ]
     discon_list = [
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    # '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_lowBW.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-semi/ServoData/DISCON-UMaineSemi.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-semi/ServoData/DISCON-UMaineSemi.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-semi/ServoData/DISCON-UMaineSemi.IN',
+                    '/scratch/dzalkind/WEIS-3/examples/OpenFAST_models/CT15MW-semi/ServoData/DISCON-UMaineSemi.IN',
                     ]
                     
     # tuning choices: fl_gain, fl_phase
