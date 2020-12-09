@@ -123,7 +123,7 @@ if __name__ == "__main__":
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_Simp(tm,co,sd,n_cores=1,tune=test_type_dir)
+        run_Simp(tm,co,sd,n_cores=36,tune=test_type_dir)
     
     
     

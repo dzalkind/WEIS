@@ -36,11 +36,11 @@ def post_BatchRun(test_dirs):
         cm[i] = pd.DataFrame(case_matrix[i])
 
         # Get ALL FAST info
-        fastRead[i] = InputReader_OpenFAST(FAST_ver='OpenFAST', dev_branch=True)
-        fastFile[i] = os.path.join(test_dir[i],cm[i]['Case_Name'][0] + '.fst')
-        fastRead[i].FAST_InputFile = os.path.basename(fastFile[i])   # FAST input file (ext=.fst)
-        fastRead[i].FAST_directory = os.path.dirname(fastFile[i])   # Path to fst directory files
-        fastRead[i].execute()
+        # fastRead[i] = InputReader_OpenFAST(FAST_ver='OpenFAST', dev_branch=True)
+        # fastFile[i] = os.path.join(test_dir[i],cm[i]['Case_Name'][0] + '.fst')
+        # fastRead[i].FAST_InputFile = os.path.basename(fastFile[i])   # FAST input file (ext=.fst)
+        # fastRead[i].FAST_directory = os.path.dirname(fastFile[i])   # Path to fst directory files
+        # fastRead[i].execute()
     
     # Set up pCrunch, run if not already
     reCrunch = False
@@ -49,7 +49,7 @@ def post_BatchRun(test_dirs):
     # Do stats yaml exist?
     stat_yaml_there = [os.path.exists(os.path.join(test,'stats',name_base + '_stats.yaml')) for test in test_dir]
 
-    outfiles = [[os.path.join(test, cn + '.outb') for cn in cm[0].Case_Name] for test in test_dir]
+    outfiles = [[os.path.join(test, cn + '.outb') for cn in cm[i_test].Case_Name] for i_test, test in enumerate(test_dir)]
 
 
 
@@ -67,7 +67,7 @@ def post_BatchRun(test_dirs):
             fp[i_test].results_dir              = os.path.join(test, 'stats')
             fp[i_test].OpenFAST_outfile_list    = outfiles[i_test]
             fp[i_test].t0                       = 200         
-            fp[i_test].parallel_analysis        = True
+            fp[i_test].parallel_analysis        = False
             fp[i_test].parallel_cores           = 36
     #         fp[i_test].DEL_info = [('TwrBsMyt', 4)]#, ('RootMyb2', 10), ('RootMyb3', 10)]
 
@@ -100,7 +100,14 @@ if __name__ == '__main__':
 
 
     test_dir = [
-        '/scratch/dzalkind/WEIS-3/results/CT-spar/DISCON_CT-spar_lowBW/ntm'
+        # '/scratch/dzalkind/WEIS-3/results/CT-barge/DISCON-UMaineSemi/simp+fl_phase',
+        # '/scratch/dzalkind/WEIS-3/results/CT-barge/DISCON-UMaineSemi/simp+pc_mode',
+        # '/scratch/dzalkind/WEIS-3/results/CT-semi/DISCON-UMaineSemi/simp+fl_phase',
+        # '/scratch/dzalkind/WEIS-3/results/CT-semi/DISCON-UMaineSemi/simp+pc_mode',
+        # '/scratch/dzalkind/WEIS-3/results/CT-TLP/DISCON-UMaineSemi/simp+fl_phase',
+        # '/scratch/dzalkind/WEIS-3/results/CT-TLP/DISCON-UMaineSemi/simp+pc_mode',
+        '/scratch/dzalkind/WEIS-3/results/CT-spar/DISCON-UMaineSemi/simp+fl_phase',
+        # '/scratch/dzalkind/WEIS-3/results/CT-spar/DISCON-UMaineSemi/simp+pc_mode',
         ]
 
 
