@@ -16,7 +16,7 @@ from ROSCO_toolbox import utilities as ROSCO_utilities
 def run_Simp(turbine_model,control,save_dir,n_cores=1,tune=''):
     
     # Specify rosco controller
-    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon.dylib'
+    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon_carbon_trust.dylib'
 
     if not rosco_dll: # use WEIS ROSCO
         run_dir1            = os.path.dirname( os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ) ) + os.sep
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     test_type_dir = 'simp'
 
-    tune   = 'max_tq'
+    tune   = 'fl_gain'
 
     if tune:
         test_type_dir += '+'+tune
