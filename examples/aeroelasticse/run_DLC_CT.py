@@ -19,14 +19,14 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     iec.overwrite           = False
     iec.Turbine_Class       = 'I'   # Wind class I, II, III, IV
     iec.Turbulence_Class    = 'B'   # Turbulence class 'A', 'B', or 'C'
-    iec.D                   = 240.  # Rotor diameter to size the wind grid
-    iec.z_hub               = 150.  # Hub height to size the wind grid
+    iec.D                   = 45.  # Rotor diameter to size the wind grid
+    iec.z_hub               = 35.  # Hub height to size the wind grid
     cut_in                  = 4.    # Cut in wind speed
     cut_out                 = 25.   # Cut out wind speed
     n_ws                    = 3    # Number of wind speed bins
-    TMax                    = 800.    # Length of wind grids and OpenFAST simulations, suggested 720 s
-    Vrated                  = 10.59 # Rated wind speed
-    Ttrans                  = max([0., TMax - 400.])  # Start of the transient for DLC with a transient, e.g. DLC 1.4
+    TMax                    = 720.    # Length of wind grids and OpenFAST simulations, suggested 720 s
+    Vrated                  = 11 # Rated wind speed
+    Ttrans                  = max([0., TMax - 120.])  # Start of the transient for DLC with a transient, e.g. DLC 1.4
     TStart                  = 0 # Start of the recording of the channels of OpenFAST
 
     # Initial conditions to start the OpenFAST runs
@@ -58,7 +58,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
         iec.dlc_inputs['Seeds'] = [1,2,3,4,5,6]
         
     elif dlc_type == 'lite':
-        wind_speeds = [12,14,16]
+        wind_speeds = [6,12,20]
         iec.dlc_inputs['Seeds'] = [[25]]
 
     else:
@@ -137,6 +137,8 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
         iec.mpi_run               = False
     iec.run_dir = save_dir
 
+    iec.Turbsim_exe = '/Users/dzalkind/Tools/openfast/install/bin/turbsim'
+
     # Run case generator / wind file writing
     case_inputs = {}
     case_inputs[("Fst","TMax")]              = {'vals':[TMax], 'group':0}
@@ -169,7 +171,8 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     case_inputs[('ServoDyn', 'GenModel')] = {'vals': [1], 'group': 0}
 
     # Specify rosco controller
-    rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon_carbon_trust.dylib'
+    # rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon_carbon_trust.dylib'
+    rosco_dll = ''
 
     if rosco_dll:
         case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[rosco_dll], 'group':0}
@@ -195,7 +198,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     if tune == 'pc_mode':     
         control_param_yaml  = os.path.join(weis_dir,'examples/OpenFAST_models/CT15MW-spar/ServoData/IEA15MW-CT-spar.yaml')
         omega = np.linspace(.05,.25,12,endpoint=True).tolist()
-        zeta  = [2.25]
+        # zeta  = [2.25]
         control_case_inputs = sweep_pc_mode(control_param_yaml,omega,zeta,group=3)
         case_inputs.update(control_case_inputs)
     elif tune == 'max_tq':
@@ -239,6 +242,9 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
 
         fastBatch.select_CT_model(turbine_model,model_dir)
 
+        # FAST/TurbSim
+        fastBatch.FAST_exe          = '/Users/dzalkind/Tools/openfast/install/bin/openfast'
+
         fastBatch.channels          = channels
         fastBatch.FAST_runDirectory = save_dir  # input!
         fastBatch.case_list         = case_list
@@ -273,16 +279,16 @@ if __name__ == "__main__":
 
     # set up cases
     turbine_mods = [
-                    'CT-spar',
+                    'CART',
                     ]
     discon_list = [
-                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_lowBW.IN',
+                    '/Users/dzalkind/Tools/WEIS-4/examples/OpenFAST_models/CART/CART_DISCON.IN',
                     ]
 
     test_type_dir   = 'ntm'
 
-    tune            = 'max_tq'
-    dlc_type        = ''
+    tune            = ''
+    dlc_type        = 'lite'
 
     if tune:
         test_type_dir += '+'+tune
@@ -291,6 +297,6 @@ if __name__ == "__main__":
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_DLC_CT(tm,co,sd,n_cores=6,tune=tune,dlc_type=dlc_type)
+        run_DLC_CT(tm,co,sd,n_cores=4,tune=tune,dlc_type=dlc_type)
     
     
