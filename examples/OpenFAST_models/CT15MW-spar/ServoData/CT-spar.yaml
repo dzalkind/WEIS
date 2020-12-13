@@ -21,8 +21,8 @@ turbine_params:
   bld_edgewise_freq:  4.0324                # Blade edgewise first natural frequency [rad/s]
   bld_flapwise_freq:  3.4872                # Blade flapwise first natural frequency [rad/s]
   TSR_operational:    9.0
-  twr_freq:  3.12     # for semi only!
-  ptfm_freq: 0.226    # for semi only!
+  twr_freq:  3.12
+  ptfm_freq: 0.10
 #------------------------------- CONTROLLER PARAMETERS ----------------------------------
 controller_params:
   # Controller flags 
