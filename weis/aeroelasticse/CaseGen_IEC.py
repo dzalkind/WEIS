@@ -82,7 +82,7 @@ class CaseGen_IEC():
                 TMax = 800.
 
             elif dlc in [1.3, 6.1, 6.3, 6.5]:
-                if self.Turbine_Class == 'I':
+                if self.Turbine_Class in ['I','Maine']:
                     x = 1
                 elif self.Turbine_Class == 'II':
                     x = 2
