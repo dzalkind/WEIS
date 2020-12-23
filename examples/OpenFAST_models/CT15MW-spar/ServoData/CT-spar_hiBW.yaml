@@ -43,8 +43,8 @@ controller_params:
   Flp_Mode:           0                     # Flap control mode {0: no flap control, 1: steady state flap angle, 2: Proportional flap control}
   # Controller parameters       
   zeta_pc:            1.5                   # Pitch controller desired damping ratio [-]
-  # omega_pc:           0.075                  # Pitch controller desired natural frequency [rad/s]
-  omega_pc:           [[12,18],[0.075,.15]]                  # Pitch controller desired natural frequency [rad/s]
+  omega_pc:           0.2                  # Pitch controller desired natural frequency [rad/s]
+  # omega_pc:           [[12,18],[0.075,.15]]                  # Pitch controller desired natural frequency [rad/s]
   zeta_vs:            0.85                   # Torque controller desired damping ratio [-]
   omega_vs:           0.12                 # Torque controller desired natural frequency [rad/s]
   # Optional - these can be defined, but do not need to be
