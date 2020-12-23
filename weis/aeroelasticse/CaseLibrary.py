@@ -326,8 +326,8 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
     hh_step.wind_directory = runDir
 
     # Run conditions
-    U_start     = [10]#[10,11,12,16] #, 16]
-    U_end       = [11]#[11,12,13,17] #, 17]
+    U_start     = [10,11,12,16] #, 16]
+    U_end       = [11,12,13,17] #, 17]
     step_wind_files = []
 
     for u_s,u_e in zip(U_start,U_end):
