@@ -44,7 +44,7 @@ controller_params:
   # Controller parameters       
   zeta_pc:            1.5                   # Pitch controller desired damping ratio [-]
   # omega_pc:           0.075                  # Pitch controller desired natural frequency [rad/s]
-  omega_pc:           [[12,18],[0.075,.20]]                  # Pitch controller desired natural frequency [rad/s]
+  omega_pc:           [[12,18],[0.075,.15]]                  # Pitch controller desired natural frequency [rad/s]
   zeta_vs:            0.85                   # Torque controller desired damping ratio [-]
   omega_vs:           0.12                 # Torque controller desired natural frequency [rad/s]
   # Optional - these can be defined, but do not need to be
