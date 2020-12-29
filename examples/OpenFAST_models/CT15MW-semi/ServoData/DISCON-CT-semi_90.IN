@@ -1,5 +1,5 @@
 ! Controller parameter input file for the CT15MW_semi wind turbine
-!    - File written using ROSCO Controller tuning logic on 12/22/20
+!    - File written using ROSCO Controller tuning logic on 12/29/20
 
 !------- DEBUG ------------------------------------------------------------
 1                   ! LoggingLevel		- {0: write no debug files, 1: write standard output .dbg-file, 2: write standard output .dbg-file and complete avrSWAP-array .dbg2-file}
@@ -32,8 +32,8 @@
 !------- BLADE PITCH CONTROL ----------------------------------------------
 28                  ! PC_GS_n			- Amount of gain-scheduling table entries
 0.064065  0.091441  0.113134  0.131901  0.148787  0.164298  0.178797  0.192476  0.205467  0.217906  0.229898  0.241557  0.252756  0.263645  0.274434  0.284672  0.294952  0.304789  0.314694  0.324122  0.333781  0.342816  0.352034  0.361052  0.369784  0.378753  0.387278  0.395688                ! PC_GS_angles	    - Gain-schedule table: pitch angles
--1.907424  -1.671602  -1.478261  -1.316870  -1.180114  -1.062753  -0.960934  -0.871761  -0.793016  -0.722971  -0.660259  -0.603787  -0.552667  -0.506172  -0.463703  -0.424758  -0.388915  -0.355819  -0.325165  -0.296693  -0.270177  -0.245424  -0.222261  -0.200542  -0.180135  -0.160925  -0.142810  -0.125698                ! PC_GS_KP		- Gain-schedule table: pitch controller kp gains
--0.130837  -0.117886  -0.107268  -0.098405  -0.090895  -0.084449  -0.078858  -0.073960  -0.069636  -0.065789  -0.062345  -0.059244  -0.056436  -0.053883  -0.051551  -0.049412  -0.047443  -0.045626  -0.043942  -0.042379  -0.040923  -0.039563  -0.038291  -0.037098  -0.035978  -0.034923  -0.033928  -0.032988                ! PC_GS_KI		- Gain-schedule table: pitch controller ki gains
+-1.416785  -1.229529  -1.076274  -0.957854  -0.868920  -0.800999  -0.747864  -0.704834  -0.668322  -0.635537  -0.604268  -0.572746  -0.539539  -0.503471  -0.463703  -0.424758  -0.388915  -0.355819  -0.325165  -0.296693  -0.270177  -0.245424  -0.222261  -0.200542  -0.180135  -0.160925  -0.142810  -0.125698                ! PC_GS_KP		- Gain-schedule table: pitch controller kp gains
+-0.073596  -0.066311  -0.060365  -0.056358  -0.054137  -0.053155  -0.053007  -0.053378  -0.054002  -0.054648  -0.055103  -0.055177  -0.054700  -0.053523  -0.051551  -0.049412  -0.047443  -0.045626  -0.043942  -0.042379  -0.040923  -0.039563  -0.038291  -0.037098  -0.035978  -0.034923  -0.033928  -0.032988                ! PC_GS_KI		- Gain-schedule table: pitch controller ki gains
 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0                ! PC_GS_KD			- Gain-schedule table: pitch controller kd gains
 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0                ! PC_GS_TF			- Gain-schedule table: pitch controller tf gains (derivative filter)
 1.570800000000      ! PC_MaxPit			- Maximum physical pitch limit, [rad].
@@ -54,7 +54,7 @@
 96.55000000000      ! VS_GenEff			- Generator efficiency mechanical power -> electrical power, [should match the efficiency defined in the generator properties!], [%]
 19624046.66639      ! VS_ArSatTq		- Above rated generator torque PI control saturation, [Nm]
 4500000.000000      ! VS_MaxRat			- Maximum torque rate (in absolute value) in torque controller, [Nm/s].
-19624046.66639      ! VS_MaxTq			- Maximum generator torque in Region 3 (HSS side), [Nm].
+29436069.00000      ! VS_MaxTq			- Maximum generator torque in Region 3 (HSS side), [Nm].
 0.000000000000      ! VS_MinTq			- Minimum generator (HSS side), [Nm].
 0.523600000000      ! VS_MinOMSpd		- Optimal mode minimum speed, cut-in speed towards optimal mode gain path, [rad/s]
 34937749.21735      ! VS_Rgn2K			- Generator torque constant in Region 2 (HSS side), [N-m/(rad/s)^2]
