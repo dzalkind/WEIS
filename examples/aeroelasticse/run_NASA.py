@@ -49,7 +49,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
     iec.init_cond[('HydroDyn','WaveTp')] = {'U': [4., 6., 8., 10., 12., 14., 16., 18., 20., 22., 24.]}
     iec.init_cond[('HydroDyn','WaveTp')]['val'] = [8.515,8.310,8.006,7.651,7.441,7.461,7.643,8.047,8.521,8.987,9.452]
 
-    iec.Turbine_Class = 'II' # I, II, III, IV
+    iec.Turbine_Class = 'Maine' # I, II, III, IV
     iec.Turbulence_Class = 'A'
     iec.D = 300.            #TODO: pull this info from fast file...do we know fast file?
     iec.z_hub = 150
@@ -80,10 +80,10 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
         iec.TMax    = 800
 
     elif True:   # c_tuning cases
-        iec.dlc_inputs['DLC']   = [1.2,1.6]#,6.1,6.3]
-        iec.dlc_inputs['U']     = [[12,14,16,24],[12,14,16,24],[],[],[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
-        iec.dlc_inputs['Seeds'] = [[3],[5]]#,[],[]] #[[5, 6, 7], []]
-        iec.dlc_inputs['Yaw']   = [[],[]]#,[],[]]  #[[], []]
+        iec.dlc_inputs['DLC']   = [6.1]#,6.1,6.3]
+        iec.dlc_inputs['U']     = [[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
+        iec.dlc_inputs['Seeds'] = [[3]]#,[],[]] #[[5, 6, 7], []]
+        iec.dlc_inputs['Yaw']   = [[]]#,[],[]]  #[[], []]
         iec.TMax    = 800
     
     else:  # reduced set
@@ -103,7 +103,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
     print(weis_dir)
     iec.wind_dir = os.path.join(weis_dir,'results','NASA','wind')
     iec.case_name_base = 'DLC'
-    iec.Turbsim_exe = '/home/dzalkind/Tools/openfast-umaine/build/modules/turbsim/turbsim'
+    iec.Turbsim_exe = '/Users/dzalkind/Tools/openfast-umaine/install/bin/turbsim'
     iec.debug_level = 2
     if n_cores == 1:
         iec.parallel_windfile_gen = False
@@ -285,10 +285,10 @@ if __name__=="__main__":
     # c_peakshave: tune peak shaver w/ various TMD settings
     # c_fl_phase: tune floating feedback w/ various TMD settings
     # c_fl_gain: tune floating feedback w/ various TMD settings
-    test_case = 'c_pitch'
+    test_case = 'no_mass'
 
 
 
 
-    NASA_runFAST_CaseGenIEC(test_case,n_cores=8)
+    NASA_runFAST_CaseGenIEC(test_case,n_cores=1)
     # runFAST_TestROSCO()
