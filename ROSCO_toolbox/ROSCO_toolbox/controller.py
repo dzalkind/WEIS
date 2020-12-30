@@ -61,6 +61,8 @@ class Controller():
         self.PS_Mode = controller_params['PS_Mode']
         self.SD_Mode = controller_params['SD_Mode']
         self.Fl_Mode = controller_params['Fl_Mode']
+        if 'Fl_Gain' in controller_params:
+            self.Fl_Gain = controller_params['Fl_Gain']
         self.Flp_Mode = controller_params['Flp_Mode']
 
         # Necessary parameters
@@ -311,10 +313,13 @@ class Controller():
 
         # --- Floating feedback term ---
         if self.Fl_Mode == 1: # Floating feedback
-            Kp_float = (dtau_dv/dtau_dbeta) * turbine.TowerHt * Ng 
-            self.Kp_float = Kp_float[len(v_below_rated)]
-            # Turn on the notch filter if floating
-            self.F_NotchType = 2
+            if hasattr(self,'Fl_Gain'):
+                self.Kp_float = self.Fl_Gain
+            else:
+                Kp_float = (dtau_dv/dtau_dbeta) * turbine.TowerHt * Ng 
+                self.Kp_float = Kp_float[len(v_below_rated)]
+                # Turn on the notch filter if floating
+                self.F_NotchType = 2
             
             # And check for .yaml input inconsistencies
             if turbine.twr_freq == 0.0 or turbine.ptfm_freq == 0.0:
@@ -565,6 +570,62 @@ class ControllerTypes():
             A = pA[0]*v + pA[1]
             B = pB[0]*v + pB[1]
 
+        # Set natural frequency schedule, if necessary
+        if isinstance(om_n,list):
+            U = om_n[0]
+            om = om_n[1]
+
+            # U.insert(0,0)
+            # U.append(25)
+            
+
+            om_n = sigma(v,U[0],U[1],y0=om[0],y1=om[1])
+            # om.insert(0,om[0])
+            # om.append(om[-1])
+            # f_om = interpolate.interp1d(om_n[0],om_n[1],kind='linear')
+
+            # om_n = f_om(v)
+
+            if True:
+                import matplotlib.pyplot as plt
+                plt.plot(v,om_n);
+                plt.show()
+
         # Calculate gain schedule
-        self.Kp = 1/B * (2*zeta*om_n + A)
+        self.Kp = 1/B * (2*zeta*om_n + A)   # DZ: This A is causing positive gains!!
+        # self.Kp = 1/B * (2*zeta*om_n) # + A)   # DZ: This A is causing positive gains!!
         self.Ki = om_n**2/B           
+
+# helper functions
+
+def sigma(tt,t0,t1,y0=0,y1=1):
+    ''' 
+    generates timeseries for a smooth transition from y0 to y1 from x0 to x1
+
+    inputs: tt - time indices
+            t0 - start time
+            t1 - end time
+            y0 - start output
+            y1 - end output
+
+    outputs: yy - output timeseries corresponding to tt
+    '''
+
+    a3 = 2/(t0-t1)**3
+    a2 = -3*(t0+t1)/(t0-t1)**3
+    a1 = 6*t1*t0/(t0-t1)**3
+    a0 = (t0-3*t1)*t0**2/(t0-t1)**3
+
+    a = np.array([a3,a2,a1,a0])  
+
+    T = np.vander(tt,N=4)       # vandermonde matrix
+
+    ss = T @ a.T                # base sigma
+
+    yy = (y1-y0) * ss + y0      # scale and offset
+
+    # saturate
+    yy[tt<t0] = y0
+    yy[tt>t1] = y1
+
+    return yy

@@ -382,7 +382,12 @@ class FAST_IO():
                 try:
                     data.append(np.array(d).astype(np.float))
                 except:     # just skip this timestep for now
-                    pass
+                    for i, d_i in enumerate(d):
+                        try:
+                            d[i] = float(d_i)
+                        except:
+                            d[i] = 0
+                    data.append(np.array(d).astype(np.float))
             data = np.array(data)
             return data, info
 
@@ -1069,13 +1074,42 @@ class DataProcessing():
 
 if __name__ == "__main__":
 
-    fio = FAST_IO()
-    fpl = FAST_Plots()
-    ro_out = fio.load_fast_out('/Users/dzalkind/Tools/WEIS-3/results/CT-spar/DISCON_CT-spar_z2/fl_phase_2/step_07.RO.dbg')
-    # fa_out = fio.load_fast_out('/Users/dzalkind/Tools/WEIS-3/results/CT-spar/DISCON_CT-spar_z2/fl_phase_2/step_07.out')
+    fast_io = FAST_IO()
+    fast_pl = FAST_Plots()
 
+    # Select Case I.D.s
+    output = '/Users/dzalkind/Tools/WEIS-3/results/CT-barge/DISCON_CT-spar_Draft/simp/step_0.outb'
+
+
+    output_ext = '.out'
+    plt.rcParams["figure.figsize"] = [9,7]
+
+    #  Define Plot cases 
     cases = {}
-    cases['Plt. Control Sigs.'] = ['RotVAvgX', 'BldPitch1', 'Fl_Pitcom', 'FA_AccR','PtfmPitch','SS_dOmF']
+    cases['Gen. Speed Sigs.'] = ['Wind1VelX', 'BldPitch1', 'GenTq', 'GenSpeed','TwrBsMyt','GenPwr','PtfmPitch','PtfmYaw','NacYaw']
+    cases['Plt. Control Sigs.'] = ['RtVAvgxh', 'BldPitch1', 'Fl_Pitcom', 'FA_AccR','PtfmPitch','SS_dOmF']
+    cases['Platform Motion'] = ['PtfmSurge', 'PtfmSway', 'PtfmHeave', 'PtfmPitch','PtfmRoll','PtfmYaw']
 
-    fig, ax = fpl.plot_fast_out(cases, ro_out, showplot=True)
+
+    # Rosco outfiles
+    rosco_out  = output.strip('outb') + 'RO.dbg'
+
+    # # for i_case, case in enumerate(case_ids):
+    fast_out = fast_io.load_fast_out(output)
+    rosco_out = fast_io.load_fast_out(rosco_out)
+    fast_out
+        
+    # Combine outputs
+    comb_out = [None] * len(fast_out)
+    for i, (r_out, f_out) in enumerate(zip(rosco_out,fast_out)):
+        r_out.update(f_out)
+        comb_out[i] = r_out
+        
+    # comb_out[0]['Fl_Pitcom']
+    # comb_out = rosco_out.update(fast_out)
+
+    # # Plot
+    fig, ax = fast_pl.plot_fast_out(cases, comb_out, showplot=True)
+
+    print('here')
 

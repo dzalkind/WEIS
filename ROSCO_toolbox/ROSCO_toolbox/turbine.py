@@ -72,7 +72,9 @@ class Turbine():
         self.v_max = turbine_params['v_max']
         self.max_pitch_rate = turbine_params['max_pitch_rate'] 
         self.min_pitch_rate = -1 * self.max_pitch_rate
-        self.max_torque_rate = turbine_params['max_torque_rate']             
+        self.max_torque_rate = turbine_params['max_torque_rate']    
+        if 'max_torque' in turbine_params:
+            self.max_torque = turbine_params['max_torque']         
         self.rated_power = turbine_params['rated_power']           
         self.bld_edgewise_freq = turbine_params['bld_edgewise_freq']     
 
@@ -197,7 +199,9 @@ class Turbine():
         self.yaw = 0.0
         self.J = self.rotor_inertia + self.generator_inertia * self.Ng**2
         self.rated_torque = self.rated_power/(self.GenEff/100*self.rated_rotor_speed*self.Ng)
-        self.max_torque = self.rated_torque * 1.1
+
+        if not hasattr(self,'max_torque'):
+            self.max_torque = self.rated_torque * 1.1
         self.rotor_radius = self.TipRad
         # self.omega_dt = np.sqrt(self.DTTorSpr/self.J)
 
