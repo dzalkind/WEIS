@@ -77,6 +77,8 @@ def post_BatchRun(test_dirs):
             fp[i_test].ranking_vars.append(['NcIMUTAxs']), fp[i_test].ranking_stats.append('std')
             fp[i_test].ranking_vars.append(['NcIMUTAys']), fp[i_test].ranking_stats.append('std')
 
+            fp[i_test].channels_magnitude = {'TwrBsM': ['TwrBsMyt','TwrBsMxt']}
+
             stats[i_test], load_rankings[i_test] = fp[i_test].batch_processing()
             
         # re-load to get rid of dataset
@@ -92,7 +94,7 @@ def post_BatchRun(test_dirs):
 
 
     test_dir = [
-        '/Users/dzalkind/Tools/WEIS/results/NASA/sweep_wn'
+        '/Users/dzalkind/Tools/WEIS-1/results/NASA/no_mass'
         ]
 
 

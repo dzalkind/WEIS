@@ -57,6 +57,7 @@ class FAST_Processing(object):
                                     ] # should be same length as ranking_vars
         
         self.DEL_info = None  # [('RootMyb1', 10), ('RootMyb2', 10), ('RootMyb3', 10)]
+        self.channels_magnitude = None
 
         # Save settings
         self.results_dir       = 'temp_results'
@@ -192,6 +193,7 @@ class FAST_Processing(object):
             loads_analysis.DEL_info = self.DEL_info
             loads_analysis.ranking_stats = self.ranking_stats
             loads_analysis.ranking_vars = self.ranking_vars
+            loads_analysis.channels_magnitude = self.channels_magnitude
 
             # run analysis in parallel
             if self.parallel_analysis:
@@ -286,6 +288,7 @@ class FAST_Processing(object):
         loads_analysis.ranking_vars = self.ranking_vars
         loads_analysis.ranking_stats = self.ranking_stats
         loads_analysis.DEL_info = self.DEL_info
+        loads_analysis.channels_magnitude = self.channels_magnitude
         
         if self.parallel_analysis: # run analysis in parallel
             # run analysis
