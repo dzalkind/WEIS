@@ -112,7 +112,7 @@ metadata = dict(
     packages                      = weis_pkgs,
     python_requires               = '>=3.6',
     license                       = 'Apache License, Version 2.0',
-    ext_modules                   = [roscoExt, fastExt],
+    ext_modules                   = [roscoExt],
     cmdclass                      = {'build_ext': CMakeBuildExt},
     zip_safe                      = False,
 )
