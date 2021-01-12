@@ -57,16 +57,19 @@ def run_Simp(turbine_model,control,save_dir,n_cores=1):
         fastBatch                   = runFAST_pywrapper_batch(FAST_ver='OpenFAST',dev_branch = True)
         
         # Select Turbine Model
-        model_dir                   = os.path.join(os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ), 'OpenFAST_models')
+        # model_dir                   = os.path.join(os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ), 'OpenFAST_models')
 
-        fastBatch.select_CT_model(turbine_model,model_dir)
+        # fastBatch.select_CT_model(turbine_model,model_dir)
+
+        fastBatch.FAST_directory    = '/Users/dzalkind/Tools/IEA-10.0-198-RWT/openfast/'
+        fastBatch.FAST_InputFile    = 'IEA-10.0-198-RWT.fst'
         
         fastBatch.channels          = channels
         fastBatch.FAST_runDirectory = save_dir  # input!
         fastBatch.case_list         = case_list
         fastBatch.case_name_list    = case_name_list
         fastBatch.debug_level       = 2
-        # fastBatch.FAST_exe          = '/Users/dzalkind/Tools/openfast/install/bin/openfast'
+        fastBatch.FAST_exe          = '/Users/dzalkind/Tools/openfast-main/install/bin/openfast'
 
         if MPI:
             fastBatch.run_mpi(comm_map_down)
@@ -98,14 +101,14 @@ if __name__ == "__main__":
     turbine_mods = [
                     # 'UMaine-Fixed',
                     # 'CT-spar',
-                    'CT-TLP',
+                    'IEA-10MW',
                     # 'UMaine-Fixed',
                     # 'UMaine-Semi',
                     # 'UMaine-Semi'
                     ]
     discon_list = [
                     # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
-                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps100.IN',
+                    '/Users/dzalkind/Tools/IEA-10.0-198-RWT/openfast/IEA-10.0-198-RWT_DISCON.IN',
                     # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_ps080.IN',
                     # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi/DISCON_fixed_ps100.IN',
                     # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi/DISCON_fixed_ps100_const_pwr.IN',
@@ -118,7 +121,7 @@ if __name__ == "__main__":
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_Simp(tm,co,sd,n_cores=1)
+        run_Simp(tm,co,sd,n_cores=8)
     
     
     

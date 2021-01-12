@@ -312,19 +312,19 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
     # 3.x in controller tuning register
 
     # Default Runtime
-    T_max   = 800.
+    T_max   = 600.
 
     # Step Wind Setup
 
     # Make Default step wind object
     hh_step = HH_StepFile()
     hh_step.t_max = T_max
-    hh_step.t_step = 400
+    hh_step.t_step = 300
     hh_step.wind_directory = runDir
 
     # Run conditions
-    U_start     = [10]#[10,11,12,16] #, 16]
-    U_end       = [11]#[11,12,13,17] #, 17]
+    U_start     = [10,11,12,16,23] #, 16]
+    U_end       = [11,12,13,17,24] #, 17]
     step_wind_files = []
 
     for u_s,u_e in zip(U_start,U_end):
