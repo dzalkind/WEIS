@@ -49,7 +49,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
     iec.init_cond[('HydroDyn','WaveTp')] = {'U': [4., 6., 8., 10., 12., 14., 16., 18., 20., 22., 24.]}
     iec.init_cond[('HydroDyn','WaveTp')]['val'] = [8.515,8.310,8.006,7.651,7.441,7.461,7.643,8.047,8.521,8.987,9.452]
 
-    iec.Turbine_Class = 'Maine' # I, II, III, IV
+    iec.Turbine_Class = 'II' # I, II, III, IV
     iec.Turbulence_Class = 'A'
     iec.D = 300.            #TODO: pull this info from fast file...do we know fast file?
     iec.z_hub = 150
@@ -79,21 +79,21 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
         iec.dlc_inputs['Yaw']   = [[],[],[],[],[]]#,[],[]]  #[[], []]
         iec.TMax    = 800
 
-    elif True:   # c_tuning cases
+    elif False:   # c_tuning cases
         iec.dlc_inputs['DLC']   = [6.1]#,6.1,6.3]
         iec.dlc_inputs['U']     = [[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
         iec.dlc_inputs['Seeds'] = [[3]]#,[],[]] #[[5, 6, 7], []]
         iec.dlc_inputs['Yaw']   = [[]]#,[],[]]  #[[], []]
         iec.TMax    = 800
     
-    else:  # reduced set
+    else:  # reduced set, demo
         iec.dlc_inputs['DLC']   = [6.5]#,6.1,6.3]
         iec.dlc_inputs['U']     = [[]] #[8,12,14,24]#,[],[]]  #[[10, 12, 14], [12]]
-        iec.dlc_inputs['Seeds'] = [[1,2,3,4,5,6]]#,[],[]] #[[5, 6, 7], []]
-        iec.dlc_inputs['Yaw']   = [[]]#,[],[]]  #[[], []]
+        iec.dlc_inputs['Seeds'] = [[1]]#,[],[]] #[[5, 6, 7], []]
+        iec.dlc_inputs['Yaw']   = [[0]]#,[],[]]  #[[], []]
 
-    iec.uniqueSeeds = True
-    iec.uniqueWaveSeeds = True
+    # iec.uniqueSeeds = True
+    # iec.uniqueWaveSeeds = True
     # Set up TMD Case
     # TMD_Case = TMD
 
@@ -123,8 +123,10 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
     case_inputs[("Fst","OutFileFmt")]        = {'vals':[2], 'group':0}
     # case_inputs[("Fst","TMax")]        = {'vals':[60], 'group':0}
 
-
     case_inputs[('ElastoDyn','YawDOF')] = {'vals':[False], 'group':0}
+    
+    # ROSCO dll
+    case_inputs[("ServoDyn","DLL_FileName")] = {'vals':['/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon.dylib'], 'group':0}
 
     # TMD Cases
     # no mass
@@ -246,7 +248,7 @@ def NASA_runFAST_CaseGenIEC(test_case='no_mass',n_cores=1):
 
 
     # Run FAST cases
-    fastBatch.FAST_exe = '/home/dzalkind/Tools/openfast-umaine/install/bin/openfast'   # Path to executable
+    fastBatch.FAST_exe = '/Users/dzalkind/Tools/openfast-umaine/install/bin/openfast'   # Path to executable
     fastBatch.FAST_InputFile = 'NASA_Float.fst'   # FAST input file (ext=.fst)
     fastBatch.FAST_directory = os.path.join(os.path.dirname(os.path.dirname(__file__)),'OpenFAST_models/NASA_Float')
     fastBatch.FAST_runDirectory = iec.run_dir
@@ -285,7 +287,7 @@ if __name__=="__main__":
     # c_peakshave: tune peak shaver w/ various TMD settings
     # c_fl_phase: tune floating feedback w/ various TMD settings
     # c_fl_gain: tune floating feedback w/ various TMD settings
-    test_case = 'no_mass'
+    test_case = 'const_wn'
 
 
 
