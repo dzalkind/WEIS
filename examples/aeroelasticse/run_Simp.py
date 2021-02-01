@@ -27,8 +27,18 @@ def run_Simp(turbine_model,control,save_dir,n_cores=1):
         else:
             rosco_dll = os.path.join(run_dir1, 'local/lib/libdiscon.so')
 
+    # Select case function
+    if os.path.basename(save_dir) == 'simp':
+        case_function = simp_step
+        name_base = 'step'
+    elif os.path.basename(save_dir) == 'pwr_curve':
+        case_function = power_curve_control
+        name_base = 'const'
+    else:
+        raise Exception('Test type not specified properly')
+
     # Set up cases from CaseLibrary
-    case_list, case_name_list, channels = simp_step(control,save_dir,'step',rosco_dll=rosco_dll)
+    case_list, case_name_list, channels = case_function(control,save_dir,name_base,rosco_dll=rosco_dll)
 
     # Management of parallelization, leave in for now
     if MPI:
@@ -57,12 +67,10 @@ def run_Simp(turbine_model,control,save_dir,n_cores=1):
         fastBatch                   = runFAST_pywrapper_batch(FAST_ver='OpenFAST',dev_branch = True)
         
         # Select Turbine Model
-        # model_dir                   = os.path.join(os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ), 'OpenFAST_models')
+        model_dir                   = os.path.join(os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ), 'OpenFAST_models')
 
-        # fastBatch.select_CT_model(turbine_model,model_dir)
 
-        fastBatch.FAST_directory    = '/Users/dzalkind/Tools/IEA-10.0-198-RWT/openfast/'
-        fastBatch.FAST_InputFile    = 'IEA-10.0-198-RWT.fst'
+        fastBatch.select_CT_model(turbine_model,model_dir)
         
         fastBatch.channels          = channels
         fastBatch.FAST_runDirectory = save_dir  # input!
@@ -103,7 +111,7 @@ if __name__ == "__main__":
                     # 'CT-spar',
                     'IEA-10MW',
                     # 'UMaine-Fixed',
-                    # 'UMaine-Semi',
+                    'CT-semi',
                     # 'UMaine-Semi'
                     ]
     discon_list = [
@@ -115,9 +123,10 @@ if __name__ == "__main__":
                     # '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi/DISCON_fixed_ps100.IN',
                     ]
 
-    test_type_dir   = 'simp'
+    # Options: simp, pwr_crv
+    test_type   = 'pwr_curve'
 
-    save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],test_type_dir) \
+    save_dir_list    = [os.path.join(res_dir,tm,os.path.basename(dl).split('.')[0],test_type) \
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
