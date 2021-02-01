@@ -262,6 +262,9 @@ class runFAST_pywrapper_batch(object):
         elif turbine_model == 'CT-TLP':
             self.FAST_directory    = os.path.join(model_dir, 'CT15MW-TLP')   # Path to fst directory files
             self.FAST_InputFile    = 'CT15MW_tlp.fst'   # FAST input file (ext=.fst)
+        elif turbine_model == 'IEA-10MW':
+            self.FAST_directory    = os.path.join(model_dir, 'IEA-10-198-RWT')   # Path to fst directory files
+            self.FAST_InputFile    = 'IEA-10.0-198-RWT.fst'   # FAST input file (ext=.fst)
         else:
             raise Exception('Turbine model not selected properly')
 
