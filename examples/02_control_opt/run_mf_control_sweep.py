@@ -20,7 +20,7 @@ from weis.aeroelasticse.FAST_reader import InputReader_Common, InputReader_OpenF
 from weis.aeroelasticse.Util.FileTools import save_yaml, load_yaml
 from weis.aeroelasticse.LinearFAST import LinearFAST
 from weis.aeroelasticse.FAST_post   import FAST_IO_timeseries
-from pCrunch.Analysis import Loads_Analysis
+# from pCrunch.Analysis import Loads_Analysis
 
 
 
@@ -41,8 +41,8 @@ fast_io = output_processing()
 from weis.aeroelasticse.Util import FileTools
 
 # Batch Analysis
-from pCrunch import pdTools
-from pCrunch import Processing, Analysis
+# from pCrunch import pdTools
+# from pCrunch import Processing, Analysis
 
 
 import numpy as np
@@ -354,18 +354,18 @@ def compute_outputs(levelX_out):
         lx_out['meta'] = {}
         lx_out['meta']['name'] = 'placeholder'
     chan_info = [('TwrBsMyt',4)]
-    la = Loads_Analysis()
-    TwrBsMyt_DEL = la.get_DEL(levelX_out,chan_info)['TwrBsMyt'].tolist()
+    # la = Loads_Analysis()
+    # TwrBsMyt_DEL = la.get_DEL(levelX_out,chan_info)['TwrBsMyt'].tolist()
 
-    # Generator Speed Measures
-    GenSpeed_Max = [lx_out['GenSpeed'].max() for lx_out in levelX_out]
-    GenSpeed_Std = [lx_out['GenSpeed'].std() for lx_out in levelX_out]
+    # # Generator Speed Measures
+    # GenSpeed_Max = [lx_out['GenSpeed'].max() for lx_out in levelX_out]
+    # GenSpeed_Std = [lx_out['GenSpeed'].std() for lx_out in levelX_out]
 
     # save outputs
     outputs = {}
-    outputs['TwrBsMyt_DEL']     = TwrBsMyt_DEL[0]
-    outputs['GenSpeed_Max']     = GenSpeed_Max[0]
-    outputs['GenSpeed_Std']     = GenSpeed_Std[0]
+    outputs['TwrBsMyt_DEL']     = 0 #TwrBsMyt_DEL[0]
+    outputs['GenSpeed_Max']     = 0 #GenSpeed_Max[0]
+    outputs['GenSpeed_Std']     = 0 #GenSpeed_Std[0]
 
     return outputs
 
