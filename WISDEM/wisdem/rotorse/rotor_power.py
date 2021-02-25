@@ -9,6 +9,7 @@ import numpy as np
 from openmdao.api import Group, ExplicitComponent
 from scipy.optimize import brentq, minimize, minimize_scalar
 from scipy.interpolate import PchipInterpolator
+from wisdem.ccblade.Polar import Polar
 from wisdem.ccblade.ccblade import CCBlade, CCAirfoil
 from wisdem.commonse.utilities import smooth_abs, smooth_min, linspace_with_deriv
 from wisdem.commonse.distribution import RayleighCDF, WeibullWithMeanCDF
@@ -60,7 +61,7 @@ class RotorPower(Group):
                 "mu",
             ],
         )
-        self.add_subsystem("gust", GustETM())
+        self.add_subsystem("gust", GustETM(std=modeling_options["WISDEM"]["RotorSE"]["gust_std"]))
         self.add_subsystem("cdf", WeibullWithMeanCDF(nspline=modeling_options["WISDEM"]["RotorSE"]["n_pc_spline"]))
         self.add_subsystem("aep", AEP(nspline=modeling_options["WISDEM"]["RotorSE"]["n_pc_spline"]), promotes=["AEP"])
 
@@ -78,12 +79,15 @@ class RotorPower(Group):
 class GustETM(ExplicitComponent):
     # OpenMDAO component that generates an "equivalent gust" wind speed by summing an user-defined wind speed at hub height with 3 times sigma. sigma is the turbulent wind speed standard deviation for the extreme turbulence model, see IEC-61400-1 Eq. 19 paragraph 6.3.2.3
 
+    def initialize(self):
+        # number of standard deviations for strength of gust
+        self.options.declare("std", default=3.0)
+
     def setup(self):
         # Inputs
         self.add_input("V_mean", val=0.0, units="m/s", desc="IEC average wind speed for turbine class")
         self.add_input("V_hub", val=0.0, units="m/s", desc="hub height wind speed")
         self.add_discrete_input("turbulence_class", val="A", desc="IEC turbulence class")
-        self.add_input("std", val=3.0, desc="number of standard deviations for strength of gust")
 
         # Output
         self.add_output("V_gust", val=0.0, units="m/s", desc="gust wind speed")
@@ -91,7 +95,7 @@ class GustETM(ExplicitComponent):
     def compute(self, inputs, outputs, discrete_inputs, discrete_outputs):
         V_mean = inputs["V_mean"]
         V_hub = inputs["V_hub"]
-        std = inputs["std"]
+        std = self.options["std"]
         turbulence_class = discrete_inputs["turbulence_class"]
 
         if turbulence_class.upper() == "A":
@@ -840,25 +844,20 @@ def eval_unsteady(alpha, cl, cd, cm):
     # calculate unsteady coefficients from polars for OpenFAST's Aerodyn
 
     unsteady = {}
-
-    alpha_rad = np.radians(alpha)
-    cn = cl * np.cos(alpha_rad) + cd * np.sin(alpha_rad)
-
-    # alpha0, Cd0, Cm0
-    aoa_l = [-30.0]
-    aoa_h = [30.0]
-    idx_low = np.argmin(abs(alpha - aoa_l))
-    idx_high = np.argmin(abs(alpha - aoa_h))
-
-    if max(np.abs(np.gradient(cl))) > 0.0:
-        unsteady["alpha0"] = np.interp(0.0, cl[idx_low:idx_high], alpha[idx_low:idx_high])
-        unsteady["Cd0"] = np.interp(0.0, cl[idx_low:idx_high], cd[idx_low:idx_high])
-        unsteady["Cm0"] = np.interp(0.0, cl[idx_low:idx_high], cm[idx_low:idx_high])
-    else:
-        unsteady["alpha0"] = 0.0
-        unsteady["Cd0"] = cd[np.argmin(abs(alpha - 0.0))]
-        unsteady["Cm0"] = 0.0
-
+    Re = 1e6  # Does not factor into any calculations
+    try:
+        mypolar = Polar(Re, alpha, cl, cd, cm, compute_params=True, radians=False)
+        (alpha0, alpha1, alpha2, cnSlope, cn1, cn2, cd0, cm0) = mypolar.unsteadyParams()
+    except:
+        alpha0 = alpha1 = alpha2 = cnSlope = cn1 = cn2 = cd0 = cm0 = 0.0
+    unsteady["alpha0"] = alpha0
+    unsteady["alpha1"] = alpha1
+    unsteady["alpha2"] = alpha2
+    unsteady["Cd0"] = cd0
+    unsteady["Cm0"] = cm0
+    unsteady["Cn1"] = cn1
+    unsteady["Cn2"] = cn2
+    unsteady["C_nalpha"] = cnSlope
     unsteady["eta_e"] = 1
     unsteady["T_f0"] = "Default"
     unsteady["T_V0"] = "Default"
@@ -874,87 +873,6 @@ def eval_unsteady(alpha, cl, cd, cm):
     unsteady["S2"] = 0
     unsteady["S3"] = 0
     unsteady["S4"] = 0
-
-    def find_breakpoint(x, y, idx_low, idx_high, multi=1.0):
-        lin_fit = np.interp(x[idx_low:idx_high], [x[idx_low], x[idx_high]], [y[idx_low], y[idx_high]])
-        idx_break = 0
-        lin_diff = 0
-        for i, (fit, yi) in enumerate(zip(lin_fit, y[idx_low:idx_high])):
-            if multi == 0:
-                diff_i = np.abs(yi - fit)
-            else:
-                diff_i = multi * (yi - fit)
-            if diff_i > lin_diff:
-                lin_diff = diff_i
-                idx_break = i
-        idx_break += idx_low
-        return idx_break
-
-    # Cn1
-    idx_alpha0 = np.argmin(abs(alpha - unsteady["alpha0"]))
-
-    if max(np.abs(np.gradient(cm))) > 1.0e-10:
-        aoa_h = alpha[idx_alpha0] + 35.0
-        idx_high = np.argmin(abs(alpha - aoa_h))
-
-        cm_temp = cm[idx_low:idx_high]
-        idx_cm_min = [
-            i
-            for i, local_min in enumerate(
-                np.r_[True, cm_temp[1:] < cm_temp[:-1]] & np.r_[cm_temp[:-1] < cm_temp[1:], True]
-            )
-            if local_min
-        ] + idx_low
-        idx_high = idx_cm_min[-1]
-
-        idx_Cn1 = find_breakpoint(alpha, cm, idx_alpha0, idx_high)
-        unsteady["Cn1"] = cn[idx_Cn1]
-    else:
-        idx_Cn1 = np.argmin(abs(alpha - 0.0))
-        unsteady["Cn1"] = 0.0
-
-    # Cn2
-    if max(np.abs(np.gradient(cm))) > 1.0e-10:
-        aoa_l = np.mean([alpha[idx_alpha0], alpha[idx_Cn1]]) - 30.0
-        idx_low = np.argmin(abs(alpha - aoa_l))
-
-        cm_temp = cm[idx_low:idx_high]
-        idx_cm_min = [
-            i
-            for i, local_min in enumerate(
-                np.r_[True, cm_temp[1:] < cm_temp[:-1]] & np.r_[cm_temp[:-1] < cm_temp[1:], True]
-            )
-            if local_min
-        ] + idx_low
-        idx_high = idx_cm_min[-1]
-
-        idx_Cn2 = find_breakpoint(alpha, cm, idx_low, idx_alpha0, multi=0.0)
-        unsteady["Cn2"] = cn[idx_Cn2]
-    else:
-        idx_Cn2 = np.argmin(abs(alpha - 0.0))
-        unsteady["Cn2"] = 0.0
-
-    # C_nalpha
-    if max(np.abs(np.gradient(cm))) > 1.0e-10:
-        # unsteady['C_nalpha'] = np.gradient(cn, alpha_rad)[idx_alpha0]
-        unsteady["C_nalpha"] = max(np.gradient(cn[idx_alpha0:idx_Cn1], alpha_rad[idx_alpha0:idx_Cn1]))
-
-    else:
-        unsteady["C_nalpha"] = 0.0
-
-    # alpha1, alpha2
-    # finding the break point in drag as a proxy for Trailing Edge separation, f=0.7
-    # 3d stall corrections cause erroneous f calculations
-    if max(np.abs(np.gradient(cm))) > 1.0e-10:
-        aoa_l = [0.0]
-        idx_low = np.argmin(abs(alpha - aoa_l))
-        idx_alpha1 = find_breakpoint(alpha, cd, idx_low, idx_Cn1, multi=-1.0)
-        unsteady["alpha1"] = alpha[idx_alpha1]
-    else:
-        idx_alpha1 = np.argmin(abs(alpha - 0.0))
-        unsteady["alpha1"] = 0.0
-    unsteady["alpha2"] = -1.0 * unsteady["alpha1"]
-
     unsteady["St_sh"] = "Default"
     unsteady["k0"] = 0
     unsteady["k1"] = 0
@@ -964,7 +882,6 @@ def eval_unsteady(alpha, cl, cd, cm):
     unsteady["x_cp_bar"] = "Default"
     unsteady["UACutout"] = "Default"
     unsteady["filtCutOff"] = "Default"
-
     unsteady["Alpha"] = alpha
     unsteady["Cl"] = cl
     unsteady["Cd"] = cd
