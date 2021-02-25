@@ -21,8 +21,8 @@ from ROSCO_toolbox import utilities as ROSCO_utilities
 from weis.aeroelasticse.Util import FileTools
 
 # Batch Analysis
-from pCrunch import pdTools
-from pCrunch import Processing, Analysis
+# from pCrunch import pdTools
+# from pCrunch import Processing, Analysis
 
 
 import numpy as np
@@ -138,113 +138,113 @@ class LinearFAST(runFAST_pywrapper_batch):
                 self.run_serial()
 
         
-    def postFAST_steady(self):
-        """
-        Post process results to get steady state information for all initial conditions at each wind speed
-        Save as ss_ops.yaml for 
-        """
+    # def postFAST_steady(self):
+        # """
+        # Post process results to get steady state information for all initial conditions at each wind speed
+        # Save as ss_ops.yaml for 
+        # """
 
-        # Plot steady states vs wind speed
-        PLOT = 0
+        # # Plot steady states vs wind speed
+        # PLOT = 0
 
-        # Define input files paths
-        output_dir      = self.FAST_steadyDirectory
+        # # Define input files paths
+        # output_dir      = self.FAST_steadyDirectory
 
-        # Find all outfiles
-        outfiles = []
-        for file in os.listdir(output_dir):
-            if file.endswith('.outb'):
-                outfiles.append(os.path.join(output_dir,file))
-            # elif file.endswith('.out') and not file.endswith('.MD.out'):  
-            #     outfiles.append(os.path.join(output_dir,file))
-
-
-        # Initialize processing classes
-        fp = Processing.FAST_Processing()
-
-        # Set some processing parameters
-        fp.OpenFAST_outfile_list        = outfiles
-        fp.t0                           = self.TMax - 400            # make sure this is less than simulation time
-        fp.parallel_analysis            = self.cores > 1
-        fp.parallel_cores               = self.cores
-        fp.results_dir                  = os.path.join(output_dir, 'stats')
-        fp.verbose                      = True
-        fp.save_LoadRanking             = True
-        fp.save_SummaryStats            = True
-
-        # Load and save statistics and load rankings
-        if self.overwrite or not os.path.exists(os.path.join(output_dir,'ss_ops.yaml')):
-            stats, _ =fp.batch_processing()
-
-            if isinstance(stats,list):
-                stats = stats[0]
-
-            windSortInd = np.argsort(stats['Wind1VelX']['mean'])
-
-            #            FAST output name,  FAST IC name
-            ssChannels = [['Wind1VelX',     'Wind1VelX'],  
-                        ['OoPDefl1',        'OoPDefl'],
-                        ['IPDefl1',         'IPDefl'],
-                        ['BldPitch1',       'BlPitch1'],
-                        ['RotSpeed',        'RotSpeed'],
-                        ['TTDspFA',         'TTDspFA'],
-                        ['TTDspSS',         'TTDspSS'],
-                        ['PtfmSurge',       'PtfmSurge'],
-                        ['PtfmSway',        'PtfmSway'],
-                        ['PtfmHeave',       'PtfmHeave'],
-                        ['PtfmRoll',        'PtfmRoll'],
-                        ['PtfmYaw',         'PtfmYaw'],
-                        ['PtfmPitch',       'PtfmPitch'],
-                        ]
-
-            ssChanData = {}
-            for iChan in ssChannels:
-                try:
-                    ssChanData[iChan[1]] = np.array(stats[iChan[0]]['mean'])[windSortInd].tolist()
-                except:
-                    print('Warning: ' + iChan[0] + ' is is not in OutList')
+        # # Find all outfiles
+        # outfiles = []
+        # for file in os.listdir(output_dir):
+        #     if file.endswith('.outb'):
+        #         outfiles.append(os.path.join(output_dir,file))
+        #     # elif file.endswith('.out') and not file.endswith('.MD.out'):  
+        #     #     outfiles.append(os.path.join(output_dir,file))
 
 
-            if PLOT:
-                fig1 = plt.figure()
-                ax1 = fig1.add_subplot(211)
-                ax2 = fig1.add_subplot(212)
+        # # Initialize processing classes
+        # fp = Processing.FAST_Processing()
 
-                ax1.plot(ssChanData['Wind1VelX'],ssChanData['BlPitch1'])
-                ax2.plot(ssChanData['Wind1VelX'],ssChanData['RotSpeed'])
+        # # Set some processing parameters
+        # fp.OpenFAST_outfile_list        = outfiles
+        # fp.t0                           = self.TMax - 400            # make sure this is less than simulation time
+        # fp.parallel_analysis            = self.cores > 1
+        # fp.parallel_cores               = self.cores
+        # fp.results_dir                  = os.path.join(output_dir, 'stats')
+        # fp.verbose                      = True
+        # fp.save_LoadRanking             = True
+        # fp.save_SummaryStats            = True
+
+        # # Load and save statistics and load rankings
+        # if self.overwrite or not os.path.exists(os.path.join(output_dir,'ss_ops.yaml')):
+        #     stats, _ =fp.batch_processing()
+
+        #     if isinstance(stats,list):
+        #         stats = stats[0]
+
+        #     windSortInd = np.argsort(stats['Wind1VelX']['mean'])
+
+        #     #            FAST output name,  FAST IC name
+        #     ssChannels = [['Wind1VelX',     'Wind1VelX'],  
+        #                 ['OoPDefl1',        'OoPDefl'],
+        #                 ['IPDefl1',         'IPDefl'],
+        #                 ['BldPitch1',       'BlPitch1'],
+        #                 ['RotSpeed',        'RotSpeed'],
+        #                 ['TTDspFA',         'TTDspFA'],
+        #                 ['TTDspSS',         'TTDspSS'],
+        #                 ['PtfmSurge',       'PtfmSurge'],
+        #                 ['PtfmSway',        'PtfmSway'],
+        #                 ['PtfmHeave',       'PtfmHeave'],
+        #                 ['PtfmRoll',        'PtfmRoll'],
+        #                 ['PtfmYaw',         'PtfmYaw'],
+        #                 ['PtfmPitch',       'PtfmPitch'],
+        #                 ]
+
+        #     ssChanData = {}
+        #     for iChan in ssChannels:
+        #         try:
+        #             ssChanData[iChan[1]] = np.array(stats[iChan[0]]['mean'])[windSortInd].tolist()
+        #         except:
+        #             print('Warning: ' + iChan[0] + ' is is not in OutList')
 
 
-                fig2 = plt.figure()
-                ax1 = fig2.add_subplot(411)
-                ax2 = fig2.add_subplot(412)
-                ax3 = fig2.add_subplot(413)
-                ax4 = fig2.add_subplot(414)
+        #     if PLOT:
+        #         fig1 = plt.figure()
+        #         ax1 = fig1.add_subplot(211)
+        #         ax2 = fig1.add_subplot(212)
 
-                ax1.plot(ssChanData['Wind1VelX'],ssChanData['OoPDefl'])
-                ax2.plot(ssChanData['Wind1VelX'],ssChanData['IPDefl'])
-                ax3.plot(ssChanData['Wind1VelX'],ssChanData['TTDspFA'])
-                ax4.plot(ssChanData['Wind1VelX'],ssChanData['TTDspSS'])
-
-                fig3 = plt.figure()
-                ax1 = fig3.add_subplot(611)
-                ax2 = fig3.add_subplot(612)
-                ax3 = fig3.add_subplot(613)
-                ax4 = fig3.add_subplot(614)
-                ax5 = fig3.add_subplot(615)
-                ax6 = fig3.add_subplot(616)
-
-                ax1.plot(ssChanData['Wind1VelX'],ssChanData['PtfmSurge'])
-                ax2.plot(ssChanData['Wind1VelX'],ssChanData['PtfmSway'])
-                ax3.plot(ssChanData['Wind1VelX'],ssChanData['PtfmHeave'])
-                ax4.plot(ssChanData['Wind1VelX'],ssChanData['PtfmRoll'])
-                ax5.plot(ssChanData['Wind1VelX'],ssChanData['PtfmPitch'])
-                ax6.plot(ssChanData['Wind1VelX'],ssChanData['PtfmYaw'])
-
-                plt.show()
+        #         ax1.plot(ssChanData['Wind1VelX'],ssChanData['BlPitch1'])
+        #         ax2.plot(ssChanData['Wind1VelX'],ssChanData['RotSpeed'])
 
 
-            # output steady states to yaml
-            save_yaml(output_dir,'ss_ops.yaml',ssChanData)
+        #         fig2 = plt.figure()
+        #         ax1 = fig2.add_subplot(411)
+        #         ax2 = fig2.add_subplot(412)
+        #         ax3 = fig2.add_subplot(413)
+        #         ax4 = fig2.add_subplot(414)
+
+        #         ax1.plot(ssChanData['Wind1VelX'],ssChanData['OoPDefl'])
+        #         ax2.plot(ssChanData['Wind1VelX'],ssChanData['IPDefl'])
+        #         ax3.plot(ssChanData['Wind1VelX'],ssChanData['TTDspFA'])
+        #         ax4.plot(ssChanData['Wind1VelX'],ssChanData['TTDspSS'])
+
+        #         fig3 = plt.figure()
+        #         ax1 = fig3.add_subplot(611)
+        #         ax2 = fig3.add_subplot(612)
+        #         ax3 = fig3.add_subplot(613)
+        #         ax4 = fig3.add_subplot(614)
+        #         ax5 = fig3.add_subplot(615)
+        #         ax6 = fig3.add_subplot(616)
+
+        #         ax1.plot(ssChanData['Wind1VelX'],ssChanData['PtfmSurge'])
+        #         ax2.plot(ssChanData['Wind1VelX'],ssChanData['PtfmSway'])
+        #         ax3.plot(ssChanData['Wind1VelX'],ssChanData['PtfmHeave'])
+        #         ax4.plot(ssChanData['Wind1VelX'],ssChanData['PtfmRoll'])
+        #         ax5.plot(ssChanData['Wind1VelX'],ssChanData['PtfmPitch'])
+        #         ax6.plot(ssChanData['Wind1VelX'],ssChanData['PtfmYaw'])
+
+        #         plt.show()
+
+
+        #     # output steady states to yaml
+        #     save_yaml(output_dir,'ss_ops.yaml',ssChanData)
 
 
 
