@@ -47,11 +47,11 @@ ones shown.
     :align: center
 
     Geometry parameterization with common wind turbine and naval architecture conventions.
-   
+
 Inputs: WindIO
 --------------
 
-The parameterization of the input variables in the Geometry YAML file into *FloatingSE* is documented within the larger `WindIO <https://windio.readthedocs.io/en/latest/>`_ effort. When running *FloatingSE* directly as a standalone with a python script, users are encouraged to review the `floating-specific examples <https://github.com/WISDEM/WISDEM/tree/develop/examples/floating>`_ for syntax.
+The parameterization of the input variables in the Geometry YAML file into *FloatingSE* is documented within the larger `WindIO <https://windio.readthedocs.io/en/latest/>`_ effort. When running *FloatingSE* directly as a standalone with a python script, users are encouraged to review the `floating-specific examples <https://github.com/WISDEM/WISDEM/tree/master/examples/09_floating>`_ for syntax.
 
 Tapered Cylinders (Vertical Frustums)
 -------------------------------------
@@ -97,7 +97,7 @@ Stiffeners
 ~~~~~~~~~~
 
 The ring stiffener geometry is depicted in :numref:`fig_stiffenerCut`, and :numref:`fig_stiffenerZoom`.
-       
+
 .. _fig_stiffenerCut:
 .. figure::  /images/floatingse/stiffenerCut.*
     :width: 30%
@@ -134,7 +134,7 @@ as opposed to permanent ballast, is water that is added or removed above
 the permanent ballast to achieve neutral buoyancy as the operating
 conditions of the turbine change. A discussion of variable water balance
 in the model is found in Section :ref:`static-label`.
-   
+
 
 Buoyancy Tanks (and Heave Plates)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -215,3 +215,6 @@ the proprietary nature of commercial cost data, so cost rates and
 estimates should be considered notional.
 
 
+
+.. bibliography:: ../../references.bib
+   :filter: docname in docnames
