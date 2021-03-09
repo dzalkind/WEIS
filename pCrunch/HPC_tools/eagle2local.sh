@@ -7,11 +7,18 @@
 # rsync -aP --no-g --include="*/" --include="*.yaml" --exclude="*" dzalkind@eagle.hpc.nrel.gov:$outdir $indir
 # # rsync dzalkind@eagle.hpc.nrel.gov:$outdir/case_matrix.yaml $indir
 
-outdir='/scratch/dzalkind/WEIS-3/results/'
-indir='/Users/dzalkind/Tools/WEIS-3/results/'
+# outdir='/scratch/dzalkind/WEIS-3/results/NREL-5MW/DISCON_5MW/ntm/'
+# indir='/Users/dzalkind/Tools/WEIS-3/results/NREL-5MW/DISCON_5MW/ntm/'
+# mkdir -p $indir;
+# # rsync -aP --no-g dzalkind@eagle.hpc.nrel.gov:$outdir $indir
+# rsync -aP --no-g --include="*/" --include="*.yaml" --exclude="*" dzalkind@eagle.hpc.nrel.gov:$outdir $indir
+
+outdir='/projects/ssc/rotor_sweep/c_001_sp6_h150_D240_oR2_yaw_base/'
+indir='/Users/dzalkind/Tools/WEIS-3/sowfa_debug/rotor_sweep/c_001_sp6_h150_D240_oR2_yaw_base/'
 mkdir -p $indir;
 # rsync -aP --no-g dzalkind@eagle.hpc.nrel.gov:$outdir $indir
-rsync -aP --no-g --include="*/" --include="*.yaml" --exclude="*" dzalkind@eagle.hpc.nrel.gov:$outdir $indir
+rsync -aP --no-g --include="IEA-15-240-RWT-Monopile*" dzalkind@eagle.hpc.nrel.gov:$outdir $indir
+
 
 
 # outdir='/scratch/dzalkind/WEIS-3/results/CT-spar/DISCON-CT-spar_90/simp+pc_mode/'

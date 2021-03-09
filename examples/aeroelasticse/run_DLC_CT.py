@@ -281,7 +281,7 @@ if __name__ == "__main__":
 
     test_type_dir   = 'ntm'
 
-    tune            = 'max_tq'
+    tune            = ''
     dlc_type        = ''
 
     if tune:
@@ -291,6 +291,6 @@ if __name__ == "__main__":
         for tm, dl in zip(turbine_mods,discon_list)]
 
     for tm, co, sd in zip(turbine_mods,discon_list,save_dir_list):
-        run_DLC_CT(tm,co,sd,n_cores=6,tune=tune,dlc_type=dlc_type)
+        run_DLC_CT(tm,co,sd,n_cores=1,tune=tune,dlc_type=dlc_type)
     
     

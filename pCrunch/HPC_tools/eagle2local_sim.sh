@@ -2,11 +2,15 @@
 
 
 # --- Steps ---
-outdir='/scratch/dzalkind/WEIS-3/results/CT-barge/DISCON-CT-barge_90/simp+pc_mode/'
-indir='/Users/dzalkind/Tools/WEIS-3/results/CT-barge/DISCON-CT-barge_90/simp+pc_mode/'
+outdir='/projects/wfcn/mult_turbines/IEA_10MW_ts_0.02/'
+indir='/Users/dzalkind/Tools/WEIS-3/sowfa_debug/IEA_10MW_ts_0.02/'
+filebase='IEA-10.0-198-RWT*'
 mkdir -p $indir;
-rsync -aP --no-g --include="*/" --include="step_10.*" --exclude="*" dzalkind@eagle.hpc.nrel.gov:$outdir $indir
-rsync -aP --no-g --include="*/" --include="step_14.*" --exclude="*" dzalkind@eagle.hpc.nrel.gov:$outdir $indir
+rsync -aP --no-g --include="*/" --include=$filebase --exclude="*" --exclude="Airfoils/" dzalkind@eagle.hpc.nrel.gov:$outdir $indir
+# rsync -aP --no-g --include="*/" --include="iea15mw_38.*" --exclude="*" --exclude="Airfoils/" dzalkind@eagle.hpc.nrel.gov:$outdir $indir
+# rsync -aP --no-g --include="*/" --include="iea15mw_48.*" --exclude="*" --exclude="Airfoils/" dzalkind@eagle.hpc.nrel.gov:$outdir $indir
+# rsync -aP --no-g --include="*/" --include="iea15mw_58.*" --exclude="*" --exclude="Airfoils/" dzalkind@eagle.hpc.nrel.gov:$outdir $indir
+# rsync -aP --no-g --include="*/" --include="iea15mw_38.*" --exclude="*" --exclude="Airfoils/" dzalkind@eagle.hpc.nrel.gov:$outdir $indir
 
 
 # --- NTM ---
