@@ -54,8 +54,8 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     # DLC inputs
     iec.dlc_inputs = {}
     if dlc_type == 'full':
-        wind_speeds = [np.arange(int(cut_in), int(cut_out), 2)]
-        iec.dlc_inputs['Seeds'] = [1,2,3,4,5,6]
+        wind_speeds = np.arange(int(cut_in), int(cut_out), 2)
+        iec.dlc_inputs['Seeds'] = [[1,2,3,4,5,6]]
         
     elif dlc_type == 'lite':
         wind_speeds = [12,14,16]
