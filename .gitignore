@@ -24,6 +24,9 @@ develop-eggs
 
 # Output files
 outputs/
+results/
+sowfa_debug/
+wind/
 *.out
 
 # Sphinx
