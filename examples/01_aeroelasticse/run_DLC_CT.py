@@ -62,7 +62,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
         iec.dlc_inputs['Seeds'] = [[25]]
 
     else:
-        wind_speeds = [20]
+        wind_speeds = [8]
         iec.dlc_inputs['Seeds'] = [[25]]
 
 
@@ -170,6 +170,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
 
     # Specify rosco controller
     rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon_carbon_trust.dylib'
+    rosco_dll = ''
 
     if rosco_dll:
         case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[rosco_dll], 'group':0}
@@ -234,7 +235,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
         fastBatch                   = runFAST_pywrapper_batch(FAST_ver='OpenFAST',dev_branch = True)
         
         # Select Turbine Model
-        model_dir                   = os.path.join(os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) ), 'OpenFAST_models')
+        model_dir                   = os.path.join(os.path.dirname( ( os.path.realpath(__file__) ) ), 'OpenFAST_models')
 
         fastBatch.select_CT_model(turbine_model,model_dir)
 
@@ -272,10 +273,10 @@ if __name__ == "__main__":
 
     # set up cases
     turbine_mods = [
-                    'CT-spar',
+                    'CT-TLP',
                     ]
     discon_list = [
-                    '/Users/dzalkind/Tools/WEIS-3/examples/OpenFAST_models/CT15MW-spar/ServoData/DISCON_CT-spar_lowBW.IN',
+                    '/Users/dzalkind/Tools/WEIS-3/examples/01_aeroelasticse/OpenFAST_models/CT15MW-TLP/ServoData/DISCON-CT-TLP.IN',
                     ]
 
     test_type_dir   = 'ntm'
