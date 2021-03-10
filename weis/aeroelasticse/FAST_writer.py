@@ -1350,9 +1350,9 @@ class InputWriter_OpenFAST(InputWriter_Common):
         controller.Fl_Mode              = int(self.fst_vt['DISCON_in']['Fl_Mode'])
         controller.Flp_Mode             = int(self.fst_vt['DISCON_in']['Flp_Mode'])
         controller.F_LPFDamping         = self.fst_vt['DISCON_in']['F_LPFDamping']
-        # controller.f_we_cornerfreq      = self.fst_vt['DISCON_in']['F_WECornerFreq']
+        controller.f_we_cornerfreq      = self.fst_vt['DISCON_in']['F_WECornerFreq']
         controller.f_ss_cornerfreq      = self.fst_vt['DISCON_in']['F_SSCornerFreq']
-        # controller.f_fl_highpassfreq    = self.fst_vt['DISCON_in']['F_FlHighPassFreq']
+        controller.f_fl_highpassfreq    = self.fst_vt['DISCON_in']['F_FlHighPassFreq']
         controller.pitch_op_pc          = self.fst_vt['DISCON_in']['PC_GS_angles']
         controller.pc_gain_schedule.Kp  = self.fst_vt['DISCON_in']['PC_GS_KP']
         controller.pc_gain_schedule.Ki  = self.fst_vt['DISCON_in']['PC_GS_KI']
@@ -1381,6 +1381,20 @@ class InputWriter_OpenFAST(InputWriter_Common):
         controller.Ki_flap              = self.fst_vt['DISCON_in']['Flp_Ki']
         controller.flp_angle            = self.fst_vt['DISCON_in']['Flp_Angle']
         controller.flp_maxpit           = self.fst_vt['DISCON_in']['Flp_MaxPit']
+
+        controller.PwC_Mode             = self.fst_vt['DISCON_in']['PwC_Mode']
+        controller.OL_Mode              = self.fst_vt['DISCON_in']['OL_Mode']
+
+        controller.PwC_R                = self.fst_vt['DISCON_in']['PwC_PwrRating']
+        controller.PwC_BldPitchMin      = self.fst_vt['DISCON_in']['PwC_BldPitchMin']
+        controller.PwC_ConstPwr         = self.fst_vt['DISCON_in']['PwC_ConstPwr']
+        controller.PwC_OpenLoop_Inp     = self.fst_vt['DISCON_in']['PwC_OpenLoop_Inp']
+
+        controller.OL_Filename             = self.fst_vt['DISCON_in']['OL_Filename']
+        controller.OL_Ind_Breakpoint       = int(self.fst_vt['DISCON_in']['Ind_Breakpoint'])
+        controller.OL_Ind_BldPitch         = int(self.fst_vt['DISCON_in']['Ind_BldPitch'])
+        controller.OL_Ind_GenTq            = int(self.fst_vt['DISCON_in']['Ind_GenTq'])
+        controller.OL_Ind_YawRate          = int(self.fst_vt['DISCON_in']['Ind_YawRate'])
 
         turbine = type('', (), {})()
         turbine.Cp = type('', (), {})()

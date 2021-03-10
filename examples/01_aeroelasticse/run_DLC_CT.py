@@ -184,8 +184,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
         case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[path2dll], 'group':0}
 
     # Control (DISCON) Inputs
-    file_processing = ROSCO_utilities.FileProcessing()
-    discon_vt = file_processing.read_DISCON(control)
+    discon_vt = ROSCO_utilities.read_DISCON(control)
     for discon_input in discon_vt:
         case_inputs[('DISCON_in',discon_input)] = {'vals': [discon_vt[discon_input]], 'group': 0}
 
