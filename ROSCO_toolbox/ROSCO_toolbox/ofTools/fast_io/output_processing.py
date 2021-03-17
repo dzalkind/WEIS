@@ -236,6 +236,7 @@ class output_processing():
         fig, ax = plt.subplots(num=fignum)
 
         leg = []
+        max_periods = []
         for channel, run in cases:
             try:
                 # Find time
@@ -255,6 +256,7 @@ class output_processing():
                     max_ind         = np.argmax(y[valid_freq_ind])
                     max_freq        = valid_freq[max_ind]
                     print('({},{}) max period = {}'.format(channel,run,1/max_freq))
+                    max_periods.append(1/max_freq)
 
                 # Plot data
                 plt.loglog(fq, y, label='{}, run: {}'.format(channel, str(run)))
@@ -301,7 +303,7 @@ class output_processing():
         if showplot:
             plt.show()
 
-        return fig, ax
+        return fig, ax, max_periods
 
 
 def load_ascii_output(filename):
@@ -587,6 +589,7 @@ def trim_output(fast_data, tmin=None, tmax=None, verbose=False):
 if __name__=='__main__':
     outfiles = [
     '/Users/dzalkind/Tools/WEIS-3/results/CT-semi/ntm_long/DISCON-CT-semi/iea15mw_44.outb',
+    '/Users/dzalkind/Tools/WEIS-3/results/CT-semi/ntm_long/DISCON-CT-semi/iea15mw_38.outb',
 #     '/Users/dzalkind/Tools/ROSCO_toolbox/Examples/examples_out/13_Simulink_Test/OL_Test_1.SFunc.outb',
 #     '/Users/dzalkind/Tools/WEIS-3/sowfa_debug/rotor_sweep/c_001_sp6_h150_D240_oR2_yaw_base/IEA-15-240-RWT-Monopile.1.T1.out',
 #     '/Users/dzalkind/Tools/WEIS-3/sowfa_debug/rotor_sweep/c_001_sp6_h150_D240_oR2_yaw_base/IEA-15-240-RWT-Monopile.2.T2.out',
@@ -597,7 +600,7 @@ if __name__=='__main__':
     op = output_processing()
     fast_out = op.load_fast_out(outfiles, tmin=0)
 
-    op.plot_spectral(fast_out,[('PtfmYaw',0)],showplot=True,detrend=True)
+    _,_,max_periods = op.plot_spectral(fast_out,[('PtfmYaw',0),('PtfmYaw',1)],showplot=False,detrend=True)
 
 
     print('here')
