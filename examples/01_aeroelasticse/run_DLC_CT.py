@@ -142,6 +142,7 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     case_inputs[("Fst","TMax")]              = {'vals':[TMax], 'group':0}
     case_inputs[("Fst","TStart")]            = {'vals':[TStart], 'group':0}
     case_inputs[("Fst","OutFileFmt")]        = {'vals':[2], 'group':0}
+    case_inputs[("Fst","DT")]                = {'vals':[1/40], 'group':0}
     # case_inputs[("ElastoDyn","TwFADOF1")]    = {'vals':["True"], 'group':0}
     # case_inputs[("ElastoDyn","TwFADOF2")]    = {'vals':["True"], 'group':0}
     # case_inputs[("ElastoDyn","TwSSDOF1")]    = {'vals':["True"], 'group':0}
@@ -161,12 +162,14 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     case_inputs[("ServoDyn","PCMode")]       = {'vals':[5], 'group':0}
     case_inputs[("ServoDyn","VSContrl")]     = {'vals':[5], 'group':0}
 
+
     # Stop Generator from Turning Off
     case_inputs[('ServoDyn', 'GenTiStr')] = {'vals': ['True'], 'group': 0}
     case_inputs[('ServoDyn', 'GenTiStp')] = {'vals': ['True'], 'group': 0}
     case_inputs[('ServoDyn', 'SpdGenOn')] = {'vals': [0.], 'group': 0}
     case_inputs[('ServoDyn', 'TimGenOn')] = {'vals': [0.], 'group': 0}
     case_inputs[('ServoDyn', 'GenModel')] = {'vals': [1], 'group': 0}
+    case_inputs[('ElastoDyn', 'YawDOF')] = {'vals': ['True'], 'group': 0}
 
     # Specify rosco controller
     rosco_dll = '/Users/dzalkind/Tools/ROSCO_toolbox/ROSCO/build/libdiscon_carbon_trust.dylib'
@@ -193,13 +196,55 @@ def run_DLC_CT(turbine_model,control,save_dir,n_cores=1,tune=[],dlc_type='full')
     # load default params     
     # 
     if tune == 'pc_mode':     
-        control_param_yaml  = os.path.join(weis_dir,'examples/OpenFAST_models/CT15MW-spar/ServoData/IEA15MW-CT-spar.yaml')
+        control_param_yaml  = os.path.join(
+            weis_dir,
+            'examples/01_aeroelasticse/OpenFAST_models/CT15MW-spar/ServoData/CT-spar.yaml'
+            )
         omega = np.linspace(.05,.25,12,endpoint=True).tolist()
         zeta  = [2.25]
         control_case_inputs = sweep_pc_mode(control_param_yaml,omega,zeta,group=3)
         case_inputs.update(control_case_inputs)
     elif tune == 'max_tq':
         case_inputs[('DISCON_in','VS_MaxTq')] = {'vals': [19624046.66639, 1.5*19624046.66639], 'group': 3}
+    elif tune == 'yaw_oss':
+        control_param_yaml  = os.path.join(
+            weis_dir,
+            'examples/01_aeroelasticse/OpenFAST_models/CT15MW-spar/ServoData/CT-spar.yaml'
+            )
+
+        inps                = yaml.safe_load(open(control_param_yaml))
+        path_params         = inps['path_params']
+        turbine_params      = inps['turbine_params']
+        controller_params   = inps['controller_params']
+
+        # make default controller, turbine objects for ROSCO_toolbox
+        turbine             = ROSCO_turbine.Turbine(turbine_params)
+        turbine.load_from_fast( path_params['FAST_InputFile'],path_params['FAST_directory'], dev_branch=True)
+
+        # Add open loop yaw controller params
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        ol_yaw_input_file = os.path.join(save_dir,'ol_yaw_input.dat')
+
+        ol_params               = {}
+        ol_params['yaw_angle']  = {}
+        ol_params['filename']   = ol_yaw_input_file
+
+        ol_params['yaw_angle']['sine']              = {}
+        ol_params['yaw_angle']['sine']['amplitude'] = 0.0524
+        ol_params['yaw_angle']['sine']['period']    = 20
+
+        controller_params['open_loop']     = ol_params
+
+        controller          = ROSCO_controller.Controller(controller_params)
+
+        ROSCO_utilities.write_ol_control(controller)
+
+        case_inputs[('DISCON_in','OL_Filename')] = {'vals':[ol_yaw_input_file], 'group':0}
+        case_inputs[('DISCON_in','Ind_YawRate')] = {'vals':[controller.OL_Ind_YawRate], 'group':0}
+        case_inputs[('DISCON_in','OL_Mode')] = {'vals':[controller.OL_Mode], 'group':0}
+        case_inputs[('ServoDyn','YCMode')] = {'vals':[5], 'group':0}
+        case_inputs[('ServoDyn','TYCOn')] = {'vals':[0], 'group':0}
 
     # Aerodyn Params
     # case_inputs[("AeroDyn15","TwrAero")]     = {'vals':["True"], 'group':0}
@@ -273,15 +318,15 @@ if __name__ == "__main__":
 
     # set up cases
     turbine_mods = [
-                    'CT-TLP',
+                    'CT-spar',
                     ]
     discon_list = [
-                    '/Users/dzalkind/Tools/WEIS-3/examples/01_aeroelasticse/OpenFAST_models/CT15MW-TLP/ServoData/DISCON-CT-TLP.IN',
+                    '/Users/dzalkind/Tools/WEIS-3/examples/01_aeroelasticse/OpenFAST_models/CT15MW-spar/ServoData/DISCON-CT-spar.IN',
                     ]
 
     test_type_dir   = 'ntm'
 
-    tune            = ''
+    tune            = 'yaw_oss'
     dlc_type        = ''
 
     if tune:
