@@ -765,7 +765,7 @@ class OpenLoopControl(object):
 
     def __init__(self,controller,ol_control_params):
         self.dt = 1/20
-        self.max_time  = 200
+        self.max_time  = 3600
 
         ol_timeseries = {}
         # common time input
