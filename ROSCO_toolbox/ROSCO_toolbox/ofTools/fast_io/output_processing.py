@@ -11,6 +11,7 @@ trim_output
 '''
 import os
 import numpy as np
+from scipy import signal
 import matplotlib.pyplot as plt
 from matplotlib import transforms
 from itertools import takewhile
@@ -218,9 +219,9 @@ class output_processing():
         fig, ax - corresponds to generated figure
         '''
 
-        if not fastdict:
+        if not fastout:
             try:
-                fastdict = self.fastout
+                fastout = self.fastout
             except:
                 Error('Cannot plot OpenFAST output data before it is loaded with load_fast_out.')
         if not cases:
@@ -242,6 +243,19 @@ class output_processing():
                 # Load PSD
                 fq, y, info = spectral.fft_wrap(
                     Time, fastout[run][channel], averaging=averaging, averaging_window=averaging_window, detrend=detrend, nExp=nExp)
+
+                # Filter data
+                if True:
+                    n = 12
+                    b = np.ones(n)/n
+                    y = signal.filtfilt(b,1,y)
+
+                    valid_freq_ind  = fq > 4e-3
+                    valid_freq      = fq[valid_freq_ind]
+                    max_ind         = np.argmax(y[valid_freq_ind])
+                    max_freq        = valid_freq[max_ind]
+                    print('({},{}) max period = {}'.format(channel,run,1/max_freq))
+
                 # Plot data
                 plt.loglog(fq, y, label='{}, run: {}'.format(channel, str(run)))
             except:
@@ -569,3 +583,22 @@ def trim_output(fast_data, tmin=None, tmax=None, verbose=False):
 
 
     return fast_data
+
+if __name__=='__main__':
+    outfiles = [
+    '/Users/dzalkind/Tools/WEIS-3/results/CT-semi/ntm_long/DISCON-CT-semi/iea15mw_44.outb',
+#     '/Users/dzalkind/Tools/ROSCO_toolbox/Examples/examples_out/13_Simulink_Test/OL_Test_1.SFunc.outb',
+#     '/Users/dzalkind/Tools/WEIS-3/sowfa_debug/rotor_sweep/c_001_sp6_h150_D240_oR2_yaw_base/IEA-15-240-RWT-Monopile.1.T1.out',
+#     '/Users/dzalkind/Tools/WEIS-3/sowfa_debug/rotor_sweep/c_001_sp6_h150_D240_oR2_yaw_base/IEA-15-240-RWT-Monopile.2.T2.out',
+#     '/Users/dzalkind/Tools/WEIS-3/results/CT-barge/DISCON-CT-barge_hiBW/simp/step_1.outb',
+    ]
+    
+
+    op = output_processing()
+    fast_out = op.load_fast_out(outfiles, tmin=0)
+
+    op.plot_spectral(fast_out,[('PtfmYaw',0)],showplot=True,detrend=True)
+
+
+    print('here')
+
