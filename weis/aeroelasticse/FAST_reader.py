@@ -1021,7 +1021,7 @@ class InputReader_OpenFAST(InputReader_Common):
         self.fst_vt['AeroDyn15']['WakeMod']       = int(f.readline().split()[0])
         self.fst_vt['AeroDyn15']['AFAeroMod']     = int(f.readline().split()[0])
         self.fst_vt['AeroDyn15']['TwrPotent']     = int(f.readline().split()[0])
-        self.fst_vt['AeroDyn15']['TwrShadow']     = int(f.readline().split()[0])
+        self.fst_vt['AeroDyn15']['TwrShadow']     = bool_read(f.readline().split()[0])
         self.fst_vt['AeroDyn15']['TwrAero']       = bool_read(f.readline().split()[0])
         self.fst_vt['AeroDyn15']['FrozenWake']    = bool_read(f.readline().split()[0])
         if self.FAST_ver.lower() != 'fast8':
