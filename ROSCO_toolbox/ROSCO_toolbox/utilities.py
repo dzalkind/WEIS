@@ -572,7 +572,11 @@ def write_ol_control(controller):
     ol_timeseries = controller.OpenLoopControl.ol_timeseries
     
     if 'time' in ol_timeseries:
-        ol_control_array = np.zeros([len(ol_timeseries['time']),len(ol_timeseries)])
+        num_timeseries = len(ol_timeseries)
+        if 'yaw_angle' in ol_timeseries:
+            num_timeseries -= 1         # only yaw_rate will be in timeseries array
+
+        ol_control_array = np.zeros([len(ol_timeseries['time']),num_timeseries])
         ol_control_array[:,0] = ol_timeseries['time']
 
     else:
