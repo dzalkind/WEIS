@@ -587,7 +587,7 @@ def trim_output(fast_data, tmin=None, tmax=None, verbose=False):
     return fast_data
 
 if __name__=='__main__':
-    outfiles = [
+    out_files = [
     '/Users/dzalkind/Tools/WEIS-3/results/CT-semi/ntm_long/DISCON-CT-semi/iea15mw_44.outb',
     '/Users/dzalkind/Tools/WEIS-3/results/CT-semi/ntm_long/DISCON-CT-semi/iea15mw_38.outb',
 #     '/Users/dzalkind/Tools/ROSCO_toolbox/Examples/examples_out/13_Simulink_Test/OL_Test_1.SFunc.outb',
@@ -596,12 +596,36 @@ if __name__=='__main__':
 #     '/Users/dzalkind/Tools/WEIS-3/results/CT-barge/DISCON-CT-barge_hiBW/simp/step_1.outb',
     ]
     
-
-    op = output_processing()
-    fast_out = op.load_fast_out(outfiles, tmin=0)
-
-    _,_,max_periods = op.plot_spectral(fast_out,[('PtfmYaw',0),('PtfmYaw',1)],showplot=False,detrend=True)
+    
 
 
-    print('here')
+    # std_yaw_fast = []
+    # mean_ws = []
+    # max_per = []
+    # yaw_amp = []
+    # for out in out_files[:6]:
+    #     print('loading ' + out)
+    #     op = output_processing()
+    #     fast_out = op.load_fast_out(out, tmin=0)
+        
+    #     _,_,max_periods = op.plot_spectral(fast_out,[('PtfmYaw',0)],showplot=False,detrend=True)
+    #     max_per.append(float(max_periods[0]))
+        
+    #     yaw_fast = fast_out[0]['PtfmYaw']
+    #     ws_fast = fast_out[0]['Wind1VelX']
+    #     std_yaw_fast.append(float(np.std(yaw_fast)))
+    #     mean_ws.append(float(np.mean(ws_fast)))
+    #     yaw_amp.append(float(np.std(yaw_fast) * np.sqrt(2)))
+
+
+
+    # out_data = {}
+    # out_data['std_yaw_fast'] = std_yaw_fast
+    # out_data['mean_ws'] = mean_ws
+    # out_data['yaw_amp'] = yaw_amp
+    # out_data['max_per'] = max_per
+
+    # print(out_data)
+
+    # FileTools.save_yaml('.', 'yaw_oss.yaml', out_data)
 
