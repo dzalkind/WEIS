@@ -233,11 +233,11 @@ def power_curve_control(discon_file,runDir, namebase,rosco_dll=''):
     # 2.x in controller tuning register
 
     # Default Runtime
-    T_max   = 800.
+    T_max   = 400.
 
 
     # Run conditions
-    U = np.arange(4,24.5,.5).tolist()
+    U = np.arange(4,14.5,.5).tolist()
 
     case_inputs = {}
     # simulation settings
@@ -295,8 +295,7 @@ def power_curve_control(discon_file,runDir, namebase,rosco_dll=''):
         case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[rosco_dll], 'group':0}
 
     # Control (DISCON) Inputs
-    file_processing = ROSCO_utilities.FileProcessing()
-    discon_vt = file_processing.read_DISCON(discon_file)
+    discon_vt = ROSCO_utilities.read_DISCON(discon_file)
     for discon_input in discon_vt:
         case_inputs[('DISCON_in',discon_input)] = {'vals': [discon_vt[discon_input]], 'group': 0}
 
@@ -395,8 +394,7 @@ def simp_step(discon_file,runDir, namebase,rosco_dll='',tune=''):
         case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[rosco_dll], 'group':0}
 
     # Control (DISCON) Inputs
-    file_processing = ROSCO_utilities.FileProcessing()
-    discon_vt = file_processing.read_DISCON(discon_file)
+    discon_vt = ROSCO_utilities.read_DISCON(discon_file)
     for discon_input in discon_vt:
         case_inputs[('DISCON_in',discon_input)] = {'vals': [discon_vt[discon_input]], 'group': 0}
 
@@ -564,8 +562,7 @@ def steps(discon_file,runDir, namebase,rosco_dll=''):
         case_inputs[("ServoDyn","DLL_FileName")] = {'vals':[rosco_dll], 'group':0}
 
     # Control (DISCON) Inputs
-    file_processing = ROSCO_utilities.FileProcessing()
-    discon_vt = file_processing.read_DISCON(discon_file)
+    discon_vt = ROSCO_utilities.read_DISCON(discon_file)
     for discon_input in discon_vt:
         case_inputs[('DISCON_in',discon_input)] = {'vals': [discon_vt[discon_input]], 'group': 0}
 
@@ -623,6 +620,8 @@ def sweep_pc_mode(cont_yaml,omega=np.linspace(.05,.35,8,endpoint=True).tolist(),
     case_inputs[('DISCON_in', 'PC_GS_KI')] = {'vals': pc_ki, 'group': group}
 
     return case_inputs
+
+
 
 
 def RotorSE_rated(fst_vt, runDir, namebase, TMax, turbine_class, turbulence_class, Vrated, U_init=[], Omega_init=[], pitch_init=[], Turbsim_exe='', ptfm_U_init=[], ptfm_pitch_init=[], ptfm_surge_init=[], ptfm_heave_init=[], metocean_U_init=[], metocean_Hs_init=[], metocean_Tp_init=[]):
