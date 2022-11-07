@@ -1110,6 +1110,10 @@ properties:
                         type: boolean
                         default: True
                         description: Platform yaw rotation DOF (flag)
+                    InitialConditions:
+                        type: string
+                        default: unused
+                        description: Yaml with mean wind speed vs. intitial condition. Absolute or paths relative to base WEIS dir
                     OoPDefl:
                         type: number
                         minimum: 0.0

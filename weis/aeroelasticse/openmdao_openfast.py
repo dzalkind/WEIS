@@ -1873,6 +1873,19 @@ class FASTLoadCases(ExplicitComponent):
         case_inputs[("DLC","MeanWS")] = {'vals':mean_wind_speed, 'group':1}
         fst_vt['DLC'] = []
 
+        # Set initial conditions (will overwrite other inputs)
+        ic_yaml = modopt['Level3']['ElastoDyn']['InitialConditions']
+        if not os.path.isabs(ic_yaml):
+            ic_yaml = os.path.join(weis_dir,ic_yaml)
+        
+        if ic_yaml != 'unused':
+            ics = FileTools.load_yaml(ic_yaml)
+            for ic in ics:
+                if ic != 'MeanWS':
+                    ic_vals = np.interp(mean_wind_speed,ics['MeanWS'],ics[ic])
+                    case_inputs[("ElastoDyn",ic)] = {'vals':ic_vals,'group':1}
+
+
         # Append current DLC to full list of cases
         case_list, case_name = CaseGen_General(case_inputs, self.FAST_runDirectory, self.FAST_InputFile)
         channels= self.output_channels(fst_vt)
