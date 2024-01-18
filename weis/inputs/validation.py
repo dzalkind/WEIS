@@ -81,8 +81,10 @@ def write_analysis_yaml(instance, foutput):
     validate_without_defaults(instance, merged_schema)
     sfx_str = ".yaml"
     if foutput[-5:] == sfx_str:
-        foutput = foutput[-5:]
+        foutput = foutput[:-5]
     elif foutput[-4:] == ".yml":
-        foutput = foutput[-4:]
+        foutput = foutput[:-4]
     sfx_str = "-analysis.yaml"
-    write_yaml(instance, foutput+sfx_str)
+    foutput += sfx_str
+    write_yaml(instance, foutput)
+    return foutput
