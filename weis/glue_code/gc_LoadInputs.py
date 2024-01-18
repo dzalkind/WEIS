@@ -29,6 +29,10 @@ class WindTurbineOntologyPythonWEIS(WindTurbineOntologyPython):
 
     def set_weis_data(self):
 
+        # make the folder_output relative to the input, if it's a relative path
+        analysis_input_dir = os.path.dirname(self.analysis_options['fname_input_analysis'])
+        self.analysis_options['general']['folder_output'] = os.path.join(analysis_input_dir,self.analysis_options['general']['folder_output'])
+
         # Directory of modeling option input, if we want to use it for relative paths
         mod_opt_dir = os.path.split(self.modeling_options['fname_input_modeling'])[0]
 
