@@ -59,12 +59,14 @@ def write_modeling_yaml(instance, foutput):
     validate_without_defaults(instance, weis_schema)
     sfx_str = ".yaml"
     if foutput[-5:] == sfx_str:
-        foutput = foutput[-5:]
+        foutput = foutput[:-5]
     elif foutput[-4:] == ".yml":
-        foutput = foutput[-4:]
+        foutput = foutput[:-4]
     sfx_str = "-modeling.yaml"
     instance2 = simple_types(instance)
-    write_yaml(instance2, foutput+sfx_str)
+    foutput += sfx_str    
+    write_yaml(instance2, foutput)
+    return foutput
 
 def get_analysis_schema():
     wisdem_schema = load_yaml(fschema_opt_wisdem)
