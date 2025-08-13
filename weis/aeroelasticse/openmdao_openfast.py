@@ -632,10 +632,6 @@ class FASTLoadCases(ExplicitComponent):
             if not isinstance(fst_vt['AeroDyn']['TwrCb'],list):
                 fst_vt['AeroDyn']['TwrCb'] = [fst_vt['AeroDyn']['TwrCb']] * len(fst_vt['AeroDyn']['TwrElev'])
 
-            # Fix AddF0: Should be a n x 1 array (list of lists):
-            if fst_vt['HydroDyn']:
-                fst_vt['HydroDyn']['AddF0'] = [[F0] for F0 in fst_vt['HydroDyn']['AddF0']]
-
             if modopt['ROSCO']['flag']:
                 fst_vt['DISCON_in'] = modopt['General']['openfast_configuration']['fst_vt']['DISCON_in']
 
