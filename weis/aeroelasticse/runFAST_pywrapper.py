@@ -252,7 +252,8 @@ class runFAST_pywrapper(object):
 
         # For analysis later
         for i_blade in range(self.fst_vt['ElastoDyn']['NumBl']):
-            output.add_gradient_channel(f'BldPitch{i_blade+1}', f'dBldPitch{i_blade+1}')
+            if f'BldPitch{i_blade+1}' in output.channels:
+                output.add_gradient_channel(f'BldPitch{i_blade+1}', f'dBldPitch{i_blade+1}')
                     
         if not self.keep_time:
             output.process(goodman_correction=self.goodman)
