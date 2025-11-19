@@ -1765,7 +1765,9 @@ class DLCGenerator(object):
         # Power production steady wind
 
         # Get default options
-        dlc_options.update(self.default_options)   
+        dlc_options_case = self.default_options.copy()
+        dlc_options_case.update(dlc_options)
+        dlc_options = dlc_options_case.copy()
         
         # DLC Specific options:
         dlc_options['label'] = 'steady'
