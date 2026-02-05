@@ -745,10 +745,6 @@ class FASTLoadCases(ExplicitComponent):
                 fst_vt['AeroDyn']['TwrTI'] = [fst_vt['AeroDyn']['TwrTI']] * len(fst_vt['AeroDyn']['TwrElev'])
             if not isinstance(fst_vt['AeroDyn']['TwrCb'],list):
                 fst_vt['AeroDyn']['TwrCb'] = [fst_vt['AeroDyn']['TwrCb']] * len(fst_vt['AeroDyn']['TwrElev'])
-            
-            # Fix AddF0: Should be a n x 1 array (list of lists):
-            if fst_vt['HydroDyn']:
-                fst_vt['HydroDyn']['AddF0'] = [[F0] for F0 in fst_vt['HydroDyn']['AddF0']]
 
             if modopt['ROSCO']['flag']:
                 # This is usually populated in tune_rosco if the ROSCO flag is true
