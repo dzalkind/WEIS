@@ -426,6 +426,11 @@ class DLCGenerator(object):
         # Generate case list, both generic and OpenFAST specific
         self.set_time_options(dlc_options, generic_case_inputs)
         met_options = self.gen_met_options(dlc_options, sea_state=dlc_options['sea_state'])
+
+        # Add model options that are needed in all dlcs (e.g., wave_model, wake_mod)
+        for key in ['wave_model', 'wake_mod']:
+            if key in dlc_options and not key in generic_case_inputs[0]:
+                generic_case_inputs[0].append(key) # add to first group of generic_case_inputs
         
         # Add met options to dlc_options for output reporting
         dlc_options.update(met_options)
