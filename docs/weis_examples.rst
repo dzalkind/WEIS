@@ -41,7 +41,7 @@ This method allows users to define and vary OpenFAST inputs systematically:
 - **Example Usage**:
   
   - The script ``run_openfast_cases.py`` simulates a set of steady-state cases.
-  - Users define the initial conditions (corresponding to each wind speed) and wind speed in the same ``group``.
+  - Users define the initial conditions (corresponding to each inflow speed) and inflow speed in the same ``group``.
 
 Running Design Load Cases (DLCs)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,7 +55,7 @@ This approach uses the WEIS driver along with a full set of inputs:
 - **Modeling Inputs**:
   
   - **OpenFAST Model**: Defines the location of the pre-existing turbine model.
-  - **ROSCO Controller Input**: Specifies the control configuration.  See the ``ROSCO`` section and the ``tuning_yaml`` for details.
+  - **ROSCO Controller Input**: Specifies the control configuration.  See the ``ROSCO`` section and the ``tuning_yaml`` for details.  Setting ``ROSCO: flag: False`` bypasses ROSCO toolbox tuning, allowing you to run with a given DISCON library as-is (i.e., using the controller already specified in the OpenFAST model).
   - **Design Load Cases (DLCs)**: Configures the load cases. Users should see the :ref:`section-dlc_driver` for detailed DLC set up instructions.
 
 - **Geometry Inputs**:

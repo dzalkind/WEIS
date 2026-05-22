@@ -1,12 +1,46 @@
 # WTCBench
 
-[![Coverage Status](https://coveralls.io/repos/github/WISDEM/WEIS/badge.svg?branch=develop)](https://coveralls.io/github/WISDEM/WEIS?branch=develop)
-[![Actions Status](https://github.com/WISDEM/WEIS/workflows/CI_WEIS/badge.svg?branch=develop)](https://github.com/WISDEM/WEIS/actions)
+[![Coverage Status](https://coveralls.io/repos/github/NLRWindSystems/WEIS/badge.svg?branch=develop)](https://coveralls.io/github/NLRWindSystems/WEIS?branch=develop)
+[![Actions Status](https://github.com/NLRWindSystems/WEIS/workflows/CI_WEIS/badge.svg?branch=develop)](https://github.com/NLRWindSystems/WEIS/actions)
 [![Documentation Status](https://readthedocs.org/projects/weis/badge/?version=develop)](https://weis.readthedocs.io/en/develop/?badge=develop)
 [![DOI](https://zenodo.org/badge/289320573.svg)](https://zenodo.org/badge/latestdoi/289320573)
 
-WTCBench is a fork of the [WEIS](https://github.com/WISDEM/WEIS) repository, focused on controller benchmarking and performance.
+WEIS, Wind Energy with Integrated Servo-control, performs multifidelity co-design of wind turbines. WEIS is a framework that combines multiple NLR-developed tools to enable design optimization of floating offshore wind turbines.
 
+Author: [NLR Wind Systems & OpenFAST & Control Teams](mailto:systems.engineering@nrel.gov)
+
+## Part of the WETO Stack
+
+WEIS is primarily developed with the support of the U.S. Department of Energy and is part of the [WETO Software Stack](https://nrel.github.io/WETOStack). For more information and other integrated modeling software, see:
+- [Portfolio Overview](https://nrel.github.io/WETOStack/portfolio_analysis/overview.html)
+- [Entry Guide](https://nrel.github.io/WETOStack/_static/entry_guide/index.html)
+- [Systems Engineering Workshop](https://nrel.github.io/WETOStack/workshops/user_workshops_2024.html#systems-engineering)
+- [OpenFAST Workshop](https://nrel.github.io/WETOStack/workshops/user_workshops_2024.html#openfast-ecosystem)
+
+## Documentation
+
+See local documentation in the `docs`-directory or access the online version at <https://weis.readthedocs.io/en/latest/>
+
+## Packages
+
+WEIS integrates in a unique workflow four models:
+* [WISDEM](https://github.com/NLRWindSystems/WISDEM) is a set of models for assessing overall wind plant cost of energy (COE).
+* [OpenFAST](https://github.com/OpenFAST/openfast) is the community model for wind turbine simulation to be developed and used by research laboratories, academia, and industry.
+* [TurbSim](https://www.nrel.gov/docs/fy09osti/46198.pdf) is a stochastic, full-field, turbulent-wind simulator.
+* [ROSCO](https://github.com/NREL/ROSCO) provides an open, modular and fully adaptable baseline wind turbine controller to the scientific community.
+* [RAFT](https://github.com/NLRWindSystems/RAFT) is a tool for assessing the performance of floating offshore wind turbines in the frequency domain. RAFT is designed to be computationally efficient while still capturing the essential physics of floating offshore wind turbine dynamics, making it a valuable tool for preliminary design and optimization studies.
+
+In addition, three external libraries are added:
+* [pCrunch](https://github.com/NREL/pCrunch) is a collection of tools to ease the process of parsing large amounts of OpenFAST output data and conduct loads analysis.
+* [pyOptSparse](https://github.com/mdolab/pyoptsparse) is a framework for formulating and efficiently solving nonlinear constrained optimization problems.
+
+The core WEIS modules are:
+ * _aeroelasticse_ is a wrapper to call [OpenFAST](https://github.com/OpenFAST/openfast)
+ * _control_ contains the routines calling [ROSCO](https://github.com/NREL/ROSCO) and the routines supporting distributed aerodynamic control devices, such trailing edge flaps
+ * _gluecode_ contains the scripts glueing together all models and libraries
+ * _multifidelity_ contains the codes to run multifidelity design optimizations
+ * _optimization_drivers_ contains various optimization drivers
+ * _schema_ contains the YAML files and corresponding schemas representing the input files to WEIS
 
 ## Installation
 
@@ -23,23 +57,29 @@ The installation instructions below use the environment name, "weis-env," but an
 
         conda config --add channels conda-forge
         conda install git
-        git clone https://github.com/WISDEM/WEIS.git
+        git clone https://github.com/NLRWindSystems/WEIS.git
         cd WEIS
         git checkout branch_name                         # (Only if you want to switch branches, say "develop")
         conda env create --name weis-env -f environment.yml
         conda activate weis-env                          # (if this does not work, try source activate weis-env)
-        conda install -y petsc4py=3.22.2 mpi4py pyoptsparse     # (Mac / Linux only, sometimes Windows users may need to install mpi4py)
+        conda install -y pyoptsparse     # (Mac / Linux only, sometimes Windows users may need to install mpi4py)
 
 2. If you are NOT on Kestrel, install the software
+        
         pip install -e .
 
 3. If you are on Kestrel, first load some modules and then install:
-        module load intel-oneapi-compilers intel-oneapi-mpi intel-oneapi-mkl conda
+        
+        module load intel-oneapi-compilers intel-oneapi-mpi intel-oneapi-mkl
         pip install --no-deps -e . -v
 
 **NOTE:** To use WEIS again after installation is complete, you will always need to activate the conda environment first with `conda activate weis-env` (or `source activate weis-env`). On Kestrel, make sure to reload the necessary modules
 
 For Windows users, we recommend installing `git` and the `m264` packages in separate environments as some of the libraries appear to conflict such that WISDEM cannot be successfully built from source.  The `git` package is best installed in the `base` environment.
+
+For macOS users (Apple Silicon), if you encounter an `AttributeError: partially initialized module 'polars'` error, it is caused by a conflict between the `polars` and `polars-lts-cpu` packages installed by a dependency (`wombat`). Run the following after installation to resolve it:
+
+        pip uninstall -y polars-lts-cpu
 
 ## Developer guide
 
@@ -47,4 +87,4 @@ If you plan to contribute code to WEIS, please first consult the [developer guid
 
 ## Feedback
 
-For software issues please use <https://github.com/WISDEM/WEIS/issues>.  
+For software issues please use <https://github.com/NLRWindSystems/WEIS/issues>.  
