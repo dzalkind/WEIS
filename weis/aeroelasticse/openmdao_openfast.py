@@ -471,12 +471,25 @@ class FASTLoadCases(ExplicitComponent):
             self.add_input('TMD_stiffness',    val=np.zeros(n_TMDs), units='N/m',        desc='TMD Stiffnes')
             self.add_input('TMD_damping',      val=np.zeros(n_TMDs), units='N/(m/s)',    desc='TMD Damping')
 
-        self.setup_directories()
+        # Generic DISCON params
+        if not modopt['ROSCO']['flag']:
+            # If the ROSCO flag were on, the DISCON params would have gone there
 
+            opt_options = self.options['opt_options']
+            discon_dvs = opt_options.get('design_variables', {}).get('control', {}).get('discon', [])
+            for dv in discon_dvs:
+                ivc_units = None
+                if 'units' in dv:
+                    ivc_units = dv['units']
 
-        # DLC options
-        n_ws_aep = np.max([1,modopt['DLC_driver']['n_ws_aep']])
-        
+                ivc_desc = None
+                if 'description' in dv:
+                    ivc_desc = dv['description']
+
+                self.add_input(f'discon:{dv["name"]}', val=dv['start'], units=ivc_units, desc=ivc_desc)
+
+        # Set up OpenFAST directories
+        self.setup_directories()    
 
         # Rotor power outputs
         if self.n_ws_aep > 0:
@@ -616,22 +629,6 @@ class FASTLoadCases(ExplicitComponent):
     def setup_directories(self):
 
         modopt = self.options['modeling_options']
-
-        # Generic DISCON params
-        if not modopt['ROSCO']['flag']:
-            # If the ROSCO flag were on, the DISCON params would have gone there
-
-            discon_dvs = self.options['opt_options']['design_variables']['control']['discon']
-            for dv in discon_dvs:
-                ivc_units = None
-                if 'units' in dv:
-                    ivc_units = dv['units']
-
-                ivc_desc = None
-                if 'description' in dv:
-                    ivc_desc = dv['description']
-
-                self.add_input(f'discon:{dv["name"]}', val=dv['start'], units=ivc_units, desc=ivc_desc)
                 
 
         # OpenFAST options
@@ -676,6 +673,34 @@ class FASTLoadCases(ExplicitComponent):
             if self.mpi_run:
                 self.mpi_comm_map_down   = OFmgmt['mpi_comm_map_down']
 
+
+        # User-defined FAST library/executable
+        if OFmgmt['FAST_exe'] != 'none':
+            if os.path.isabs(OFmgmt['FAST_exe']):
+                self.FAST_exe_user = OFmgmt['FAST_exe']
+            else:
+                self.FAST_exe_user = os.path.join(os.path.dirname(self.options['modeling_options']['fname_input_modeling']),
+                                             OFmgmt['FAST_exe'])
+        else:
+            self.FAST_exe_user = None
+
+        if OFmgmt['FAST_lib'] != 'none':
+            if os.path.isabs(OFmgmt['FAST_lib']):
+                self.FAST_lib_user = OFmgmt['FAST_lib']
+            else:
+                self.FAST_lib_user = os.path.join(os.path.dirname(self.options['modeling_options']['fname_input_modeling']),
+                                             OFmgmt['FAST_lib'])
+        else:
+            self.FAST_lib_user = None
+
+        if OFmgmt['turbsim_exe'] != 'none':
+            if os.path.isabs(OFmgmt['turbsim_exe']):
+                self.turbsim_exe = OFmgmt['turbsim_exe']
+            else:
+                self.turbsim_exe = os.path.join(os.path.dirname(self.options['modeling_options']['fname_input_modeling']),
+                                             OFmgmt['turbsim_exe'])
+        else:
+            self.turbsim_exe = shutil.which('turbsim')
             
     def compute(self, inputs, outputs, discrete_inputs, discrete_outputs):
         modopt = self.options['modeling_options']
@@ -887,7 +912,8 @@ class FASTLoadCases(ExplicitComponent):
                 fst_vt['DISCON_in'] = modopt['General']['openfast_configuration']['fst_vt']['DISCON_in']
             else:
                 # If we're not tuning ROSCO, this iwll update DISCON inputs
-                discon_dvs = self.options['opt_options']['design_variables']['control']['discon']
+                opt_options = self.options['opt_options']
+                discon_dvs = opt_options.get('design_variables', {}).get('control', {}).get('discon', [])
                 for dv in discon_dvs:
                     fst_vt['DISCON_in'][dv['name']] = inputs[f'discon:{dv["name"]}']
 
@@ -2460,8 +2486,9 @@ class FASTLoadCases(ExplicitComponent):
         # Floating output channels
         if modopt['flags']['floating']:
             channels_out += ["PtfmPitch", "PtfmRoll", "PtfmYaw", "PtfmSurge", "PtfmSway", "PtfmHeave"]
-            for i_line in range(modopt['mooring']['n_lines']):
-                channels_out += [f"AnchTen{i_line+1}", f"FairTen{i_line+1}"]
+            if 'mooring' in modopt and 'n_lines' in modopt['mooring']:
+                for i_line in range(modopt['mooring']['n_lines']):
+                    channels_out += [f"AnchTen{i_line+1}", f"FairTen{i_line+1}"]
 
         # Structural Control Channels
         if modopt['flags']['TMDs']:
@@ -2857,7 +2884,13 @@ class FASTLoadCases(ExplicitComponent):
                 if key[0] in ['DLC','TurbSim','CaseInfo']:
                     del case[key]
 
-        return case_list, case_name, dlc_generator
+        # Compute n_ws_aep from the generated DLC cases
+        DLC_labels = [i_dlc['DLC'] for i_dlc in DLCs]
+        DLC_label_for_AEP = 'AEP' if 'AEP' in DLC_labels else '1.1'
+        dlc_aep_ws = [c.URef for c in dlc_generator.cases if c.label == DLC_label_for_AEP]
+        self.n_ws_aep = len(np.unique(dlc_aep_ws))
+
+        return dlc_generator
             
     
     
@@ -2866,7 +2899,7 @@ class FASTLoadCases(ExplicitComponent):
         modopt = self.options['modeling_options']
 
 
-        case_list, case_name, dlc_generator = self.setup_cases(modopt,inputs,discrete_inputs,fst_vt)
+        dlc_generator = self.setup_cases(modopt,inputs,discrete_inputs,fst_vt)
 
         channels= self.output_channels(fst_vt)
 
@@ -3073,7 +3106,7 @@ class FASTLoadCases(ExplicitComponent):
         modopt = self.options['modeling_options']
 
         # Save Data
-        self.save_timeseries(case_name)
+        self.save_timeseries(self.case_name)
         self.save_iterations(discrete_outputs)
 
         # Analysis
@@ -3093,7 +3126,7 @@ class FASTLoadCases(ExplicitComponent):
 
         self.get_weighted_DELs(dlc_generator, inputs, discrete_inputs, outputs)
         
-        outputs = self.get_control_measures(dlc_generator, inputs, outputs)
+        self.get_control_measures(dlc_generator, inputs, outputs)
 
         self.get_signalperiods( outputs, discrete_outputs)
         self.get_characteristic_loads()
@@ -3107,14 +3140,15 @@ class FASTLoadCases(ExplicitComponent):
                 outputs['openfast_failed'] = 2
 
         # Wind speed binning
-        if 'binning_time' in modopt['PostProcessing']:  # TODO: figure out a better flag for this
+        if modopt['OpenFAST']['PostProcessing']['binning_time'] > 0:
             self.save_time_binning()
 
         # Open loop to closed loop error, move this to before save_timeseries when finished
         if modopt['OL2CL']['flag']:
             self.get_OL2CL_error(outputs)
 
-        self.get_frequency_measures()
+        if modopt['OpenFAST']['PostProcessing']['frequency_bins']:
+            self.get_frequency_measures()
 
     def get_blade_loading(self, inputs, outputs):
         """
@@ -3401,8 +3435,10 @@ class FASTLoadCases(ExplicitComponent):
                 sum_stats = sum_stats.iloc[idx_pwrcrv]
                 outputs['V'] = np.unique(U)
                 n_seeds_AEP = int(len(U) / len(np.unique(U)))
+                prob = self.cruncher.prob[idx_pwrcrv]
             else:
                 outputs['V'] = dlc_generator.cases[0].URef
+                prob = self.cruncher.prob
                 logger.warning('WARNING: OpenFAST is not run using DLC AEP, 1.1, or 1.2. AEP cannot be estimated well. Using average power instead.')
 
             if len(U) == 1:
@@ -3729,7 +3765,7 @@ class FASTLoadCases(ExplicitComponent):
         # Average the data in time bins and plot against wind speed
         logging.info("Binning timeseries data")
 
-        bin_time = self.options['modeling_options']['General']['openfast_configuration']['postprocessing']['binning_time']
+        bin_time = self.options['modeling_options']['OpenFAST']['PostProcessing']['binning_time']
 
         binned_cruncher = copy.deepcopy(self.cruncher)
         binned_cruncher.time_binning(bin_time)
@@ -3759,7 +3795,7 @@ class FASTLoadCases(ExplicitComponent):
 
         cm = self.case_df
 
-        freq_bins = self.options['modeling_options']['PostProcessing']['frequency_bins']
+        freq_bins = self.options['modeling_options']['OpenFAST']['PostProcessing']['frequency_bins']
 
         freq_dict = {}
         all_psd_dfs = []

@@ -219,6 +219,36 @@ properties:
         type: object
         default: {}
         description: Options for running OpenFAST.  No further options are included in this file.  They are populated using the openfast schema.
+        properties:
+            PostProcessing:
+                type: object
+                default: {}
+                description: Options for post-processing OpenFAST simulation outputs
+                properties:
+                    binning_time:
+                        type: number
+                        default: 0
+                        minimum: 0.0
+                        unit: s
+                        description: Time in seconds to bin the output data. If 0, no binning is performed.
+                    frequency_bins:
+                        type: array
+                        default: []
+                        description: List of frequency bins for spectral analysis. Each entry can be a single frequency (number) or a frequency range ([min, max]).
+                        items:
+                            oneOf:
+                                - type: number
+                                  minimum: 0.0
+                                  description: Single frequency bin center
+                                  unit: Hz
+                                - type: array
+                                  description: Frequency range [min, max]
+                                  items:
+                                      type: number
+                                      minimum: 0.0
+                                      unit: Hz
+                                  minItems: 2
+                                  maxItems: 2
     OpenFAST_Linear: &of_linear_modopt
         type: object
         default: {}

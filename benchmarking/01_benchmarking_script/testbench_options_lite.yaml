@@ -1,13 +1,13 @@
 Testbench_Options:
-    output_directory: outputs/0_setup_4p1
+    output_directory: outputs/2_reintegrate_weis
     n_cores: 1  # (Optional) Number of cores to use for mulit-processing, MPI cores will be determined automatically
     # FAST_exe: /projects/weis/dzalkind/openfast-versions/openfast-main/build/glue-codes/openfast/openfast
     # turbsim_exe: /projects/weis/dzalkind/openfast-versions/openfast-main/build/modules/turbsim/turbsim
 
 
 Controller:
-    path2dll: /Users/dzalkind/miniforge3/envs/weis-dlcs/lib/libdiscon.dylib
-    DISCON_in: /Users/dzalkind/Tools/WEIS-DLC/examples/01_aeroelasticse/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi/IEA-15-240-RWT-UMaineSemi_DISCON.IN
+    # path2dll: /Users/dzalkind/miniforge3/envs/weis-dlcs/lib/libdiscon.dylib
+    # DISCON_in: /Users/dzalkind/Tools/WEIS-DLC/examples/01_aeroelasticse/OpenFAST_models/IEA-15-240-RWT/IEA-15-240-RWT-UMaineSemi/IEA-15-240-RWT-UMaineSemi_DISCON.IN
 
 OpenFAST: 
     regulation_trajectory: ../00_OpenFAST_Models/IEA-15-240-RWT/IEA-15-240-RWT/IEA-15-240-RWT-outputs.yaml  # (Optional) for setting initial conditions

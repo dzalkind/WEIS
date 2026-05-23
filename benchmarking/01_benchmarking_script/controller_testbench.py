@@ -53,6 +53,7 @@ def main():
         'Vrated':           testbench_options['Turbine_Info']['wind_speed_rated'],
         'hub_height':       testbench_options['Turbine_Info']['hub_height'],
         'Rtip':             testbench_options['Turbine_Info']['rotor_radius'],
+        'rho':    1.225,    # Air density, kg/m^3
         'shearExp': 0.14,   # Not used, hard code
         'lifetime': 25.,   # Not used, hard code
     }
@@ -160,12 +161,12 @@ def main():
 
         fst_vt = flc.create_fst_vt(inputs, discrete_inputs)
 
-        case_list, case_name, dlc_generator  = flc.run_FAST(inputs, discrete_inputs, fst_vt)
+        dlc_generator  = flc.run_FAST(inputs, discrete_inputs, fst_vt)
 
         # Post-processing here
         outputs = {}
         discrete_outputs = {}
-        flc.post_process(case_list, case_name, dlc_generator, inputs, discrete_inputs, outputs, discrete_outputs)
+        flc.post_process(dlc_generator, inputs, discrete_inputs, outputs, discrete_outputs)
 
 
     # Close signal to subprocessors
