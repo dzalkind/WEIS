@@ -3464,15 +3464,15 @@ class FASTLoadCases(ExplicitComponent):
                 outputs['P'] = avg_seeds(sum_stats['GenPwr']['mean'])
                 outputs['P_std'] = avg_seeds(sum_stats['GenPwr']['std'])
 
-        # Save summary info
-        aep_info = {}
-        aep_info['probability'] = prob
-        aep_info['mean_wind_speeds'] = U
-        aep_info['AEP'] = AEP
+            # Save summary info
+            aep_info = {}
+            aep_info['probability'] = prob
+            aep_info['mean_wind_speeds'] = U
+            aep_info['AEP'] = AEP
 
-        save_dir = os.path.join(self.FAST_runDirectory,'iteration_'+str(self.of_inumber))
-        os.makedirs(save_dir, exist_ok=True)
-        write_yaml(aep_info,os.path.join(save_dir,'aep_info.yaml'))
+            save_dir = os.path.join(self.FAST_runDirectory,'iteration_'+str(self.of_inumber))
+            os.makedirs(save_dir, exist_ok=True)
+            write_yaml(aep_info,os.path.join(save_dir,'aep_info.yaml'))
 
         return outputs
 
