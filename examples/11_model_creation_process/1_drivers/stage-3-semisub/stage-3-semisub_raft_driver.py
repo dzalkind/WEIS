@@ -3,7 +3,7 @@ import os
 from weis import weis_main
 from openmdao.utils.mpi import MPI
 
-TEST_RUN = False
+TEST_RUN = True
 
 ## File management
 run_dir = os.path.dirname( os.path.realpath(__file__) )
