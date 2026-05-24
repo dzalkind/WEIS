@@ -100,6 +100,11 @@ properties:
                         default: {}
                         description: Options for post-processing OpenFAST simulation outputs
                         properties:
+                            nfft:
+                                type: integer
+                                default: 512
+                                minimum: 1
+                                description: Number of FFT points used for spectral analysis in frequency post-processing.
                             binning_time:
                                 type: number
                                 default: 0

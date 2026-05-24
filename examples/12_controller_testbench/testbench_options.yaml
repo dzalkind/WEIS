@@ -38,7 +38,7 @@ Turbine_Info:  # Can we pull this information from OpenFAST input?
 
 PostProcessing:
     binning_time: 20
-    frequency_bins:   # TODO: add NFFT somewhere here
+    frequency_bins:
         - 0.0339  # Platform pitch
         - [.1134, .1387]  # 1P \pm 10%
         - [.340, .416]  # 3P \pm 10%

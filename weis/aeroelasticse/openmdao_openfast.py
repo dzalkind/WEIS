@@ -3795,7 +3795,9 @@ class FASTLoadCases(ExplicitComponent):
 
         cm = self.case_df
 
-        freq_bins = self.options['modeling_options']['General']['openfast_configuration']['PostProcessing']['frequency_bins']
+        post_proc = self.options['modeling_options']['General']['openfast_configuration']['PostProcessing']
+        freq_bins = post_proc['frequency_bins']
+        nfft = post_proc['nfft']
 
         freq_dict = {}
         all_psd_dfs = []
@@ -3804,7 +3806,7 @@ class FASTLoadCases(ExplicitComponent):
             output_init = self.cruncher.outputs[i_case]
             # output_init.trim_data(np.min([120,output_init.time.max()/2]))
 
-            freq_obj = output_init.psd(nfft=512)        
+            freq_obj = output_init.psd(nfft=nfft)        
 
             psd_df_i = freq_obj.df
             psd_df_i.set_index('Freq',inplace=True)
