@@ -1,0 +1,114 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+$id: WEIS_testbench_options_schema_v00
+title: WTCBench controller testbench options schema
+description: Schema for the controller testbench input file. Shared sections (PostProcessing, DLC_driver) reference the WEIS modeling schema.
+type: object
+properties:
+    Testbench_Options:
+        type: object
+        default: {}
+        description: General testbench configuration
+        properties:
+            output_directory:
+                type: string
+                default: outputs/testbench
+                description: Directory for testbench output files, relative to the input file location
+            n_cores:
+                type: integer
+                default: 1
+                minimum: 1
+                description: Number of cores to use for multi-processing. MPI cores are determined automatically.
+            FAST_exe:
+                $ref: "modeling_schema.yaml#/properties/General/properties/openfast_configuration/properties/FAST_exe"
+            turbsim_exe:
+                $ref: "modeling_schema.yaml#/properties/General/properties/openfast_configuration/properties/turbsim_exe"
+
+    Controller:
+        type: ["object", "null"]
+        default: {}
+        description: Controller configuration for the testbench
+        properties:
+            path2dll:
+                $ref: "modeling_schema.yaml#/properties/General/properties/openfast_configuration/properties/path2dll"
+            DISCON_in:
+                type: string
+                description: Path to DISCON input file. If not specified, uses the DISCON input defined in the OpenFAST input set.
+
+    OpenFAST:
+        type: object
+        default: {}
+        description: OpenFAST model configuration
+        properties:
+            regulation_trajectory:
+                $ref: "openfast_schema.yaml#/properties/OpenFAST/properties/regulation_trajectory"
+            openfast_file:
+                $ref: "openfast_schema.yaml#/properties/OpenFAST/properties/openfast_file"
+            openfast_dir:
+                $ref: "openfast_schema.yaml#/properties/OpenFAST/properties/openfast_dir"
+            write_stdout:
+                $ref: "modeling_schema.yaml#/properties/General/properties/openfast_configuration/properties/write_stdout"
+
+    PostProcessing:
+        $ref: "modeling_schema.yaml#/properties/General/properties/openfast_configuration/properties/PostProcessing"
+
+    Turbine_Info:
+        type: object
+        default: {}
+        description: Turbine information used to generate wind inputs and determine output channels
+        properties:
+            wind_speed_cut_in:
+                type: number
+                description: Cut-in wind speed
+                unit: m/s
+            wind_speed_cut_out:
+                type: number
+                description: Cut-out wind speed
+                unit: m/s
+            wind_speed_rated:
+                type: number
+                description: Rated wind speed
+                unit: m/s
+            hub_height:
+                type: number
+                description: Hub height above ground/sea level
+                unit: m
+            rotor_radius:
+                type: number
+                description: Rotor radius
+                unit: m
+            turbine_class:
+                type: string
+                enum: ["I", "II", "III", "IV"]
+                description: IEC turbine class
+            turbulence_class:
+                type: string
+                enum: ["A", "B", "C"]
+                description: IEC turbulence class
+            flags:
+                type: object
+                default: {}
+                description: Flags to determine OpenFAST output channels
+                properties:
+                    offshore:
+                        type: boolean
+                        default: false
+                    floating:
+                        type: boolean
+                        default: false
+                    monopile:
+                        type: boolean
+                        default: false
+                    TMDs:
+                        type: boolean
+                        default: false
+                    blade:
+                        type: boolean
+                        default: false
+                        description: Enable local blade loading analysis
+                    tower:
+                        type: boolean
+                        default: false
+                        description: Enable local tower loading analysis
+
+    DLC_driver:
+        $ref: "modeling_schema.yaml#/properties/DLC_driver"

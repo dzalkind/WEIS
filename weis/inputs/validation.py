@@ -1,9 +1,13 @@
 import os
+from pathlib import Path
 import jsonmerge
 import wisdem.inputs
 import wisdem.inputs.validation as wisval
 import rosco.toolbox.inputs
 from openfast_io.FileTools import remove_numpy
+from referencing import Registry
+from referencing.exceptions import NoSuchResource
+from windIO.validator import _jsonschema_validate_modified
 
 froot_wisdem           = os.path.dirname(wisdem.inputs.__file__)
 fschema_model_wisdem   = os.path.join(froot_wisdem, 'modeling_schema.yaml')
@@ -19,6 +23,7 @@ fschema_model   = os.path.join(froot, 'modeling_schema.yaml')
 fschema_opt     = os.path.join(froot, 'analysis_schema.yaml')
 
 fschema_openfast       = os.path.join(froot, 'openfast_schema.yaml')
+fschema_testbench      = os.path.join(froot, 'testbench_schema.yaml')
 #---------------------
 def load_default_geometry_yaml():
     return wisval.load_yaml(fdefaults_geom)
@@ -63,6 +68,35 @@ def get_modeling_schema():
 def load_modeling_yaml(finput):
     weis_schema = get_modeling_schema()
     return wisval._validate(finput, weis_schema, defaults=True, restrictive=False)
+
+def _retrieve_weis_yaml(uri: str):
+    if not uri.endswith('.yaml'):
+        raise NoSuchResource(ref=uri)
+    path = Path(froot) / uri
+    return wisval.Resource.from_contents(wisval.load_yaml(path))
+
+_testbench_registry = Registry(retrieve=_retrieve_weis_yaml)
+
+def get_testbench_schema():
+    """Load the testbench schema, resolving $ref against the WEIS inputs directory."""
+    return wisval.load_yaml(fschema_testbench)
+
+def load_testbench_yaml(finput):
+    """Load and validate a testbench options YAML file, populating defaults.
+    
+    First validates against the testbench schema (with $ref resolution),
+    then validates against the full WEIS modeling schema to populate
+    all modeling defaults (General, ROSCO, OpenFAST, etc.).
+    """
+    schema = get_testbench_schema()
+    input_dict = finput if isinstance(finput, dict) else wisval.load_yaml(finput)
+
+    # Validate with testbench schema defaults
+    _jsonschema_validate_modified(input_dict, schema, cls=wisval.DefaultValidatingDraft7Validator, registry=_testbench_registry)
+
+    # Also validate against the full modeling schema to populate modeling defaults
+    weis_schema = get_modeling_schema()
+    return wisval._validate(input_dict, weis_schema, defaults=True, restrictive=False)
 
 def write_modeling_yaml(instance, foutput):
     weis_schema = get_modeling_schema()
