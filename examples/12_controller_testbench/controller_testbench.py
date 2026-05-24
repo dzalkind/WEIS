@@ -69,7 +69,6 @@ def main():
 
     # Usually, in WEIS, we populate fst_vt['DISCON'] with previously tuned ROSCO.  
     # This will just use the DISCON referenced by the OpenFAST model. 
-    # TODO: should we do any tuning or specify a DISCON?
     testbench_options['ROSCO']['flag'] = False   
 
     # OpenFAST: should always use pre-existing input set
@@ -167,6 +166,26 @@ def main():
         outputs = {}
         discrete_outputs = {}
         flc.post_process(dlc_generator, inputs, discrete_inputs, outputs, discrete_outputs)
+
+        # Verify all expected outputs for the reporting notebook are present
+        output_dir = OFmgmt['OF_run_dir']
+        iteration_dir = os.path.join(output_dir, 'iteration_0')
+        expected_files = [
+            'summary_stats.p',
+            'DELs.p',
+            'del_summary.yaml',
+            'characteristic_loads.yaml',
+            'aep_info.yaml',
+        ]
+        missing = [f for f in expected_files if not os.path.isfile(os.path.join(iteration_dir, f))]
+        if missing:
+            msg = f"Missing expected output files in {iteration_dir}: {missing}"
+            if os.environ.get('PYTEST_CURRENT_TEST'):
+                raise FileNotFoundError(msg)
+            else:
+                logger.warning(msg)
+        else:
+            logger.info('All expected output files present in %s', iteration_dir)
 
 
     # Close signal to subprocessors

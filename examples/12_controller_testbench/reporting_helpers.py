@@ -1,10 +1,96 @@
 import os
 import copy
+import warnings
 import numpy as np
 import pandas as pd
 import ruamel.yaml as ry
 import matplotlib.pyplot as plt
 from openfast_io import FileTools
+
+
+# ---------------------------------------------------------------------------
+# Data loading
+# ---------------------------------------------------------------------------
+
+# Which downstream sections need which data keys
+_DATA_USAGE = {
+    'ss':         'Summary table, AEP plot, DEL plot, Failed cases',
+    'dd':         'Summary table, DEL plot',
+    'ds':         'Summary table, DEL plot',
+    'aep_info':   'Summary table, AEP plot',
+    'char_loads': 'Summary table, Characteristic loads plot',
+    'cm':         'Failed cases, Stability analysis, Binned-by-DLC',
+}
+
+
+def load_results(output_folders, run_with_mpi=False):
+    """Load all available testbench results.
+
+    Returns
+    -------
+    results : dict
+        Keys: 'summary_folders', 'cm', 'dd', 'ss', 'ds', 'char_loads',
+        'aep_info', 'unique_dlcs'.  Each value is a list (one entry per
+        output folder).  Missing files produce ``None`` entries.
+    loaded : set
+        Set of data-key strings that were successfully loaded for *all*
+        folders.  Use with :func:`requires` in downstream cells.
+    """
+    keys_and_loaders = {
+        'dd':         lambda sf: pd.read_pickle(os.path.join(sf, 'DELs.p')),
+        'ss':         lambda sf: pd.read_pickle(os.path.join(sf, 'summary_stats.p')),
+        'ds':         lambda sf: FileTools.load_yaml(os.path.join(sf, 'del_summary.yaml'), package=1),
+        'char_loads': lambda sf: FileTools.load_yaml(os.path.join(sf, 'characteristic_loads.yaml'), package=1),
+        'aep_info':   lambda sf: FileTools.load_yaml(os.path.join(sf, 'aep_info.yaml')),
+    }
+
+    results = {k: [] for k in ['summary_folders', 'cm', 'unique_dlcs'] + list(keys_and_loaders)}
+    missing_items = []
+
+    for output_folder in output_folders:
+        if run_with_mpi:
+            output_folder = os.path.join(output_folder, 'rank_0')
+        sf = os.path.join(output_folder, 'iteration_0')
+        results['summary_folders'].append(sf)
+
+        # Case matrix is always required
+        cm_i, _ = read_cm(os.path.join(output_folder, 'case_matrix_combined.yaml'))
+        results['cm'].append(cm_i)
+        results['unique_dlcs'].append(cm_i['DLC'].unique())
+
+        for key, loader in keys_and_loaders.items():
+            try:
+                results[key].append(loader(sf))
+            except (FileNotFoundError, OSError):
+                results[key].append(None)
+                missing_items.append((output_folder, key))
+
+    # Determine which keys loaded for ALL folders
+    loaded = set()
+    for key in keys_and_loaders:
+        if all(v is not None for v in results[key]):
+            loaded.add(key)
+
+    # Report
+    if missing_items:
+        print('⚠️  Some result files are missing (affected sections will be skipped):')
+        for folder, key in missing_items:
+            usage = _DATA_USAGE.get(key, '')
+            print(f'   • {key} in {folder}  →  affects: {usage}')
+    else:
+        print('✓ All result files loaded successfully.')
+
+    return results, loaded
+
+
+def requires(loaded, *keys):
+    """Check whether all *keys* were loaded.  Print a skip message if not."""
+    missing = [k for k in keys if k not in loaded]
+    if missing:
+        usage = ', '.join(_DATA_USAGE.get(k, k) for k in missing)
+        print(f'⏭️  Skipping (missing {missing}): {usage}')
+        return False
+    return True
 
 
 def create_summary_table(aep_info, char_loads, char_load_cases, char_load_channels, dd, ds, del_channels, labels):
