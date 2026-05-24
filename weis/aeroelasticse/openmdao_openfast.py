@@ -3140,14 +3140,14 @@ class FASTLoadCases(ExplicitComponent):
                 outputs['openfast_failed'] = 2
 
         # Wind speed binning
-        if modopt['OpenFAST']['PostProcessing']['binning_time'] > 0:
+        if modopt['General']['openfast_configuration']['PostProcessing']['binning_time'] > 0:
             self.save_time_binning()
 
         # Open loop to closed loop error, move this to before save_timeseries when finished
         if modopt['OL2CL']['flag']:
             self.get_OL2CL_error(outputs)
 
-        if modopt['OpenFAST']['PostProcessing']['frequency_bins']:
+        if modopt['General']['openfast_configuration']['PostProcessing']['frequency_bins']:
             self.get_frequency_measures()
 
     def get_blade_loading(self, inputs, outputs):
@@ -3765,7 +3765,7 @@ class FASTLoadCases(ExplicitComponent):
         # Average the data in time bins and plot against wind speed
         logging.info("Binning timeseries data")
 
-        bin_time = self.options['modeling_options']['OpenFAST']['PostProcessing']['binning_time']
+        bin_time = self.options['modeling_options']['General']['openfast_configuration']['PostProcessing']['binning_time']
 
         binned_cruncher = copy.deepcopy(self.cruncher)
         binned_cruncher.time_binning(bin_time)
@@ -3795,7 +3795,7 @@ class FASTLoadCases(ExplicitComponent):
 
         cm = self.case_df
 
-        freq_bins = self.options['modeling_options']['OpenFAST']['PostProcessing']['frequency_bins']
+        freq_bins = self.options['modeling_options']['General']['openfast_configuration']['PostProcessing']['frequency_bins']
 
         freq_dict = {}
         all_psd_dfs = []

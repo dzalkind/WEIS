@@ -53,11 +53,7 @@ def get_modeling_schema():
     weis_schema['properties']['ROSCO'].update(merged_rosco_schema)
 
     # Update WEIS schema with OpenFAST schema
-    weis_of_props = weis_schema['properties']['OpenFAST'].get('properties', {})
     weis_schema['properties']['OpenFAST'].update( openfast_schema['properties']['OpenFAST'] )
-    # Re-add WEIS-specific OpenFAST properties (e.g. PostProcessing) that were overwritten
-    if weis_of_props:
-        weis_schema['properties']['OpenFAST'].setdefault('properties', {}).update(weis_of_props)
     
     # Update WEIS schema with WISDEM schema
     merged_schema = jsonmerge.merge(weis_schema, wisdem_schema)

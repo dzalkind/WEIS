@@ -12,7 +12,7 @@ OpenFAST:
     write_stdout: True  # (Optional) Write OpenFAST stdout to file, default is False
 
 PostProcessing:
-    binning_time: 20
+    binning_time: .25   # Small for testing
     frequency_bins:   # TODO: add NFFT somewhere here
         - 0.0339  # Platform pitch
         - [.1134, .1387]  # 1P \pm 10%
@@ -56,3 +56,9 @@ DLC_driver:
           wind_speed: [8,15]
           analysis_time: 1.
           transient_time: 0.0
+        - DLC: "AEP"
+          n_seeds: 1
+          wind_speed: [8,15]
+          analysis_time: 1.
+          transient_time: 0.0
+          TI_factor: 0.5

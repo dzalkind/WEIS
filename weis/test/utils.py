@@ -13,7 +13,7 @@ from openmdao.utils.assert_utils import assert_near_equal
 def execute_script(fscript):
     thisdir = os.path.dirname(os.path.realpath(__file__))
     root_dir = os.path.dirname(os.path.dirname(thisdir))
-    examples_dir = os.path.join(root_dir, "benchmarking")
+    examples_dir = os.path.join(root_dir, "examples")
 
     # Go to location due to relative path use for airfoil files
     print("\n\n")

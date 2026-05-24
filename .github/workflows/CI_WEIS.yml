@@ -148,6 +148,13 @@ jobs:
           cd examples/09_preprocessing/fatigue
           treon Fatigue_Setup.ipynb
       
+      - name: Test controller testbench notebook
+        if: contains( matrix.os, 'ubuntu') && contains( github.event_name, 'pull_request')
+        run: |
+          cd examples/12_controller_testbench
+          python controller_testbench.py
+          treon WTCBench_Reporting.ipynb
+
       - name: Test model creation notebooks and drivers
         if: contains( matrix.os, 'ubuntu') && contains( github.event_name, 'pull_request')
         run: |

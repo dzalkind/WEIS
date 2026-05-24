@@ -10,6 +10,7 @@ skinny_scripts = [
     "04_frequency_domain_analysis_design/iea22_raft_opt_driver",    # these are used to test visualization
     "05_control_optimization/rosco_opt_driver", 
     "08_potential_flow_modeling/raft_potmod_driver",
+    "12_controller_testbench/controller_testbench",
 ]
 
 # Only run on PR on Ubuntu

@@ -107,7 +107,7 @@ def main():
     testbench_options['OpenFAST']['openfast_dir'] = os.path.join(os.path.dirname(modopt_file),testbench_options['OpenFAST']['openfast_dir'])
 
     # Postprocessing options (map to OFMgmt)
-    OFmgmt['postprocessing'] = testbench_options['PostProcessing']
+    OFmgmt['PostProcessing'] = testbench_options['PostProcessing']
 
     # Figure out how many cases we're running
     dlc_generator = DLCGenerator(
