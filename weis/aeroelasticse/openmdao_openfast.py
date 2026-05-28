@@ -1276,7 +1276,7 @@ class FASTLoadCases(ExplicitComponent):
         fst_vt['ElastoDyn']['BldFile2'] = ''
         fst_vt['ElastoDyn']['BldFile3'] = ''
         fst_vt['ElastoDynBlade']['NBlInpSt']   = len(inputs['r'])
-        fst_vt['ElastoDynBlade']['BlFract']    = (inputs['r']-inputs['Rhub'])/(inputs['Rtip']-inputs['Rhub'])
+        fst_vt['ElastoDynBlade']['BlFract']    = (inputs['r']-inputs['Rhub'][0])/(inputs['Rtip'][0]-inputs['Rhub'][0])
         fst_vt['ElastoDynBlade']['BlFract'][0] = 0.
         fst_vt['ElastoDynBlade']['BlFract'][-1]= 1.
         fst_vt['ElastoDynBlade']['PitchAxis']  = inputs['le_location'] / inputs['chord']
@@ -2615,7 +2615,7 @@ class FASTLoadCases(ExplicitComponent):
         tau1_const_interp = np.zeros_like(Ct_aero_interp)
         for i in range(len(Ct_aero_interp)):
             a = 1. / 2. * (1. - np.sqrt(1. - np.min([Ct_aero_interp[i],1])))    # don't allow Ct_aero > 1
-            tau1_const_interp[i] = 1.1 / (1. - 1.3 * np.min([a, 0.5])) * float(inputs['Rtip']) / U_interp[i]
+            tau1_const_interp[i] = 1.1 / (1. - 1.3 * np.min([a, 0.5])) * float(inputs['Rtip'][0]) / U_interp[i]
 
         initial_condition_table = {}
         initial_condition_table['U'] = U_interp
@@ -3198,9 +3198,9 @@ class FASTLoadCases(ExplicitComponent):
         if np.any(np.isnan(My)):
             logger.warning('WARNING: nans found in My extremes')
             My[np.isnan(My)] = 0.0
-        spline_Fz = PchipInterpolator(np.hstack((self.R_out_ED_bl, inputs['Rtip'])), np.hstack((Fz, 0.)))
-        spline_Mx = PchipInterpolator(np.hstack((self.R_out_ED_bl, inputs['Rtip'])), np.hstack((Mx, 0.)))
-        spline_My = PchipInterpolator(np.hstack((self.R_out_ED_bl, inputs['Rtip'])), np.hstack((My, 0.)))
+        spline_Fz = PchipInterpolator(np.hstack((self.R_out_ED_bl, inputs['Rtip'][0])), np.hstack((Fz, 0.)))
+        spline_Mx = PchipInterpolator(np.hstack((self.R_out_ED_bl, inputs['Rtip'][0])), np.hstack((Mx, 0.)))
+        spline_My = PchipInterpolator(np.hstack((self.R_out_ED_bl, inputs['Rtip'][0])), np.hstack((My, 0.)))
 
         r = inputs['r']
         Fz_out = spline_Fz(r).flatten()
