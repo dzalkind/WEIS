@@ -2588,6 +2588,13 @@ class FASTLoadCases(ExplicitComponent):
         else:
             rated = float(inputs['Vrated'][0])
         
+        # Handle inputs that may not be defined by the WISDEM model or ROSCO tuning yaml, but are needed for the regulation trajectory and DLC generation.
+        if np.isnan(inputs['Vrated'][0]):
+            logger.warning(f"Rated wind speed is not defined by the WISDEM model or the ROSCO tuning yaml. Setting to the modeling option input of {modopt['DLC_driver']['rated_wind_speed']} m/s.")
+            rated = modopt['DLC_driver']['rated_wind_speed']
+        else:
+            rated = float(inputs['Vrated'][0])
+        
         # Set initial rotor speed and pitch if the WT operates in this DLC and available,
         # otherwise set pitch to 90 deg and rotor speed to 0 rpm when not operating
         # set rotor speed to rated and pitch to 15 deg if operating
