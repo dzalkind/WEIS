@@ -1,0 +1,89 @@
+FROM mambaorg/micromamba:1.5.10-jammy
+
+USER root
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    ca-certificates \
+    curl \
+    bash \
+    build-essential \
+    gfortran \
+    pkg-config \
+    mpich \
+    libglu1-mesa \
+    libgl1 \
+    libglx-mesa0 \
+    libopengl0 \
+    libx11-6 \
+    libxext6 \
+    libxrender1 \
+    libxft2 \
+    libxi6 \
+    libxcursor1 \
+    libxinerama1 \
+    libxrandr2 \
+    libsm6 \
+    libice6 \
+    libfontconfig1 \
+    libfreetype6 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/WEIS
+
+COPY environment.yml /opt/WEIS/environment.yml
+
+# Pin Python explicitly. Do not let the solver drift to Python 3.14.
+RUN micromamba install -y -n base python=3.12 -f /opt/WEIS/environment.yml && \
+    micromamba clean -a -y
+
+SHELL ["micromamba", "run", "-n", "base", "/bin/bash", "-lc"]
+
+COPY pyproject.toml README.md setup.py /opt/WEIS/
+COPY weis /opt/WEIS/weis
+COPY examples /opt/WEIS/examples
+COPY share /opt/WEIS/share
+COPY docs /opt/WEIS/docs
+
+# Optional/advanced WEIS dependencies used in several workflows.
+RUN micromamba install -y -n base -c conda-forge \
+    python=3.12 \
+    petsc4py \
+    mpi4py \
+    pyoptsparse \
+    jupyterlab \
+    notebook \
+    ipykernel \
+    && pip install pygmsh==7.1.17 \
+    && pip install https://github.com/LHEEA/meshmagick/archive/refs/tags/3.4.zip \
+    && pip install trimesh \
+    && cd /opt/WEIS \
+    && pip install --no-deps -e . -v \
+    && python -m ipykernel install --sys-prefix --name weis --display-name "Python (WEIS)" \
+    && micromamba clean -a -y
+
+
+
+ENV ENV_NAME=base
+ENV MAMBA_DOCKERFILE_ACTIVATE=1
+
+ENV WEIS_WORKDIR=/workspace
+ENV WEIS_NP=1
+
+ENV JUPYTER_IP=0.0.0.0
+ENV JUPYTER_PORT=8888
+ENV JUPYTER_DIR=/workspace
+ENV JUPYTER_TOKEN=
+ENV JUPYTER_ALLOW_ROOT=1
+
+ENV PYVISTA_OFF_SCREEN=true
+
+WORKDIR /workspace
+
+EXPOSE 8888
+
+COPY docker/entrypoint/weis-container-entrypoint /usr/local/bin/weis-container-entrypoint
+RUN chmod +x /usr/local/bin/weis-container-entrypoint
+
+ENTRYPOINT ["/usr/local/bin/_entrypoint.sh", "weis-container-entrypoint"]
+CMD []

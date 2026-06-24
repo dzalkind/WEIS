@@ -1,0 +1,13 @@
+.git
+.github
+.agents
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.ipynb_checkpoints
+
+# Repo files not used by the Docker build context.
+.gitignore
+.readthedocs.yaml

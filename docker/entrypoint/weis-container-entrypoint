@@ -1,0 +1,345 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROGRAM_NAME="$(basename "$0")"
+
+WORKDIR_PATH="${WEIS_WORKDIR:-/workspace}"
+NP="${WEIS_NP:-1}"
+DRIVER="weis_driver.py"
+DRIVER_ARGS=()
+
+JUPYTER_IP="${JUPYTER_IP:-0.0.0.0}"
+JUPYTER_PORT="${JUPYTER_PORT:-8888}"
+JUPYTER_DIR="${JUPYTER_DIR:-/workspace}"
+JUPYTER_TOKEN="${JUPYTER_TOKEN:-}"
+JUPYTER_ALLOW_ROOT="${JUPYTER_ALLOW_ROOT:-1}"
+
+usage() {
+    cat <<EOF
+WEIS container entrypoint
+
+Usage:
+  ${PROGRAM_NAME} [OPTIONS] [-- DRIVER_ARGS...]
+  ${PROGRAM_NAME} lab [JUPYTER_OPTIONS...]
+  ${PROGRAM_NAME} jupyter-lab [JUPYTER_OPTIONS...]
+  ${PROGRAM_NAME} notebook [JUPYTER_OPTIONS...]
+  ${PROGRAM_NAME} shell
+  ${PROGRAM_NAME} exec COMMAND [ARGS...]
+
+WEIS driver options:
+  -d, --driver PATH      Python WEIS driver to run.
+                         Default: weis_driver.py
+
+  -n, --np N             Number of MPI processes.
+                         Default: \$WEIS_NP or 1
+
+  -w, --workdir PATH     Working directory.
+                         Default: \$WEIS_WORKDIR or /workspace
+
+  -h, --help             Show this help message.
+
+Jupyter commands:
+  lab                    Start JupyterLab.
+  jupyter-lab            Start JupyterLab.
+  notebook               Start classic Jupyter Notebook.
+
+Jupyter defaults:
+  IP                     \$JUPYTER_IP or 0.0.0.0
+  Port                   \$JUPYTER_PORT or 8888
+  Notebook dir           \$JUPYTER_DIR or /workspace
+  Token                  \$JUPYTER_TOKEN or empty token
+  Allow root             \$JUPYTER_ALLOW_ROOT or 1
+
+Utility commands:
+  shell                  Start bash.
+  bash                   Start bash.
+  exec COMMAND [ARGS...] Run an arbitrary command inside the active WEIS env.
+
+Host launcher examples:
+  run-weis-docker.sh entrypoint-help
+
+  export PATH="/path/to/run-weis-docker:\$PATH"
+  cd weis-docker-examples
+  run-weis-docker.sh --driver examples/12_controller_testbench/controller_testbench.py
+
+  run-weis-docker.sh --np 4 --driver examples/12_controller_testbench/controller_testbench.py
+
+  run-weis-docker.sh lab --notebook-dir /workspace/examples/12_controller_testbench
+
+  JUPYTER_TOKEN=weis run-weis-docker.sh lab
+
+  run-weis-docker.sh exec python -c "import weis; print('WEIS OK')"
+EOF
+}
+
+error() {
+    echo "ERROR: $*" >&2
+    echo >&2
+    usage >&2
+    exit 2
+}
+
+require_command() {
+    if ! command -v "$1" >/dev/null 2>&1; then
+        error "Required command not found in active environment: $1"
+    fi
+}
+
+is_positive_integer() {
+    case "$1" in
+        ''|*[!0-9]*)
+            return 1
+            ;;
+        *)
+            [ "$1" -ge 1 ]
+            ;;
+    esac
+}
+
+parse_weis_args() {
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            -h|--help)
+                usage
+                exit 0
+                ;;
+
+            -d|--driver)
+                [ "$#" -ge 2 ] || error "$1 requires a value"
+                DRIVER="$2"
+                shift 2
+                ;;
+
+            --driver=*)
+                DRIVER="${1#*=}"
+                shift
+                ;;
+
+            -n|--np)
+                [ "$#" -ge 2 ] || error "$1 requires a value"
+                NP="$2"
+                shift 2
+                ;;
+
+            --np=*)
+                NP="${1#*=}"
+                shift
+                ;;
+
+            -w|--workdir)
+                [ "$#" -ge 2 ] || error "$1 requires a value"
+                WORKDIR_PATH="$2"
+                shift 2
+                ;;
+
+            --workdir=*)
+                WORKDIR_PATH="${1#*=}"
+                shift
+                ;;
+
+            --)
+                shift
+                DRIVER_ARGS=("$@")
+                break
+                ;;
+
+            -*)
+                error "Unknown WEIS option: $1"
+                ;;
+
+            *.py)
+                DRIVER="$1"
+                shift
+                ;;
+
+            *)
+                error "Unexpected argument before '--': $1"
+                ;;
+        esac
+    done
+}
+
+validate_weis_config() {
+    is_positive_integer "$NP" || error "MPI process count must be a positive integer, got: '$NP'"
+
+    [ -d "$WORKDIR_PATH" ] || error "Working directory does not exist: $WORKDIR_PATH"
+
+    cd "$WORKDIR_PATH"
+
+    case "$DRIVER" in
+        '')
+            error "Driver path cannot be empty"
+            ;;
+        -*)
+            error "Driver path looks like an option: $DRIVER"
+            ;;
+        *.py)
+            ;;
+        *)
+            error "Driver must be a Python file ending in .py, got: $DRIVER"
+            ;;
+    esac
+
+    if [ ! -f "$DRIVER" ]; then
+        echo "ERROR: WEIS driver not found: $DRIVER" >&2
+        echo >&2
+        echo "Current directory: $(pwd)" >&2
+        echo >&2
+        echo "Python files found nearby:" >&2
+        find . -maxdepth 2 -type f -name "*.py" \
+            | sed 's#^\./#  #' \
+            | head -40 >&2 || true
+        echo >&2
+        usage >&2
+        exit 2
+    fi
+
+    [ -r "$DRIVER" ] || error "Driver exists but is not readable: $DRIVER"
+
+    require_command python
+
+    if [ "$NP" -gt 1 ]; then
+        require_command mpiexec
+    fi
+}
+
+print_weis_summary() {
+    echo "WEIS runner"
+    echo "  Workdir : $(pwd)"
+    echo "  Driver  : $DRIVER"
+    echo "  Python  : $(command -v python)"
+    echo "  MPI NP  : $NP"
+
+    if [ "${#DRIVER_ARGS[@]}" -gt 0 ]; then
+        echo "  Args    : ${DRIVER_ARGS[*]}"
+    else
+        echo "  Args    : <none>"
+    fi
+
+    echo
+}
+
+run_weis() {
+    if [ "$NP" -gt 1 ]; then
+        exec mpiexec -np "$NP" python "$DRIVER" "${DRIVER_ARGS[@]}"
+    else
+        exec python "$DRIVER" "${DRIVER_ARGS[@]}"
+    fi
+}
+
+run_jupyter() {
+    local app="$1"
+    shift
+
+    require_command jupyter
+
+    local notebook_dir="$JUPYTER_DIR"
+    local args=()
+
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --notebook-dir)
+                [ "$#" -ge 2 ] || error "--notebook-dir requires a value"
+                notebook_dir="$2"
+                shift 2
+                ;;
+
+            --notebook-dir=*)
+                notebook_dir="${1#*=}"
+                shift
+                ;;
+
+            *)
+                args+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    [ -d "$notebook_dir" ] || error "Jupyter notebook directory does not exist: $notebook_dir"
+
+    echo "WEIS Jupyter runner"
+    echo "  App          : $app"
+    echo "  Python       : $(command -v python)"
+    echo "  Jupyter      : $(command -v jupyter)"
+    echo "  IP           : $JUPYTER_IP"
+    echo "  Port         : $JUPYTER_PORT"
+    echo "  Notebook dir : $notebook_dir"
+
+    if [ -n "$JUPYTER_TOKEN" ]; then
+        echo "  Token        : <set>"
+    else
+        echo "  Token        : <empty>"
+    fi
+
+    echo
+    echo "Open in browser:"
+    if [ -n "$JUPYTER_TOKEN" ]; then
+        echo "  http://localhost:${JUPYTER_PORT}/lab?token=${JUPYTER_TOKEN}"
+    else
+        echo "  http://localhost:${JUPYTER_PORT}/lab"
+    fi
+    echo
+
+    local base_args=(
+        "--ip=${JUPYTER_IP}"
+        "--port=${JUPYTER_PORT}"
+        "--no-browser"
+        "--notebook-dir=${notebook_dir}"
+    )
+
+    if [ "$JUPYTER_ALLOW_ROOT" = "1" ]; then
+        base_args+=("--allow-root")
+    fi
+
+    if [ -n "$JUPYTER_TOKEN" ]; then
+        base_args+=("--ServerApp.token=${JUPYTER_TOKEN}")
+    else
+        base_args+=("--ServerApp.token=")
+    fi
+
+    if [ "$app" = "lab" ]; then
+        exec jupyter lab "${base_args[@]}" "${args[@]}"
+    else
+        exec jupyter notebook "${base_args[@]}" "${args[@]}"
+    fi
+}
+
+main() {
+    case "${1:-}" in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+
+        lab|jupyter-lab)
+            shift
+            run_jupyter lab "$@"
+            ;;
+
+        notebook)
+            shift
+            run_jupyter notebook "$@"
+            ;;
+
+        shell|bash)
+            shift
+            exec bash "$@"
+            ;;
+
+        exec)
+            shift
+            [ "$#" -gt 0 ] || error "exec requires a command"
+            exec "$@"
+            ;;
+
+        *)
+            parse_weis_args "$@"
+            validate_weis_config
+            print_weis_summary
+            run_weis
+            ;;
+    esac
+}
+
+main "$@"

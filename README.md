@@ -85,6 +85,10 @@ For macOS users (Apple Silicon), if you encounter an `AttributeError: partially 
 
 If you plan to contribute code to WEIS, please first consult the [developer guide](https://weis.readthedocs.io/en/latest/how_to_contribute_code.html).
 
+## Docker
+
+WEIS includes a small host-side launcher under [`docker/`](docker) for running a prebuilt image as the main workflow. Repo-local image build instructions are kept in the developer section of [`docker/README.md`](docker/README.md), and the launcher exposes both its own help and the container entrypoint help through `run-weis-docker.sh --help` and `run-weis-docker.sh entrypoint-help`.
+
 ## Feedback
 
 For software issues please use <https://github.com/NLRWindSystems/WEIS/issues>.  
