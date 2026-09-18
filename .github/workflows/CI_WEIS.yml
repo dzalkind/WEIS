@@ -191,7 +191,7 @@ jobs:
             
       # Run coveralls
       - name: Run coveralls
-        if: contains( matrix.os, 'ubuntu') && contains( matrix.python-version, '3.11')
+        if: contains( matrix.os, 'ubuntu') && matrix.python-version == '3.12'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #uses: coverallsapp/github-action@v2
