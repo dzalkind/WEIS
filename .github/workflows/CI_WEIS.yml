@@ -25,11 +25,14 @@ jobs:
       # Everything conda installs must be in ONE solve. Installing petsc4py /
       # mpi4py / pyoptsparse into an already-solved env made conda backtrack for
       # 80+ minutes; solved together with the rest it takes ~30 seconds.
+      # openmpi is pinned because conda's mpiexec shadows any system MPI, and
+      # an unpinned solve picks mpich or openmpi at random per Python version.
+      # The mpich stack breaks netCDF4's import under mpiexec; openmpi does not.
       - name: Build CI environment file
         run: |
             cp environment.yml environment_ci.yml
             if [[ "$RUNNER_OS" == "Linux" ]]; then
-                printf -- '  - petsc4py\n  - mpi4py\n  - mpich\n  - pyoptsparse\n  - libglu\n' >> environment_ci.yml
+                printf -- '  - petsc4py\n  - mpi4py\n  - openmpi\n  - pyoptsparse\n  - libglu\n' >> environment_ci.yml
             fi
             printf -- '  - pytest\n  - pytest-cov\n  - coveralls\n  - treon\n' >> environment_ci.yml
             cat environment_ci.yml
