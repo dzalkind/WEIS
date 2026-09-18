@@ -35,7 +35,7 @@ jobs:
             cat environment_ci.yml
 
       - name: Install conda/mamba
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         # https://github.com/marketplace/actions/setup-miniconda
         with:
           # To use mamba, uncomment here, comment out the miniforge line
