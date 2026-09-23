@@ -10,8 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 150
 
-    # Without this, a step killed by a signal loses all its block-buffered
-    # output, which is why the intermittent exit-143 failures show nothing.
+    # Keeps output from being lost when a step is killed by a signal (exit 143).
     env:
       PYTHONUNBUFFERED: "1"
 
@@ -28,17 +27,19 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Everything conda installs must be in ONE solve. Installing petsc4py /
-      # mpi4py / pyoptsparse into an already-solved env made conda backtrack for
-      # 80+ minutes; solved together with the rest it takes ~30 seconds.
-      # openmpi is pinned because conda's mpiexec shadows any system MPI, and
-      # an unpinned solve picks mpich or openmpi at random per Python version.
-      # The mpich stack breaks netCDF4's import under mpiexec; openmpi does not.
+      # All conda packages must go in ONE solve: adding petsc4py/mpi4py/
+      # pyoptsparse to an already-solved env made conda backtrack for 80+ min.
+      # openmpi is pinned so the MPI stack doesn't vary per Python version.
+      # netcdf4 is held at 1.7.3 because 1.7.4 build 110+ is Cython 3.3.0
+      # limited-API and clashes with petsc4py under mpiexec ("Shared Cython
+      # type ... has the wrong size"). Unpin when conda-forge rebuilds them
+      # consistently, or when windIO drops its unused netCDF4 import.
       - name: Build CI environment file
         run: |
             cp environment.yml environment_ci.yml
             if [[ "$RUNNER_OS" == "Linux" ]]; then
                 printf -- '  - petsc4py\n  - mpi4py\n  - openmpi\n  - pyoptsparse\n  - libglu\n' >> environment_ci.yml
+                printf -- '  - netcdf4=1.7.3\n' >> environment_ci.yml
             fi
             printf -- '  - pytest\n  - pytest-cov\n  - coveralls\n  - treon\n' >> environment_ci.yml
             cat environment_ci.yml

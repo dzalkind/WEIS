@@ -57,8 +57,12 @@ Standard Installation (Linux, macOS, Windows)
 2. Add final packages and install the software:
    ::
 
-      conda install -y petsc4py mpi4py pyoptsparse     # (Mac / Linux only, sometimes Windows users may need to install mpi4py)
+      conda install -y petsc4py mpi4py pyoptsparse netcdf4=1.7.3     # (Mac / Linux only, sometimes Windows users may need to install mpi4py)
       pip install -e .
+
+   ``netcdf4`` is held at 1.7.3 because newer builds clash with ``petsc4py``
+   when both are imported under ``mpiexec``. Only needed if you run WEIS in
+   parallel.
 
 3. If you want to use the more advanced meshing capability for BEM modeling, install the following after you install WEIS:
    ::
