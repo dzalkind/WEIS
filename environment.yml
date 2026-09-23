@@ -13,7 +13,7 @@ dependencies:
   - moorpy==1.2.1
   - nlopt
   - numpydoc
-  - numpy
+  - numpy<2.5  # TODO: release pin once WISDEM fixes size-1 array -> scalar assignment in rotor_power.py (thrust shaving)
   - openfast==4.2
   - openfast-io==4.2
   - pyopenfast==4.2

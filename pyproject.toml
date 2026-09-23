@@ -47,7 +47,7 @@ dependencies = [
   "mat4py",
   "moorpy",
   "nlopt",
-  "numpy",
+  "numpy<2.5",  # TODO: release pin once WISDEM fixes size-1 array -> scalar assignment in rotor_power.py (thrust shaving)
   "openpyxl",
   "openraft",
   "osqp",
