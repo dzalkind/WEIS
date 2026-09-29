@@ -73,6 +73,8 @@ The installation instructions below use the environment name, "weis-env," but an
         module load intel-oneapi-compilers intel-oneapi-mpi intel-oneapi-mkl
         pip install --no-deps -e . -v
 
+The conda environment includes the visualization tools. If you install WEIS with pip alone, the visualization app, MOO dashboard and input GUI need the `viz` extra: `pip install -e ".[viz]"`. Other extras are `opt` (pyOptSparse), `test` and `docs`.
+
 **NOTE:** To use WEIS again after installation is complete, you will always need to activate the conda environment first with `conda activate weis-env` (or `source activate weis-env`). On Kestrel, make sure to reload the necessary modules
 
 For Windows users, we recommend installing `git` and the `m264` packages in separate environments as some of the libraries appear to conflict such that WISDEM cannot be successfully built from source.  The `git` package is best installed in the `base` environment.

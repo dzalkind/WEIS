@@ -67,9 +67,34 @@ Standard Installation (Linux, macOS, Windows)
 3. If you want to use the more advanced meshing capability for BEM modeling, install the following after you install WEIS:
    ::
 
-      pip install pygmsh==7.1.17 
+      pip install pygmsh==7.1.17
       pip install https://github.com/LHEEA/meshmagick/archive/refs/tags/3.4.zip
-      pip install trimesh                              # (Only if you want to use the internal function to plot the mesh)
+
+Optional Dependencies (pip extras)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The conda environment in ``environment.yml`` installs everything, including the
+visualization tools. A plain ``pip install`` of WEIS installs only what is needed
+to run WEIS; optional features are grouped into extras:
+
+=========  ==================================================================================
+Extra      Contents
+=========  ==================================================================================
+``viz``    Visualization app (``weis_viz``), MOO dashboard, input GUI and mesh rendering
+           (dash, dash-vtk, dearpygui, pyvista, trimesh, ...)
+``opt``    pyOptSparse optimizers
+``test``   pytest and coverage tools
+``docs``   Sphinx and extensions for building this documentation
+=========  ==================================================================================
+
+Install one or more extras with, for example:
+::
+
+   pip install -e ".[viz]"
+   pip install -e ".[viz,test]"
+
+OpenFAST itself is only available from conda-forge, so the conda environment
+above is still the recommended way to install WEIS.
 
 Installation on Kestrel (DOE HPC System)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
